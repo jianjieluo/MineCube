@@ -32,4 +32,4 @@
 *.app
 
 # MacFileSystem
-# .DS_Store
+.DS_Store
