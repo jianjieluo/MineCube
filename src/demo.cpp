@@ -2,68 +2,29 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Gui.hpp"
+#include "CraftManager.hpp"
+
+#include <windows.h>
 
 // interactive variables
 int screenWidth = 800;
 int screenHeight = 600;
 
+GLfloat sizePerCube = 0.1;
+unsigned int numPerEdge = 10;
+const string mat4Name = "model";
+vector<GLuint> attriSize;
+
 // Camera class
+Camera camera;
 float deltaTime = 0.0f; // time between frames
 float lastFrame = 0.0f;
 bool isFpsMode = true;
 
-// 36 vertexes of cube
-float vertices[] = {
-	// position           normal vector
-	// back
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	// front
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	// left
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	// right
-	0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	// down
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	// up
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-};
 // lighting
 glm::vec3 lightPos(0.4f, 0.2f, 1.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-
-Camera camera;
 
 // parameters
 float ambientStrength = 0.1f;
@@ -74,6 +35,7 @@ float shininess = 32.0f;
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 int main()
@@ -90,7 +52,7 @@ int main()
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
-    // creat GLFW window
+														 // creat GLFW window
 	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "CG HW4", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -101,6 +63,7 @@ int main()
 	glfwSwapInterval(1); // vertical synchronization
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	// initialize GLAD and load pointer address of OpenGL functions
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -110,26 +73,59 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 
-	// generate VBO, VAO and then bind buffer
-	unsigned int VBO, VAO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	// specify how OpenGL should interpret the vertex data before rendering
-	// position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// normal
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
 
 	Shader phongShader("shader/phongvs.vs", "shader/phongfs.fs");
-
 	Gui gui(window);
+
+	// to normalize
+	attriSize.push_back(3);
+	CraftManager craftManger(sizePerCube, numPerEdge, phongShader.ID, mat4Name, attriSize);
+	float data[108] = {
+		0.0f,  0.0f, -1.0f,
+		0.0f,  0.0f, -1.0f,
+		0.0f,  0.0f, -1.0f,
+		0.0f,  0.0f, -1.0f,
+		0.0f,  0.0f, -1.0f,
+		0.0f,  0.0f, -1.0f,
+
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+
+		-1.0f, 0.0f,  0.0f,
+		-1.0f, 0.0f,  0.0f,
+		-1.0f, 0.0f,  0.0f,
+		-1.0f, 0.0f,  0.0f,
+		-1.0f, 0.0f,  0.0f,
+		-1.0f, 0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		0.0f, -1.0f,  0.0f,
+		0.0f, -1.0f,  0.0f,
+		0.0f, -1.0f,  0.0f,
+		0.0f, -1.0f,  0.0f,
+		0.0f, -1.0f,  0.0f,
+		0.0f, -1.0f,  0.0f,
+
+		0.0f,  1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f
+	};
+	vector<float> vertexAttrArray(data, data + 108);
+
+	craftManger.setAttriArray(0, 3, vertexAttrArray);
 
 	// main loop
 	while (!glfwWindowShouldClose(window))
@@ -137,14 +133,13 @@ int main()
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-		
+
 		gui.createNewFrame();
 		gui.draw();
 
 		processInput(window);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		// clear color buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (isFpsMode) {
@@ -164,16 +159,14 @@ int main()
 		phongShader.setFloat("specularStrength", specularStrength);
 		phongShader.setFloat("shininess", shininess);
 
-		glm::mat4 model;
-		phongShader.setMat4("model", model);
 		glm::mat4 view = camera.getViewMatrix();
 		phongShader.setMat4("view", view);
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+
+		// draw
+		craftManger.draw();
 
 		gui.render();
 
@@ -183,15 +176,9 @@ int main()
 
 	gui.clear();
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
 
 	glfwTerminate();
 	return 0;
-}
-
-void draw_GUI(GLFWwindow *window) {
-
 }
 
 void glfw_error_callback(int error, const char* description) {
@@ -201,9 +188,17 @@ void glfw_error_callback(int error, const char* description) {
 void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
 		isFpsMode = !isFpsMode;
-		Sleep(200);  // to prevent multi press
+
+		// to prevent multi press
+		Sleep(200);
+		
+		/*
+		 * if you are using Unix, comment the line below and then uncomment the folloing line
+		 * also, you have to include <unistd.h>
+		*/
+		// sleep(200000)
 	}
 	if (isFpsMode) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -222,6 +217,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 void mouse_callback(GLFWwindow* window, double cur_x, double cur_y) {
 	if (isFpsMode) {
-		camera.lookAround(cur_x, cur_y);
+		camera.lookAround((float)cur_x, (float)cur_y);
 	}
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	camera.zoomInOrOut(yoffset);
 }

@@ -36,7 +36,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
 // GL3W/GLFW
@@ -479,7 +479,7 @@ void ImGui_ImplGlfwGL3_NewFrame()
     else
     {
         glfwSetCursor(g_Window, g_MouseCursors[cursor] ? g_MouseCursors[cursor] : g_MouseCursors[ImGuiMouseCursor_Arrow]);
-        glfwSetInputMode(g_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        //glfwSetInputMode(g_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     // Gamepad navigation mapping [BETA]

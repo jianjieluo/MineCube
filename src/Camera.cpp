@@ -67,10 +67,10 @@ void Camera::lookAround(const float currentX, const float currentY) {
     float offsetY = currentY - lastY;
     lastX = currentX;
     lastY = currentY;
-
     yaw += offsetX * mouseSensitivity;
     pitch -= offsetY * mouseSensitivity;
-    // constrain pitch
+
+	// constrain pitch
     if (pitch > 89.0f)
         pitch = 89.0f;
     if (pitch < -89.0f)
@@ -90,8 +90,6 @@ void Camera::updateCamera() {
 }
 
 void Camera::zoomInOrOut(const float offsetY) {
-	std::cout << zoomFactor << std::endl;
-
     if (zoomFactor >= 1.0f && zoomFactor <= 45.0f)
         zoomFactor -= offsetY;
     if (zoomFactor <= 1.0f)
