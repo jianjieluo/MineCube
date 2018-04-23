@@ -1,5 +1,5 @@
 #include "Camera.hpp"
-
+#include <iostream>
 // default value
 const float YAW          = -90.0f;
 const float PITCH        = 0.0f;
@@ -15,7 +15,8 @@ Camera::Camera() {
     pitch = PITCH;
     moveSpeed = SPEED;
     mouseSensitivity = SENSITIVITY;
-    isFirstMove = true;
+	zoomFactor = ZOOM;
+	isFirstMove = true;
     updateCamera();
 }
 
@@ -27,7 +28,8 @@ Camera::Camera(const glm::vec3 &position, const glm::vec3 &target, const glm::ve
     pitch = PITCH;
     moveSpeed = SPEED;
     mouseSensitivity = SENSITIVITY;
-    isFirstMove = true;
+	zoomFactor = ZOOM;
+	isFirstMove = true;
     updateCamera();
 }
 
@@ -37,6 +39,10 @@ glm::mat4 Camera::getViewMatrix() {
 
 glm::vec3 Camera::getCameraPosition() {
     return cameraPosition;
+}
+
+float Camera::getZoomFactor() {
+	return zoomFactor;
 }
 
 void Camera::moveCamera(const MoveDirection &direction, float deltaTime) {
@@ -84,6 +90,8 @@ void Camera::updateCamera() {
 }
 
 void Camera::zoomInOrOut(const float offsetY) {
+	std::cout << zoomFactor << std::endl;
+
     if (zoomFactor >= 1.0f && zoomFactor <= 45.0f)
         zoomFactor -= offsetY;
     if (zoomFactor <= 1.0f)
