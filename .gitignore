@@ -33,3 +33,15 @@
 
 # MacFileSystem
 .DS_Store
+
+# ExternalFiles
+src/glad.c
+src/imconfig.h
+src/imgui.h
+src/imgui_internal.h
+src/stb_rect_pack.h
+src/stb_textedit.h
+src/stb_truetype.h
+src/imgui.cpp
+src/imgui_demo.cpp
+src/imgui_draw.cpp
