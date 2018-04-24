@@ -4,7 +4,8 @@
 #include "Gui.hpp"
 #include "CraftManager.hpp"
 
-#include <windows.h>
+// #include <windows.h>
+#include <unistd.h>
 
 // interactive variables
 int screenWidth = 800;
@@ -19,16 +20,15 @@ vector<GLuint> attriSize;
 Camera camera;
 float deltaTime = 0.0f; // time between frames
 float lastFrame = 0.0f;
-bool isFpsMode = true;
+bool isFpsMode = false;
 
 // lighting
 glm::vec3 lightPos(0.4f, 0.2f, 1.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 
+glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+glm::vec3 specular(0.5f, 0.5f, 0.5f);  // test material
 // parameters
-float ambientStrength = 0.1f;
-float specularStrength = 0.5f;
 float shininess = 32.0f;
 
 // callback functions
@@ -52,8 +52,9 @@ int main()
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
-														 // creat GLFW window
-	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "CG HW4", NULL, NULL);
+    
+    // creat GLFW window
+	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "MineCube", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -75,6 +76,7 @@ int main()
 
 
 	Shader phongShader("shader/phongvs.vs", "shader/phongfs.fs");
+    
 	Gui gui(window);
 
 	// to normalize
@@ -151,13 +153,22 @@ int main()
 		}
 
 		phongShader.use();
-		phongShader.setVec3("objectColor", objectColor);
-		phongShader.setVec3("lightColor", lightColor);
-		phongShader.setVec3("lightPos", lightPos);
+        
+//        phongShader.setVec3("lightColor", lightColor);
+//        phongShader.setVec3("lightPos", lightPos);
 		phongShader.setVec3("viewPos", camera.getCameraPosition());
-		phongShader.setFloat("ambientStrength", ambientStrength);
-		phongShader.setFloat("specularStrength", specularStrength);
-		phongShader.setFloat("shininess", shininess);
+        
+        // material
+        phongShader.setVec3("material.ambient",  objectColor);
+        phongShader.setVec3("material.diffuse",  objectColor);
+        phongShader.setVec3("material.specular", specular);
+        phongShader.setFloat("material.shininess", shininess);
+        
+        // light
+        phongShader.setVec3("light.position",  lightPos);
+        phongShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+        phongShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+        phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 view = camera.getViewMatrix();
 		phongShader.setMat4("view", view);
@@ -191,15 +202,15 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
 		isFpsMode = !isFpsMode;
 
-		// to prevent multi press
-		Sleep(200);
-		
-		/*
-		 * if you are using Unix, comment the line below and then uncomment the folloing line
-		 * also, you have to include <unistd.h>
-		*/
-		// sleep(200000)
-	}
+#ifdef __APPLE__
+        usleep(200000);
+#endif
+        
+#ifdef _WIN32
+        Sleep(200);
+#endif
+        
+    }
 	if (isFpsMode) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			camera.moveCamera(FORWARD, deltaTime);
