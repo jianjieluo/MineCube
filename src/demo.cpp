@@ -1,11 +1,19 @@
+#ifdef 	_WIN32
+#include <windows.h>
+#endif
+#ifdef __APPLE__
+#include <unistd.h>
+#endif
+#ifdef __linux__
+#include <unistd.h>
+#endif
+
 #include "Global.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Gui.hpp"
 #include "CraftManager.hpp"
 
-// #include <windows.h>
-#include <unistd.h>
 
 // interactive variables
 int screenWidth = 800;
@@ -34,9 +42,10 @@ float shininess = 32.0f;
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
+void mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main()
 {
@@ -63,7 +72,8 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // vertical synchronization
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetCursorPosCallback(window, mouse_move_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// initialize GLAD and load pointer address of OpenGL functions
@@ -75,7 +85,7 @@ int main()
 
 
 
-	Shader phongShader("shader/phongvs.vs", "shader/phongfs.fs");
+	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
     
 	Gui gui(window);
 
@@ -154,10 +164,8 @@ int main()
 
 		phongShader.use();
         
-//        phongShader.setVec3("lightColor", lightColor);
-//        phongShader.setVec3("lightPos", lightPos);
 		phongShader.setVec3("viewPos", camera.getCameraPosition());
-        
+
         // material
         phongShader.setVec3("material.ambient",  objectColor);
         phongShader.setVec3("material.diffuse",  objectColor);
@@ -167,14 +175,13 @@ int main()
         // light
         phongShader.setVec3("light.position",  lightPos);
         phongShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-        phongShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+        phongShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // a little darker to match the scene
         phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 view = camera.getViewMatrix();
 		phongShader.setMat4("view", view);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
-
 
 		// draw
 		craftManger.draw();
@@ -195,22 +202,25 @@ int main()
 void glfw_error_callback(int error, const char* description) {
 	fprintf(stderr, "Error %d: %s\n", error, description);
 }
-
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
 void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-		isFpsMode = !isFpsMode;
-
-#ifdef __APPLE__
-        usleep(200000);
-#endif
-        
-#ifdef _WIN32
-        Sleep(200);
-#endif
-        
-    }
+//	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+//		isFpsMode = !isFpsMode;
+//		// to prevent multi press
+//#ifdef 	_WIN32
+//		Sleep(200);
+//#endif
+//#ifdef __APPLE__
+//		usleep(200000);
+//#endif
+//#ifdef __linux__
+//		usleep(200000);
+//#endif       
+//	}
 	if (isFpsMode) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			camera.moveCamera(FORWARD, deltaTime);
@@ -222,14 +232,16 @@ void processInput(GLFWwindow *window) {
 			camera.moveCamera(RIGHT, deltaTime);
 	}
 }
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-void mouse_callback(GLFWwindow* window, double cur_x, double cur_y) {
+void mouse_move_callback(GLFWwindow* window, double cur_x, double cur_y) {
 	if (isFpsMode) {
 		camera.lookAround((float)cur_x, (float)cur_y);
 	}
+}
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		isFpsMode = true;
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+		isFpsMode = false;
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.zoomInOrOut(yoffset);
