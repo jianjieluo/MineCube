@@ -50,7 +50,34 @@ Now your `3rd_party` looks like:
 
 ### 2.2 Mac OS
 
+1. Generate the `build/` dir and enter it
 
+   ```Shell
+   mkdir build
+   cd build
+   ```
+
+2. If you want to do you work on Xcode, do the following
+
+   ```shell
+    cmake -G "Xcode" ..
+   ```
+
+   If something goes wrong, such as :
+
+   ```
+   CMake Error: Error required internal CMake variable not set, cmake may not be built correctly.
+   Missing variable is:
+   CMAKE_C_COMPILE_OBJECT
+   ```
+
+   Then you may need to add following statement to the `CMakeLists.txt` in the end of the file:
+
+   ```
+   set(CMAKE_C_COMPILE_OBJECT g++)
+   ```
+
+3. Then, you will find `MineCube.xcodeproj` . You can eithor double click to open it or just `open MineCube.xcodeproj`
 
 
 ## 3. Iteration Details (Chinese)
