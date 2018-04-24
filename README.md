@@ -55,7 +55,7 @@ Now your `3rd_party` looks like:
 
 ## 3. Iteration Details (Chinese)
 
-1. [2018.04.17-2018.04.26](./doc/Iterations_doc/第一轮迭代.md)
+1. [2018.04.17-2018.04.26](./docs/Iterations_doc/第一轮迭代.md)
 
 
 
