@@ -34,8 +34,8 @@ bool isFpsMode = false;
 glm::vec3 lightPos(0.4f, 0.2f, 1.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
-glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-glm::vec3 specular(0.5f, 0.5f, 0.5f);  // test material
+glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
+glm::vec3 specular(0.2f, 0.2f, 0.2f);  // test material
 // parameters
 float shininess = 32.0f;
 
@@ -151,7 +151,8 @@ int main()
 
 		processInput(window);
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (isFpsMode) {
@@ -171,12 +172,11 @@ int main()
         phongShader.setVec3("material.diffuse",  objectColor);
         phongShader.setVec3("material.specular", specular);
         phongShader.setFloat("material.shininess", shininess);
-        
         // light
         phongShader.setVec3("light.position",  lightPos);
-        phongShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-        phongShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // a little darker to match the scene
-        phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        phongShader.setVec3("light.ambient",  0.1f, 0.1f, 0.1f);
+        phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f); // a little darker to match the scene
+        phongShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
 
 		glm::mat4 view = camera.getViewMatrix();
 		phongShader.setMat4("view", view);
@@ -208,19 +208,19 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-//	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-//		isFpsMode = !isFpsMode;
-//		// to prevent multi press
-//#ifdef 	_WIN32
-//		Sleep(200);
-//#endif
-//#ifdef __APPLE__
-//		usleep(200000);
-//#endif
-//#ifdef __linux__
-//		usleep(200000);
-//#endif       
-//	}
+	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+		isFpsMode = !isFpsMode;
+		// to prevent multi press
+#ifdef 	_WIN32
+		Sleep(200);
+#endif
+#ifdef __APPLE__
+		usleep(200000);
+#endif
+#ifdef __linux__
+		usleep(200000);
+#endif       
+	}
 	if (isFpsMode) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			camera.moveCamera(FORWARD, deltaTime);

@@ -2,4 +2,5 @@
 
 bool showGuiWindow = true;
 bool menuItem = true;
-float my_color[4] = { 1.0f, 0.5f, 0.31f, 1.0f };
+float cubes_color[4] = { 0.86f, 0.88f, 0.96f, 1.0f };
+float background_color[4] = { 0.86f, 0.94f, 0.96f, 1.0f };

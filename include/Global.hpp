@@ -11,6 +11,7 @@
 // global variables for gui.cpp and main.cpp are declared here.
 extern bool showGuiWindow;
 extern bool menuItem;
-extern float my_color[4];
+extern float cubes_color[4];
+extern float background_color[4];
 
 #endif  // GLOBAL_HPP

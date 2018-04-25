@@ -30,7 +30,9 @@ void Gui::draw() {
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::ColorEdit4("Color", my_color);
+	ImGui::ColorEdit4("Cubes Color", cubes_color);
+	ImGui::NewLine();
+	ImGui::ColorEdit4("Background Color", background_color);
 
 	ImGui::NewLine();
 	ImGui::Text("Hint: Press 'V' to switch Camera View");

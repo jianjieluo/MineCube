@@ -2,11 +2,8 @@
 #include <GLFW/glfw3.h>
 
 #include "Global.hpp"
-#include "../3rd_party/imgui/imgui.h"
-#include "../3rd_party/imgui/examples/opengl3_example/imgui_impl_glfw_gl3.h"
-
-extern bool showGuiWindow;
-extern bool menuItem;
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
 class Gui {
 public:
