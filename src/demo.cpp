@@ -16,8 +16,8 @@
 
 
 // interactive variables
-int screenWidth = 800;
-int screenHeight = 600;
+int screenWidth = 1080;
+int screenHeight = 960;
 
 GLfloat sizePerCube = 0.1;
 unsigned int numPerEdge = 10;
@@ -31,7 +31,7 @@ float lastFrame = 0.0f;
 bool isFpsMode = false;
 
 // lighting
-glm::vec3 lightPos(0.4f, 0.2f, 1.0f);
+glm::vec3 lightPos(0.8f, 1.0f, 1.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
