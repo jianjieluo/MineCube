@@ -17,4 +17,8 @@ public:
 
 private:
 	GLFWwindow* window;
+	bool isFirstDraw;
+	bool colorBar;
+	void showAppMainMenuBar();
+	void showColorBar();
 };
