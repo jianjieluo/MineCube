@@ -1,6 +1,6 @@
 #include "GLBufferManager.hpp"
 
-GLBufferManager::GLBufferManager(const vector<GLuint> & attriSize, GLuint numRecord):numRecord(numRecord) {
+GLBufferManager::GLBufferManager(const vector<GLuint> & attriSize, const GLuint & numRecord):numRecord(numRecord) {
     /**
 	* 分配缓冲空间
 	*/
@@ -49,4 +49,8 @@ void GLBufferManager::unbind() {
 void GLBufferManager::bufferData() {
     // update
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data.front(), GL_STATIC_DRAW);
+}
+
+shared_ptr<GLBufferManager> GLBufferManager::getNewInstance(const vector<GLuint> & attrisize, const GLuint & numRecord) {
+    return shared_ptr<GLBufferManager>(new GLBufferManager(attrisize, numRecord));
 }
