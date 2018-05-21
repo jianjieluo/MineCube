@@ -76,6 +76,14 @@ void Gui::showAppMainMenuBar()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::MenuItem("Color Bar", NULL, &colorBar));
+
+			if (ImGui::MenuItem("Edit Bar", NULL, &editBar));
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Help"))
 		{
 			ImGui::Text("Hint: Press 'V' to switch Camera View");
@@ -86,13 +94,39 @@ void Gui::showAppMainMenuBar()
 	}
 }
 
-void Gui::showColorBar() {
-	ImGui::Begin("GUI Window", &colorBar, ImGuiWindowFlags_MenuBar);
+void Gui::showEditBar() {
+	ImGui::Begin("Edit Bar", &editBar, ImGuiWindowFlags_NoScrollbar);
+
 	if (isFirstDraw) {
-		ImGui::SetWindowSize(ImVec2(300, 800));
-		ImGui::SetWindowPos(ImVec2(0, 20));
+		ImGui::SetWindowSize(ImVec2(260, 300));
+		ImGui::SetWindowPos(ImVec2(800, 20));
 	}
 
+	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+	if (ImGui::ArrowButton("##left", ImGuiDir_Left)) {}
+	ImGui::SameLine(0.0f, spacing);
+	if (ImGui::ArrowButton("##left", ImGuiDir_Right)) {}
+	ImGui::SameLine(0.0f, 4 * spacing);
+
+	if (ImGui::Button(" + ")) {};
+	ImGui::SameLine(0.0f, spacing);
+	if (ImGui::Button(" - ")) {};
+	// List box
+	const char* listbox_items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
+	static int listbox_item_current = 1;
+	ImGui::ListBox("History", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items));
+
+	ImGui::SameLine();
+
+	ImGui::End();
+}
+
+void Gui::showColorBar() {
+	ImGui::Begin("File Bar", &colorBar, 0);
+	if (isFirstDraw) {
+		ImGui::SetWindowSize(ImVec2(260, 750));
+		ImGui::SetWindowPos(ImVec2(0, 20));
+	}
 	static bool alpha_preview = true;
 	static bool alpha_half_preview = false;
 	static bool options_menu = true;
@@ -107,9 +141,9 @@ void Gui::showColorBar() {
 	{
 		if (i % 5 != 0) ImGui::SameLine();
 		ImGui::PushID(i);
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i/ 100.0f, 0.6f, 0.6f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i/ 100.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i/ 100.0f, 0.8f, 0.8f));
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 100.0f, 0.6f, 0.6f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 100.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 100.0f, 0.8f, 0.8f));
 		if (ImGui::Button("     ")) {
 			static ImVec4 saved_palette;
 			ImGui::ColorConvertHSVtoRGB(i / 100.0f, 0.6f, 0.6f, saved_palette.x, saved_palette.y, saved_palette.z);
@@ -129,6 +163,7 @@ void Gui::showColorBar() {
 void Gui::draw() {
 	showAppMainMenuBar();
 	if (colorBar) showColorBar();
+	if (editBar) showEditBar();
 	if (isFirstDraw) isFirstDraw = false;
 }
 
