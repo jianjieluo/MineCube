@@ -12,9 +12,8 @@ enum MoveDirection {
 
 class Camera {
 	public:
-		// constructors
-		Camera();
-		Camera(const glm::vec3& position, const glm::vec3& target, const glm::vec3& worldUp);
+		// singleton
+		static Camera* getInstance();
     
 		// return view matrix
 		glm::mat4 getViewMatrix();
@@ -31,6 +30,11 @@ class Camera {
 		// pause camera
 		void pause();
 	private:
+		// instance
+		static Camera* instance;
+		// constructors
+		Camera();
+
 		// positions
 		glm::vec3 cameraPosition;
 		glm::vec3 targetPosition;

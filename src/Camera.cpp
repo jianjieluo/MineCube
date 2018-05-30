@@ -7,8 +7,13 @@ const float SPEED        = 2.5f;
 const float SENSITIVITY  = 0.01f;
 const float ZOOM         = 45.0f;
 
+Camera* Camera::instance = new Camera();
+
+Camera* Camera::getInstance() {
+	return instance;
+}
 Camera::Camera() {
-    cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);;
+    cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);;
     targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     yaw = YAW;
@@ -20,21 +25,8 @@ Camera::Camera() {
     updateCamera();
 }
 
-Camera::Camera(const glm::vec3 &position, const glm::vec3 &target, const glm::vec3 &wup) {
-    cameraPosition = position;
-    targetPosition = target;
-    worldUp = wup;
-    yaw = YAW;
-    pitch = PITCH;
-    moveSpeed = SPEED;
-    mouseSensitivity = SENSITIVITY;
-	zoomFactor = ZOOM;
-	isFirstMove = true;
-    updateCamera();
-}
-
 glm::mat4 Camera::getViewMatrix() {
-    return glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
+    return glm::lookAt(cameraPosition, targetPosition, cameraUp);
 }
 
 glm::vec3 Camera::getCameraPosition() {
@@ -51,10 +43,12 @@ void Camera::moveCamera(const MoveDirection &direction, float deltaTime) {
         cameraPosition += cameraFront * actualSpeed;
     else if (direction == BACKWARD)
         cameraPosition -= cameraFront * actualSpeed;
-    else if (direction == LEFT)
-        cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * actualSpeed;
-    else if (direction == RIGHT)
-        cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp)) * actualSpeed;
+	else if (direction == LEFT) {
+		// TODO
+	}
+	else if (direction == RIGHT) {
+		// TODO
+	}
 }
 
 void Camera::lookAround(const float currentX, const float currentY) {
@@ -87,6 +81,8 @@ void Camera::updateCamera() {
 
     cameraRight = glm::normalize(glm::cross(worldUp, cameraFront));
     cameraUp = glm::cross(cameraFront, cameraRight);
+
+	//targetPosition = cameraPosition + cameraFront;
 }
 
 void Camera::zoomInOrOut(const float offsetY) {

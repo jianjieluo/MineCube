@@ -39,6 +39,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "Camera.hpp"
 
 // GL3W/GLFW
 #include <glad/glad.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
@@ -197,8 +198,19 @@ static void ImGui_ImplGlfwGL3_SetClipboardText(void* user_data, const char* text
 
 void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/)
 {
-    if (action == GLFW_PRESS && button >= 0 && button < 3)
-        g_MouseJustPressed[button] = true;
+	if (action == GLFW_PRESS && button >= 0 && button < 3)
+		g_MouseJustPressed[button] = true;
+
+	// process mouse input
+	ImGuiIO& io = ImGui::GetIO();
+	static Camera* camera = Camera::getInstance();
+
+	if (io.MouseDown[0]) {
+
+	}
+	if (!io.MouseDown[0]) {
+
+	}
 }
 
 void ImGui_ImplGlfw_ScrollCallback(GLFWwindow*, double xoffset, double yoffset)
@@ -206,9 +218,10 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow*, double xoffset, double yoffset)
     ImGuiIO& io = ImGui::GetIO();
     io.MouseWheelH += (float)xoffset;
     io.MouseWheel += (float)yoffset;
+
 }
 
-void ImGui_ImplGlfw_KeyCallback(GLFWwindow*, int key, int, int action, int mods)
+void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, int mods)
 {
     ImGuiIO& io = ImGui::GetIO();
     if (action == GLFW_PRESS)
@@ -221,6 +234,25 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow*, int key, int, int action, int mods)
     io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
     io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
     io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+
+	// process keyboard input
+	static Camera* camera = Camera::getInstance();
+	if (io.KeysDown[GLFW_KEY_ESCAPE])
+		glfwSetWindowShouldClose(window, true);
+
+	if (io.KeysDown[GLFW_KEY_W]) {
+		camera->moveCamera(FORWARD, deltaTime);
+	}
+	else if (io.KeysDown[GLFW_KEY_S]) {
+		camera->moveCamera(BACKWARD, deltaTime);
+	}
+
+	if (io.KeysDown[GLFW_KEY_A]) {
+		camera->moveCamera(LEFT, deltaTime);
+	}
+	else if (io.KeysDown[GLFW_KEY_D]) {
+		camera->moveCamera(RIGHT, deltaTime);
+	}
 }
 
 void ImGui_ImplGlfw_CharCallback(GLFWwindow*, unsigned int c)
