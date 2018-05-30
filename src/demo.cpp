@@ -31,10 +31,6 @@ float shininess = 32.0f;
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-//void processInput(GLFWwindow *window);
-//void mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
-//void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-//void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main()
 {
@@ -134,8 +130,6 @@ int main()
 
 		gui.createNewFrame();
 		gui.draw();
-
-		//processInput(window);
 
 		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);

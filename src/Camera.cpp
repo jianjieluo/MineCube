@@ -89,7 +89,7 @@ void Camera::zoomInOrOut(const float offsetY) {
     if (zoomFactor >= 1.0f && zoomFactor <= 45.0f)
         zoomFactor -= offsetY;
     if (zoomFactor <= 1.0f)
-            zoomFactor = 1.0f;
+        zoomFactor = 1.0f;
     if (zoomFactor >= 45.0f)
         zoomFactor = 45.0f;
 }

@@ -65,6 +65,8 @@ static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
 static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
 static unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
 
+static Camera* camera = Camera::getInstance();
+
 // OpenGL3 Render function.
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so. 
@@ -203,7 +205,6 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 
 	// process mouse input
 	ImGuiIO& io = ImGui::GetIO();
-	static Camera* camera = Camera::getInstance();
 
 	if (io.MouseDown[0]) {
 
@@ -219,6 +220,7 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow*, double xoffset, double yoffset)
     io.MouseWheelH += (float)xoffset;
     io.MouseWheel += (float)yoffset;
 
+	camera->zoomInOrOut((float)yoffset);
 }
 
 void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, int mods)
@@ -236,7 +238,6 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, in
     io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
 
 	// process keyboard input
-	static Camera* camera = Camera::getInstance();
 	if (io.KeysDown[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, true);
 
