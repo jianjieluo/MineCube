@@ -26,14 +26,19 @@ using std::string;
  * You can inherit it and create your own cube.
  */
 class Cube {
-    private:
+    protected:
         static const unsigned int COOR_DIMENSION = 3;
         static const unsigned int NOR_VECTOR_DIMENSION = 3;
-        static const unsigned int TRIANGLE_PER_CUBE = 36;
+        static const unsigned int VERTEX_PER_CUBE = 36;
+        static const unsigned int VERTEX_PER_PLANE = 6;
         static const vector<GLfloat> cubeVertex;
         static const vector<GLfloat> cubeNormal;
-    protected:
-
+        static const unsigned int LEFT_PLANE_BEGIN = 0;
+        static const unsigned int RIGHT_PLANE_BEGIN = 0;
+        static const unsigned int UP_PLANE_BEGIN = 0;
+        static const unsigned int BOTTOM_PLANE_BEGIN = 0;
+        static const unsigned int FRONT_PLANE_BEGIN = 0;
+        static const unsigned int BACK_PLANE_BEGIN = 0;
         glm::mat4 model;
         string modelMat4Name;
         GLuint shaderID;
@@ -45,7 +50,7 @@ class Cube {
             string mat4Name,
             vector<GLuint> attriSize
         );
-        Cube(const Cube &);        
+        Cube(const Cube &) = delete;
         ~Cube();
 
         virtual void drawLeft();
