@@ -29,10 +29,12 @@ class Cube {
     protected:
         static const unsigned int COOR_DIMENSION = 3;
         static const unsigned int NOR_VECTOR_DIMENSION = 3;
+        static const unsigned int COLOR_DIMENSION = 3;
         static const unsigned int VERTEX_PER_CUBE = 36;
         static const unsigned int VERTEX_PER_PLANE = 6;
         static const vector<GLfloat> cubeVertex;
         static const vector<GLfloat> cubeNormal;
+        static const vector<GLfloat> cubeColor;
         static const unsigned int LEFT_PLANE_BEGIN = 0;
         static const unsigned int RIGHT_PLANE_BEGIN = 0;
         static const unsigned int UP_PLANE_BEGIN = 0;
@@ -43,6 +45,8 @@ class Cube {
         string modelMat4Name;
         GLuint shaderID;
         shared_ptr<GLBufferManager> glBufferManager;
+        void beforeDraw();
+        void afterDraw();
     public:
         Cube(
             GLfloat size,
@@ -60,6 +64,13 @@ class Cube {
         virtual void drawFront();
         virtual void drawBack();
         virtual void drawAll();
+
+        virtual void editColor(
+            unsigned int r,
+            unsigned int g,
+            unsigned int b,
+            unsigned int plane
+        );
 };
 
 

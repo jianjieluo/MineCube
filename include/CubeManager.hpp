@@ -25,23 +25,46 @@ class CubeManager {
         unsigned int width; // x
         unsigned int height; // y
         unsigned int depth; // z
+        unsigned int totalCube;
+        GLfloat sizePerCube;
+        vector<glm::vec3> cubesPosition;
+        vector<shared_ptr<Cube>> cubes;
     public:
-        CubeManager(unsigned int, unsigned int, unsigned int);
+        CubeManager(
+            unsigned int width,
+            unsigned int height,
+            unsigned int depth,
+            GLfloat sizePerCube
+        );
+        
         ~CubeManager();
         
-        shared_ptr<Cube> getCube(unsigned int, unsigned int, unsigned int);
+        shared_ptr<Cube> getCube(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z
+        );
 
         /**
          * If there already have one cube,
          * over-write it.
          */
-        void setCube(unsigned int, unsigned int, unsigned int, shared_ptr<Cube>);
+        void setCube(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z,
+            shared_ptr<Cube> newCube
+        );
 
         /**
          * If there is no cube,
          * noting happen
          */
-        void deleteCube(unsigned int, unsigned int, unsigned int);
+        void deleteCube(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z
+        );
 
         /**
          * Call this method inside render loop
@@ -49,6 +72,19 @@ class CubeManager {
         void draw();
 
         void defalut_init_all();
+
+        unsigned int getId(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z
+        );
+
+        unsigned int getId(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z,
+            unsigned int w
+        );
 };
 
 #endif /* CubeManager_hpp */

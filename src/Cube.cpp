@@ -10,6 +10,7 @@ Cube::Cube(
     * Preprocess attrisize
     * vertex coordinate and normal vector are default attribute
     */
+   attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
    attrisize.insert(attrisize.begin(), NOR_VECTOR_DIMENSION);
    attrisize.insert(attrisize.begin(), COOR_DIMENSION);
    glBufferManager = GLBufferManager::getNewInstance(attrisize, VERTEX_PER_CUBE);
@@ -17,8 +18,12 @@ Cube::Cube(
    for (unsigned int i = 0; i < vertexTemp.size(); ++i) {
        vertexTemp[i] = size * Cube::cubeVertex[i];
    }
+   // Position attri
    glBufferManager->setAttriArray(0, 3, vertexTemp);
+   // Normal Vector attri
    glBufferManager->setAttriArray(3, 3, Cube::cubeNormal);
+   // Color attri
+   glBufferManager->setAttriArray(6, 3, cubeColor);
 }
 
 Cube::~Cube() {
@@ -26,45 +31,63 @@ Cube::~Cube() {
 }
 
 void Cube::drawLeft() {
-    glBufferManager->bind();
+    this->beforeDraw();    
     glDrawArrays(GL_TRIANGLES, LEFT_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();
+    this->afterDraw();
 }
 
 void Cube::drawRight() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, RIGHT_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();    
+    this->afterDraw();    
 }
 
 void Cube::drawUp() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, UP_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();    
+    this->afterDraw();    
 }
 
 void Cube::drawBottom() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, BOTTOM_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();
+    this->afterDraw();
 }
 
 void Cube::drawFront() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, FRONT_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();
+    this->afterDraw();
 }
 
 void Cube::drawBack() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, BACK_PLANE_BEGIN, VERTEX_PER_PLANE);
-    glBufferManager->unbind();
+    this->afterDraw();
 }
 
 void Cube::drawAll() {
-    glBufferManager->bind();
+    this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_PER_CUBE);
+    this->afterDraw();
+}
+
+void Cube::beforeDraw() {
+    glUseProgram(shaderID);    
+    glBufferManager->bind();
+}
+
+void Cube::afterDraw() {
     glBufferManager->unbind();
+}
+
+void Cube::editColor(
+    unsigned int r,
+    unsigned int g,
+    unsigned int b,
+    unsigned int plane
+) {
+    // Not Implement Yet
 }
 // 36 triangles make up a cube
 const vector<GLfloat> Cube::cubeVertex = {
@@ -154,4 +177,48 @@ const vector<GLfloat> Cube::cubeNormal = {
 		0.0f,  1.0f,  0.0f,
 		0.0f,  1.0f,  0.0f,
 		0.0f,  1.0f,  0.0f
+};
+
+const vector<GLfloat> Cube::cubeColor = {
+        0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+		0.0f,  0.0f, 1.0f,
+
+		1.0f, 0.0f,  0.0f,
+		1.0f, 0.0f,  0.0f,
+		1.0f, 0.0f,  0.0f,
+		1.0f, 0.0f,  0.0f,
+		1.0f, 0.0f,  0.0f,
+		1.0f, 0.0f,  0.0f,
+
+		1.0f,  1.0f,  0.0f,
+		1.0f,  1.0f,  0.0f,
+		1.0f,  1.0f,  0.0f,
+		1.0f,  1.0f,  0.0f,
+		1.0f,  1.0f,  0.0f,
+		1.0f,  1.0f,  0.0f,
+
+		0.0f, 1.0f,  1.0f,
+		0.0f, 1.0f,  1.0f,
+		0.0f, 1.0f,  1.0f,
+		0.0f, 1.0f,  1.0f,
+		0.0f, 1.0f,  1.0f,
+		0.0f, 1.0f,  1.0f,
+
+		1.0f,  0.0f,  1.0f,
+		1.0f,  0.0f,  1.0f,
+		1.0f,  0.0f,  1.0f,
+		1.0f,  0.0f,  1.0f,
+		1.0f,  0.0f,  1.0f,
+		1.0f,  0.0f,  1.0f
 };
