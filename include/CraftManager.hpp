@@ -48,7 +48,8 @@ class CraftManager {
 		void setModel(const glm::mat4 & mat4);
 
     public:
-		CraftManager(GLfloat sizePerCube,
+		CraftManager(
+            GLfloat sizePerCube,
 			unsigned int numPerEdge,
 			unsigned int shaderID,
 			string mat4Name,
