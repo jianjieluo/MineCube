@@ -18,6 +18,7 @@ GLBufferManager::GLBufferManager(const vector<GLuint> & attriSize, const GLuint 
                                 (void*)(offset * sizeof(GLfloat)));
         glEnableVertexAttribArray(i);
     }
+    glBindVertexArray(0);
 }
 
 GLBufferManager::~GLBufferManager() {
@@ -33,7 +34,7 @@ void GLBufferManager::setAttriArray(GLuint offset, GLuint size, const vector<GLf
         unsigned int startIndex = i * totalLengthPerVertex;
         unsigned dataIndex = i * size;
         for (unsigned int j = 0; j < size; ++j) {
-            data[startIndex + j + offset] = data[dataIndex + j];
+            data[startIndex + j + offset] = in_data[dataIndex + j];
         }
     }
     this->bufferData();
@@ -49,6 +50,7 @@ void GLBufferManager::unbind() {
 
 void GLBufferManager::bufferData() {
     // update
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data.front(), GL_STATIC_DRAW);
 }
 
