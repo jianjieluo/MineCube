@@ -13,8 +13,7 @@
 #include "Camera.hpp"
 #include "Gui.hpp"
 #include "CraftManager.hpp"
-
-
+#include "CubeManager.hpp"
 // interactive variables
 int screenWidth = 1080;
 int screenHeight = 960;
@@ -85,7 +84,7 @@ int main()
 
 
 
-	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
+	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
     
 	Gui gui(window);
 
@@ -137,7 +136,9 @@ int main()
 	};
 	vector<float> vertexAttrArray(data, data + 108);
 
-	craftManger.setAttriArray(0, 3, vertexAttrArray);
+    craftManger.setAttriArray(0, 3, vertexAttrArray);
+    CubeManager cubeManager(numPerEdge, numPerEdge, numPerEdge, sizePerCube);
+    cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
 	// main loop
 	while (!glfwWindowShouldClose(window))
@@ -184,8 +185,8 @@ int main()
 		phongShader.setMat4("projection", projection);
 
 		// draw
-		craftManger.draw();
-
+//        craftManger.draw();
+        cubeManager.draw();
 		gui.render();
 
 		glfwSwapBuffers(window);
