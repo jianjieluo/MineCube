@@ -1,5 +1,16 @@
 #include "Cube.hpp"
 
+/**
+ * Usage of static const variable is weird here.
+ * I don't konw why.
+ * By Bowen Wu.
+ * https://stackoverflow.com/questions/4891067/weird-undefined-symbols-of-static-constants-inside-a-struct-class
+ */
+const unsigned int Cube::COOR_DIMENSION;
+const unsigned int Cube::NOR_VECTOR_DIMENSION;
+const unsigned int Cube::COLOR_DIMENSION;
+const unsigned int Cube::VERTEX_PER_CUBE;
+const unsigned int Cube::VERTEX_PER_PLANE;
 Cube::Cube(
     GLfloat size,
     GLuint shaderID,

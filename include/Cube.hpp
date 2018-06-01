@@ -26,7 +26,7 @@ using std::string;
  * You can inherit it and create your own cube.
  */
 class Cube {
-    protected:
+    private:
         static const unsigned int COOR_DIMENSION = 3;
         static const unsigned int NOR_VECTOR_DIMENSION = 3;
         static const unsigned int COLOR_DIMENSION = 3;
@@ -59,7 +59,6 @@ class Cube {
         GLuint shaderID;
         shared_ptr<GLBufferManager> glBufferManager;
         vector<GLfloat> cubeColor;
-        glm::mat4 model;
         void useModelMat4();
         void beforeDraw();
         void afterDraw();

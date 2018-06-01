@@ -19,7 +19,7 @@ CubeManager::CubeManager(
     for (unsigned int x = 0; x < width; ++x) {
         for (unsigned int y = 0; y < height; ++y) {
             for (unsigned int z = 0; z < depth; ++z) {
-                cubesPosition[getId(x, y, z)] = glm::vec3(x * sizePerCube, y * sizePerCube, z * sizePerCube + startPoint);
+                cubesPosition[getId(x, y, z)] = glm::vec3(x * sizePerCube, y * sizePerCube, z * sizePerCube) + startPoint;
             }
         }
     }
@@ -112,13 +112,13 @@ void CubeManager::refreshModelMat4() {
 }
 
 void CubeManager::refreshModelMat4(const unsigned int & id) {
-    if (cubes[i] == nullptr) {
+    if (cubes[id] == nullptr) {
         throw std::invalid_argument("INVALID:There is no cube in this position!");
     }
-    cubes[i]->setModelMat4(calculateModelMat4(id));
+    cubes[id]->setModelMat4(calculateModelMat4(id));
 }
 
 glm::mat4 CubeManager::calculateModelMat4(const unsigned int & id) {
     glm::mat4 model;
-    return glm::translate(model, cubesPosition[i]);
+    return glm::translate(model, cubesPosition[id]);
 }
