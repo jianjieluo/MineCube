@@ -35,7 +35,6 @@ include_directories(3rd_party/glm)
 include_directories(3rd_party/imgui)
 include_directories(3rd_party/imgui/examples/opengl3_example)
 aux_source_directory(3rd_party/imgui IMGUI_SRC)
-set(IMGUI_IMPL_GLFW_GL3_SRC 3rd_party/imgui/examples/opengl3_example/imgui_impl_glfw_gl3.cpp)
 
 # include our headers
 include_directories(include)
@@ -43,7 +42,7 @@ include_directories(include)
 # get MineCube src files
 aux_source_directory(./src MINECUBE_SRC)
 
-set(SOURCE_FILES ${MINECUBE_SRC} ${IMGUI_SRC} ${IMGUI_IMPL_GLFW_GL3_SRC} ${GLAD_SRC})
+set(SOURCE_FILES ${MINECUBE_SRC} ${IMGUI_SRC} ${GLAD_SRC})
 
 # Compile
 add_executable(MineCube ${SOURCE_FILES})

@@ -1,13 +1,3 @@
-#ifdef 	_WIN32
-#include <windows.h>
-#endif
-#ifdef __APPLE__
-#include <unistd.h>
-#endif
-#ifdef __linux__
-#include <unistd.h>
-#endif
-
 #include "Global.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
@@ -24,9 +14,8 @@ const string mat4Name = "model";
 vector<GLuint> attriSize;
 
 // Camera class
-Camera camera;
-float deltaTime = 0.0f; // time between frames
-float lastFrame = 0.0f;
+static Camera* camera = Camera::getInstance();
+
 bool isFpsMode = false;
 
 // lighting
@@ -41,10 +30,6 @@ float shininess = 32.0f;
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
-void mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main()
 {
@@ -71,9 +56,6 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // vertical synchronization
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_move_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 
 	// initialize GLAD and load pointer address of OpenGL functions
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -150,8 +132,6 @@ int main()
 		gui.createNewFrame();
 		gui.draw();
 
-		processInput(window);
-
 		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -161,12 +141,12 @@ int main()
 		}
 		else {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			camera.pause();
+			camera->pause();
 		}
 
 		phongShader.use();
         
-		phongShader.setVec3("viewPos", camera.getCameraPosition());
+		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
         phongShader.setVec3("material.ambient",  objectColor);
@@ -179,9 +159,9 @@ int main()
         phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f); // a little darker to match the scene
         phongShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
 
-		glm::mat4 view = camera.getViewMatrix();
+		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
-		glm::mat4 projection = glm::perspective(glm::radians(camera.getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
 		// draw
@@ -206,44 +186,4 @@ void glfw_error_callback(int error, const char* description) {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
-void processInput(GLFWwindow *window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-		isFpsMode = !isFpsMode;
-		// to prevent multi press
-#ifdef 	_WIN32
-		Sleep(200);
-#endif
-#ifdef __APPLE__
-		usleep(200000);
-#endif
-#ifdef __linux__
-		usleep(200000);
-#endif       
-	}
-	if (isFpsMode) {
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			camera.moveCamera(FORWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			camera.moveCamera(BACKWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			camera.moveCamera(LEFT, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			camera.moveCamera(RIGHT, deltaTime);
-	}
-}
-void mouse_move_callback(GLFWwindow* window, double cur_x, double cur_y) {
-	if (isFpsMode) {
-		camera.lookAround((float)cur_x, (float)cur_y);
-	}
-}
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-		isFpsMode = true;
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-		isFpsMode = false;
-}
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	camera.zoomInOrOut(yoffset);
-}
+

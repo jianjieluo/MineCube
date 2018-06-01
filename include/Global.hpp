@@ -13,5 +13,7 @@ extern bool showGuiWindow;
 extern bool menuItem;
 extern float cubes_color[4];
 extern float background_color[4];
+extern float deltaTime;
+extern float lastFrame;
 
 #endif  // GLOBAL_HPP
