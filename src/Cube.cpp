@@ -21,11 +21,11 @@ Cube::Cube(
     * Preprocess attrisize
     * vertex coordinate and normal vector are default attribute
     */
-   attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
+//    attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
    attrisize.insert(attrisize.begin(), NOR_VECTOR_DIMENSION);
    attrisize.insert(attrisize.begin(), COOR_DIMENSION);
    glBufferManager = GLBufferManager::getNewInstance(attrisize, VERTEX_PER_CUBE);
-   vector<GLfloat> vertexTemp = vector<GLfloat>(VERTEX_PER_CUBE);
+   vector<GLfloat> vertexTemp = vector<GLfloat>(VERTEX_PER_CUBE * COOR_DIMENSION);
    for (unsigned int i = 0; i < vertexTemp.size(); ++i) {
        vertexTemp[i] = size * Cube::cubeVertex[i];
    }
@@ -34,7 +34,7 @@ Cube::Cube(
    // Normal Vector attri
    glBufferManager->setAttriArray(NOR_VECTOR_ATTRI_OFFSET, NOR_VECTOR_DIMENSION, Cube::cubeNormal);
    // Color attri
-   glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
+//    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
 
    // make one cube has its own color
    cubeColor = initCubeColor;
@@ -53,7 +53,7 @@ void Cube::drawLeft() {
 void Cube::drawRight() {
     this->beforeDraw();
     glDrawArrays(GL_TRIANGLES, RIGHT_PLANE_BEGIN, VERTEX_PER_PLANE);
-    this->afterDraw();    
+    this->afterDraw();
 }
 
 void Cube::drawUp() {
@@ -87,9 +87,9 @@ void Cube::drawAll() {
 }
 
 void Cube::beforeDraw() {
-    glUseProgram(shaderID);
-    this->useModelMat4();
-    glBufferManager->bind();
+    glBufferManager->bind();    
+    this->useModelMat4();    
+    // glUseProgram(shaderID);
 }
 
 void Cube::afterDraw() {

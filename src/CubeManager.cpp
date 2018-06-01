@@ -1,7 +1,9 @@
 #include "CubeManager.hpp"
 #include <glm/gtx/transform.hpp>
 #include <stdexcept>
-
+#include <iostream>
+using std::cout;
+using std::endl;
 CubeManager::CubeManager(
     unsigned int width,
     unsigned int height,
@@ -64,8 +66,10 @@ void CubeManager::deleteCube(
  * We should optimize here later.
  */
 void CubeManager::draw() {
+    cout << totalCube << endl;
     for (unsigned int i = 0; i < totalCube; ++i) {
         if (cubes[i] != nullptr) {
+            // cout << "draw " << i << endl;
             cubes[i]->drawAll();
         }
     }
@@ -80,7 +84,7 @@ unsigned int CubeManager::getId(
     if (x >= width || y >= height || z >= depth) {
         throw std::out_of_range("OUT_OF_RANGE:Please make input argument is in legal range.");
     }
-    return x * (height + depth) + y * depth + z;
+    return x * (height * depth) + y * depth + z;
 }
 
 unsigned int CubeManager::getId(
@@ -92,7 +96,7 @@ unsigned int CubeManager::getId(
     if (x >= width || y >= height || z >= depth || w >= 6) {
         throw std::out_of_range("OUT_OF_RANGE:Please make input argument is in legal range.");
     }
-    return x * (height + depth + 6) + y * (depth + 6) + z * 6 + w;
+    return x * (height * depth * 6) + y * (depth * 6) + z * 6 + w;
 }
 
 // generate default cube for each position
