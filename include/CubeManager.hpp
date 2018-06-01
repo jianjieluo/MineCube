@@ -29,6 +29,7 @@ class CubeManager {
         GLfloat sizePerCube;
         vector<glm::vec3> cubesPosition;
         vector<shared_ptr<Cube>> cubes;
+        glm::vec3 rotateAngle;
     public:
         CubeManager(
             unsigned int width,
@@ -36,7 +37,10 @@ class CubeManager {
             unsigned int depth,
             GLfloat sizePerCube
         );
-        
+        // restore from file
+        CubeManager(string model_path) = delete;
+        // store to file
+        // void dump(string model_path);
         ~CubeManager();
         
         shared_ptr<Cube> getCube(
@@ -48,6 +52,8 @@ class CubeManager {
         /**
          * If there already have one cube,
          * over-write it.
+         * The incoming cube's size can be any value, just
+         * it may cover other cubes.
          */
         void setCube(
             unsigned int x,
@@ -71,7 +77,7 @@ class CubeManager {
          */
         void draw();
 
-        void defalut_init_all();
+        void defalut_init_all(const GLuint & shaderID, const string & mat4Name);
 
         unsigned int getId(
             unsigned int x,
@@ -85,6 +91,10 @@ class CubeManager {
             unsigned int z,
             unsigned int w
         );
+
+        void refreshModelMat4();
+        void refreshModelMat4(const unsigned int & id);
+        glm::mat4 calculateModelMat4(const unsigned int & id);
 };
 
 #endif /* CubeManager_hpp */

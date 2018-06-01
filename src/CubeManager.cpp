@@ -1,4 +1,5 @@
 #include "CubeManager.hpp"
+#include <glm/gtx/transform.hpp>
 #include <stdexcept>
 
 CubeManager::CubeManager(
@@ -45,7 +46,9 @@ void CubeManager::setCube(
     unsigned int z,
     shared_ptr<Cube> newCube
 ) {
-    cubes[getId(x, y, z)] = newCube;
+    unsigned int && id = getId(x, y, z);
+    cubes[id] = newCube;
+    this->refreshModelMat4(id);
 }
 
 void CubeManager::deleteCube(
@@ -92,3 +95,30 @@ unsigned int CubeManager::getId(
     return x * (height + depth + 6) + y * (depth + 6) + z * 6 + w;
 }
 
+// generate default cube for each position
+void CubeManager::defalut_init_all(const GLuint & shaderID, const string & mat4Name) {
+    for (unsigned int i = 0; i < totalCube; ++i) {
+        cubes[i] = shared_ptr<Cube>(new Cube(sizePerCube, shaderID, mat4Name, {}));
+    }
+    refreshModelMat4();
+}
+
+void CubeManager::refreshModelMat4() {
+    for (unsigned int i = 0; i < totalCube; ++i) {
+        if (cubes[i] != nullptr) {
+            cubes[i]->setModelMat4(calculateModelMat4(i));
+        }
+    }
+}
+
+void CubeManager::refreshModelMat4(const unsigned int & id) {
+    if (cubes[i] == nullptr) {
+        throw std::invalid_argument("INVALID:There is no cube in this position!");
+    }
+    cubes[i]->setModelMat4(calculateModelMat4(id));
+}
+
+glm::mat4 CubeManager::calculateModelMat4(const unsigned int & id) {
+    glm::mat4 model;
+    return glm::translate(model, cubesPosition[i]);
+}

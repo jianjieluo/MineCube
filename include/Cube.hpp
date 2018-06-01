@@ -34,17 +34,33 @@ class Cube {
         static const unsigned int VERTEX_PER_PLANE = 6;
         static const vector<GLfloat> cubeVertex;
         static const vector<GLfloat> cubeNormal;
-        static const vector<GLfloat> cubeColor;
+        static const vector<GLfloat> initCubeColor;
+
+        static const unsigned int POSITION_ATTRI_OFFSET = 0;
+        static const unsigned int NOR_VECTOR_ATTRI_OFFSET = 3;
+        static const unsigned int COLOR_ATTRI_OFFSET = 6;
+
         static const unsigned int LEFT_PLANE_BEGIN = 0;
         static const unsigned int RIGHT_PLANE_BEGIN = 0;
         static const unsigned int UP_PLANE_BEGIN = 0;
         static const unsigned int BOTTOM_PLANE_BEGIN = 0;
         static const unsigned int FRONT_PLANE_BEGIN = 0;
         static const unsigned int BACK_PLANE_BEGIN = 0;
+
+        static const unsigned int LEFT = 0;
+        static const unsigned int RIGHT = 1;
+        static const unsigned int UP = 2;
+        static const unsigned int BOTTOM = 3;
+        static const unsigned int FRONT = 4;
+        static const unsigned int BACK = 5;
+
         glm::mat4 model;
         string modelMat4Name;
         GLuint shaderID;
         shared_ptr<GLBufferManager> glBufferManager;
+        vector<GLfloat> cubeColor;
+        glm::mat4 model;
+        void useModelMat4();
         void beforeDraw();
         void afterDraw();
     public:
@@ -66,11 +82,13 @@ class Cube {
         virtual void drawAll();
 
         virtual void editColor(
-            unsigned int r,
-            unsigned int g,
-            unsigned int b,
+            GLfloat r,
+            GLfloat g,
+            GLfloat b,
             unsigned int plane
         );
+
+        virtual void setModelMat4(const glm::mat4 &);
 };
 
 

@@ -85,7 +85,7 @@ int main()
 
 
 
-	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
+	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
     
 	Gui gui(window);
 

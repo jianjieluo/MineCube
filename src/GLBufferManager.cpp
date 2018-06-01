@@ -36,6 +36,7 @@ void GLBufferManager::setAttriArray(GLuint offset, GLuint size, const vector<GLf
             data[startIndex + j + offset] = data[dataIndex + j];
         }
     }
+    this->bufferData();
 }
 
 void GLBufferManager::bind() {

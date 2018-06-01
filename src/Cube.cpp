@@ -19,11 +19,14 @@ Cube::Cube(
        vertexTemp[i] = size * Cube::cubeVertex[i];
    }
    // Position attri
-   glBufferManager->setAttriArray(0, 3, vertexTemp);
+   glBufferManager->setAttriArray(POSITION_ATTRI_OFFSET, COOR_DIMENSION, vertexTemp);
    // Normal Vector attri
-   glBufferManager->setAttriArray(3, 3, Cube::cubeNormal);
+   glBufferManager->setAttriArray(NOR_VECTOR_ATTRI_OFFSET, NOR_VECTOR_DIMENSION, Cube::cubeNormal);
    // Color attri
-   glBufferManager->setAttriArray(6, 3, cubeColor);
+   glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
+
+   // make one cube has its own color
+   cubeColor = initCubeColor;
 }
 
 Cube::~Cube() {
@@ -73,7 +76,8 @@ void Cube::drawAll() {
 }
 
 void Cube::beforeDraw() {
-    glUseProgram(shaderID);    
+    glUseProgram(shaderID);
+    this->useModelMat4();
     glBufferManager->bind();
 }
 
@@ -82,12 +86,29 @@ void Cube::afterDraw() {
 }
 
 void Cube::editColor(
-    unsigned int r,
-    unsigned int g,
-    unsigned int b,
+    GLfloat r,
+    GLfloat g,
+    GLfloat b,
     unsigned int plane
 ) {
-    // Not Implement Yet
+    // calculate total offset first
+    unsigned int totalOffset = plane * COLOR_DIMENSION * VERTEX_PER_PLANE;
+    for (unsigned int i = 0; i < VERTEX_PER_PLANE; ++i) {
+        unsigned int startIndex = i * COLOR_DIMENSION + totalOffset;
+        cubeColor[startIndex] = r;
+        cubeColor[startIndex + 1] = g;
+        cubeColor[startIndex + 2] = b;
+    }
+    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, cubeColor);
+}
+
+void Cube::setModelMat4(const glm::mat4 & model) {
+    this->model = model;
+}
+
+void Cube::useModelMat4() {
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, modelMat4Name.c_str()), 1,
+		GL_FALSE, glm::value_ptr(model));
 }
 // 36 triangles make up a cube
 const vector<GLfloat> Cube::cubeVertex = {
@@ -179,7 +200,7 @@ const vector<GLfloat> Cube::cubeNormal = {
 		0.0f,  1.0f,  0.0f
 };
 
-const vector<GLfloat> Cube::cubeColor = {
+const vector<GLfloat> Cube::initCubeColor = {
         0.0f,  1.0f, 0.0f,
 		0.0f,  1.0f, 0.0f,
 		0.0f,  1.0f, 0.0f,
