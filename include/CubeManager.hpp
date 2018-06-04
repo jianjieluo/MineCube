@@ -95,6 +95,14 @@ class CubeManager {
         void refreshModelMat4();
         void refreshModelMat4(const unsigned int & id);
         glm::mat4 calculateModelMat4(const unsigned int & id);
+
+        /**
+         * Change all shaderID of cubes managed by this CubeManager
+         * This is not a cheap operation.
+         * Warning: Calling this function will change ALL CUBE shader!
+         * If you just modify part of cubes' shader, use Cube::setShaderId instead.
+         */
+        void setAllShaderId(const GLuint & shaderID);
 };
 
 #endif /* CubeManager_hpp */

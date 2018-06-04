@@ -126,3 +126,11 @@ glm::mat4 CubeManager::calculateModelMat4(const unsigned int & id) {
     glm::mat4 model;
     return glm::translate(model, cubesPosition[id]);
 }
+
+void CubeManager::setAllShaderId(const GLuint & shaderID) {
+    for (unsigned int i = 0; i < totalCube; ++i) {
+        if (cubes[i] != nullptr) {
+            cubes[i]->setShaderId(shaderID);
+        }
+    }
+}
