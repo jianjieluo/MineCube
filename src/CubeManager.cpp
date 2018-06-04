@@ -28,6 +28,9 @@ CubeManager::CubeManager(
 
     // 初始化cubes数组
     cubes = vector<shared_ptr<Cube>>(totalCube);
+
+    rotateAngleAroundY = 0;
+    rotateAngleAroundX = 0;
 }
 
 CubeManager::~CubeManager() {
@@ -124,6 +127,8 @@ void CubeManager::refreshModelMat4(const unsigned int & id) {
 
 glm::mat4 CubeManager::calculateModelMat4(const unsigned int & id) {
     glm::mat4 model;
+    model = glm::rotate(model, glm::radians(rotateAngleAroundY), yAxis);
+    model = glm::rotate(model, glm::radians(rotateAngleAroundX), xAxis);
     return glm::translate(model, cubesPosition[id]);
 }
 
@@ -134,3 +139,19 @@ void CubeManager::setAllShaderId(const GLuint & shaderID) {
         }
     }
 }
+
+void CubeManager::rotateVertical(const GLfloat & offset) {
+    rotateAngleAroundX += offset * rotateSensivitiy;
+    this->refreshModelMat4();
+}
+
+void CubeManager::rotateHorizontal(const GLfloat & offset) {
+    rotateAngleAroundY += offset * rotateSensivitiy;
+    this->refreshModelMat4();    
+}
+
+void CubeManager::setRotateSensivity(const GLfloat & rotateSensivitiy) {
+    this->rotateSensivitiy = rotateSensivitiy;
+}
+const glm::vec3 CubeManager::yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+const glm::vec3 CubeManager::xAxis = glm::vec3(1.0f, 0.0f, 0.0f);

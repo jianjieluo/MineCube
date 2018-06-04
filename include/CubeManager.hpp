@@ -22,6 +22,9 @@ using std::shared_ptr;
  */
 class CubeManager {
     private:
+
+        static const glm::vec3 yAxis;
+        static const glm::vec3 xAxis;
         unsigned int width; // x
         unsigned int height; // y
         unsigned int depth; // z
@@ -29,7 +32,15 @@ class CubeManager {
         GLfloat sizePerCube;
         vector<glm::vec3> cubesPosition;
         vector<shared_ptr<Cube>> cubes;
-        glm::vec3 rotateAngle;
+        // glm::vec3 rotateAngle;
+        GLfloat rotateAngleAroundX;
+        GLfloat rotateAngleAroundY;
+        GLfloat rotateSensivitiy = 1.0f;
+        void refreshModelMat4();
+        void refreshModelMat4(const unsigned int & id);
+        glm::mat4 calculateModelMat4(const unsigned int & id);
+
+
     public:
         CubeManager(
             unsigned int width,
@@ -92,10 +103,6 @@ class CubeManager {
             unsigned int w
         );
 
-        void refreshModelMat4();
-        void refreshModelMat4(const unsigned int & id);
-        glm::mat4 calculateModelMat4(const unsigned int & id);
-
         /**
          * Change all shaderID of cubes managed by this CubeManager
          * This is not a cheap operation.
@@ -103,6 +110,12 @@ class CubeManager {
          * If you just modify part of cubes' shader, use Cube::setShaderId instead.
          */
         void setAllShaderId(const GLuint & shaderID);
+
+        void rotateHorizontal(const GLfloat & offset);
+
+        void rotateVertical(const GLfloat & offset);
+
+        void setRotateSensivity(const GLfloat & rotateSensivitiy);
 };
 
 #endif /* CubeManager_hpp */
