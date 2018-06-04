@@ -40,7 +40,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include "Camera.hpp"
-
+#include <iostream>
 // GL3W/GLFW
 #include <glad/glad.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <GLFW/glfw3.h>
@@ -206,11 +206,22 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 	// process mouse input
 	ImGuiIO& io = ImGui::GetIO();
 
-	if (io.MouseDown[0]) {
-
+	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
+		//std::cout << "left press\n";
 	}
-	if (!io.MouseDown[0]) {
 
+	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
+		//std::cout << "left release\n";
+	}
+	
+	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
+		//std::cout << "right press\n";
+		camera->isMoving = true;
+	}
+	
+	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT) {
+		//std::cout << "right release\n";
+		camera->isMoving = false;
 	}
 }
 

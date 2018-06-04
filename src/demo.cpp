@@ -12,11 +12,13 @@ GLfloat sizePerCube = 0.1;
 unsigned int numPerEdge = 10;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
+GLfloat rotateSensivitiy = 30.0f;
+GLfloat lookAroundSensivitiy = 1.0f;
 
 // Camera class
 static Camera* camera = Camera::getInstance();
 
-bool isFpsMode = false;
+bool isFpsMode = true;
 
 // lighting
 glm::vec3 lightPos(0.8f, 1.0f, 1.0f);
@@ -63,8 +65,6 @@ int main()
 		return -1;
 	}
 	glEnable(GL_DEPTH_TEST);
-
-
 
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
     
@@ -136,14 +136,6 @@ int main()
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (isFpsMode) {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		}
-		else {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			camera->pause();
-		}
-
 		phongShader.use();
         
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
@@ -163,6 +155,27 @@ int main()
 		phongShader.setMat4("view", view);
 		glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
+
+		if (camera->isRotateX()) {
+			cubeManager.setRotateSensivity(rotateSensivitiy);
+			cubeManager.rotateHorizontal(camera->getRotateX());
+			camera->resetRotateX();
+		}
+
+		if (camera->isRotateY()) {
+			cubeManager.setRotateSensivity(rotateSensivitiy);
+			cubeManager.rotateHorizontal(camera->getRotateY());
+			camera->resetRotateY();
+		}
+
+		if (camera->isMoving) {
+			cubeManager.setRotateSensivity(lookAroundSensivitiy);
+			double x, y;
+			glfwGetCursorPos(window, &x, &y);
+			glm::vec2 offset = camera->updateXYoffset((float)x, -(float)y);
+			cubeManager.rotateHorizontal(offset.x);
+			cubeManager.rotateVertical(offset.y);
+		}
 
 		// draw
 //        craftManger.draw();

@@ -16,19 +16,32 @@ class Camera {
 		static Camera* getInstance();
     
 		// return view matrix
-		glm::mat4 getViewMatrix();
+		glm::mat4 getViewMatrix() const;
 		// get position of camera
-		glm::vec3 getCameraPosition();
+		glm::vec3 getCameraPosition() const;
 		// get zoom factor for perspective calculation
-		float getZoomFactor();
+		float getZoomFactor() const;
 		// move position with keyboard input
 		void moveCamera(const MoveDirection &direction, float deltaTime);
 		// look around when mouse move
+		bool shouldMove() const;
 		void lookAround(const float x_offset, const float y_offset);
 		// zoom in and zoom out
 		void zoomInOrOut(float yoffset);
+		// deal with rotate
+		bool isRotateX() const;
+		float getRotateX() const;
+		void resetRotateX();
+		bool isRotateY() const;
+		float getRotateY() const;
+		void resetRotateY();
+
+		glm::vec2 updateXYoffset(float currentX, float currentY);
 		// pause camera
 		void pause();
+
+		bool isMoving;
+		bool isFirstMove;
 	private:
 		// instance
 		static Camera* instance;
@@ -51,9 +64,12 @@ class Camera {
 		float mouseSensitivity;
 		float zoomFactor;
 		// contoller
-		bool isFirstMove;
+
 		float lastX;
 		float lastY;
+		// rotate
+		float rotateX;
+		float rotateY;
 		// process input and update vectors
 		void updateCamera();
 };

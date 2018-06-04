@@ -3,7 +3,7 @@
 // default value
 const float YAW          = -90.0f;
 const float PITCH        = 0.0f;
-const float SPEED        = 2.5f;
+const float SPEED        = 5.0f;
 const float SENSITIVITY  = 0.01f;
 const float ZOOM         = 45.0f;
 
@@ -13,7 +13,7 @@ Camera* Camera::getInstance() {
 	return instance;
 }
 Camera::Camera() {
-    cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);;
+    cameraPosition = glm::vec3(0.0f, 0.7f, 4.0f);
     targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     yaw = YAW;
@@ -21,19 +21,22 @@ Camera::Camera() {
     moveSpeed = SPEED;
     mouseSensitivity = SENSITIVITY;
 	zoomFactor = ZOOM;
+	isMoving = false;
 	isFirstMove = true;
+	rotateX = 0.0f;
+	rotateY = 0.0f;
     updateCamera();
 }
 
-glm::mat4 Camera::getViewMatrix() {
+glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(cameraPosition, targetPosition, cameraUp);
 }
 
-glm::vec3 Camera::getCameraPosition() {
+glm::vec3 Camera::getCameraPosition() const {
     return cameraPosition;
 }
 
-float Camera::getZoomFactor() {
+float Camera::getZoomFactor() const {
 	return zoomFactor;
 }
 
@@ -44,10 +47,10 @@ void Camera::moveCamera(const MoveDirection &direction, float deltaTime) {
     else if (direction == BACKWARD)
         cameraPosition -= cameraFront * actualSpeed;
 	else if (direction == LEFT) {
-		// TODO
+		rotateX -= 0.1f;
 	}
 	else if (direction == RIGHT) {
-		// TODO
+		rotateX += 0.1f;
 	}
 }
 
@@ -82,7 +85,7 @@ void Camera::updateCamera() {
     cameraRight = glm::normalize(glm::cross(worldUp, cameraFront));
     cameraUp = glm::cross(cameraFront, cameraRight);
 
-	//targetPosition = cameraPosition + cameraFront;
+	targetPosition = cameraPosition + cameraFront;
 }
 
 void Camera::zoomInOrOut(const float offsetY) {
@@ -92,6 +95,43 @@ void Camera::zoomInOrOut(const float offsetY) {
         zoomFactor = 1.0f;
     if (zoomFactor >= 45.0f)
         zoomFactor = 45.0f;
+}
+
+bool Camera::isRotateX() const {
+	return glm::abs(getRotateX() - 0.0f) >= 0.001f;
+}
+
+float Camera::getRotateX() const {
+	return rotateX;
+}
+
+void Camera::resetRotateX() {
+	rotateX = 0.0f;
+}
+
+bool Camera::isRotateY() const {
+	return glm::abs(getRotateY() - 0.0f) >= 0.001f;
+}
+
+float Camera::getRotateY() const {
+	return rotateY;
+}
+
+void Camera::resetRotateY() {
+	rotateY = 0.0f;
+}
+
+glm::vec2 Camera::updateXYoffset(float currentX, float currentY) {
+	if (isFirstMove) {
+		lastX = currentX;
+		lastY = currentY;
+		isFirstMove = false;
+	}
+	float offsetX = currentX - lastX;
+	float offsetY = currentY - lastY;
+	lastX = currentX;
+	lastY = currentY;
+	return glm::vec2(offsetX, offsetY);
 }
 
 void Camera::pause() {
