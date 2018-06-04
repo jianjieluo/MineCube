@@ -69,7 +69,6 @@ void CubeManager::deleteCube(
  * We should optimize here later.
  */
 void CubeManager::draw() {
-    cout << totalCube << endl;
     for (unsigned int i = 0; i < totalCube; ++i) {
         if (cubes[i] != nullptr) {
             // cout << "draw " << i << endl;
