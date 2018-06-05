@@ -21,7 +21,7 @@ Cube::Cube(
     * Preprocess attrisize
     * vertex coordinate and normal vector are default attribute
     */
-//    attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
+   attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
    attrisize.insert(attrisize.begin(), NOR_VECTOR_DIMENSION);
    attrisize.insert(attrisize.begin(), COOR_DIMENSION);
    glBufferManager = GLBufferManager::getNewInstance(attrisize, VERTEX_PER_CUBE);
@@ -34,7 +34,7 @@ Cube::Cube(
    // Normal Vector attri
    glBufferManager->setAttriArray(NOR_VECTOR_ATTRI_OFFSET, NOR_VECTOR_DIMENSION, Cube::cubeNormal);
    // Color attri
-//    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
+    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
 
    // make one cube has its own color
    cubeColor = initCubeColor;

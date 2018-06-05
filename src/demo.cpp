@@ -66,7 +66,7 @@ int main()
 	}
 	glEnable(GL_DEPTH_TEST);
 
-	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
+	Shader phongShader("../src/Shader/phongvs2.vs", "../src/Shader/phongfs2.fs");
     
 	Gui gui(window);
 
@@ -141,8 +141,8 @@ int main()
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
-        phongShader.setVec3("material.ambient",  objectColor);
-        phongShader.setVec3("material.diffuse",  objectColor);
+        //phongShader.setVec3("material.ambient",  objectColor);
+        //phongShader.setVec3("material.diffuse",  objectColor);
         phongShader.setVec3("material.specular", specular);
         phongShader.setFloat("material.shininess", shininess);
         // light
