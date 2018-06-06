@@ -8,7 +8,7 @@
 int screenWidth = 1080;
 int screenHeight = 960;
 
-GLfloat sizePerCube = 0.1;
+GLfloat sizePerCube = 0.1f;
 unsigned int numPerEdge = 10;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
@@ -73,7 +73,6 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
-	Shader depthShader("../src/Shader/depthvs.vs", "../src/Shader/depthfs.fs");
     
 	Gui gui(window);
 
@@ -181,17 +180,23 @@ int main()
 
 		// Test each Oriented Bounding Box (OBB).
 		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+			int t_index = index;
+			int x = t_index / (int)glm::pow(numPerEdge, 2);
+			t_index -= x * (int)glm::pow(numPerEdge, 2);
+			int y = t_index / glm::pow(numPerEdge, 1);
+			t_index -= y * (int)glm::pow(numPerEdge, 1);
+			int z = t_index;
 
 			float intersection_distance; // Output of TestRayOBBIntersection()
 			// Original vertices Coordinate
+			// TODO: relative to {sizePerCube}
 			glm::vec3 aabb_min(-0.1f, -0.1f, -0.1f);
 			glm::vec3 aabb_max(0.1f, 0.1f, 0.1f);
 
 			// The ModelMatrix transforms :
 			// - Model transformation for each cube
 			// - but also the AABB (defined with aabb_min and aabb_max) into an OBB
-			glm::mat4 model_mat = glm::mat4();
-			// glm::mat4 model_mat = model_vec[index];
+			glm::mat4 model_mat = cubeManager.getModelMat4(x, y, z);
 
 			if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
 				model_mat, intersection_distance)) {
@@ -199,10 +204,27 @@ int main()
 				break;
 			}
 		}
-		if (cube_num == -1)
-			std::cout << "Background\n";
-		else
-			std::cout << "Cube No." << cube_num << "is selected\n";
+
+		//if (cube_num == -1)
+		//	std::cout << "background\n";
+		//else
+		//	std::cout << "cube no." << cube_num << "is selected\n";
+		// hit
+		if (cube_num != -1) {
+			int x = cube_num / (int)glm::pow(numPerEdge, 2);
+			cube_num -= x * (int)glm::pow(numPerEdge, 2);
+			int y = cube_num / glm::pow(numPerEdge, 1);
+			cube_num -= y * (int)glm::pow(numPerEdge, 1);
+			int z = cube_num;
+
+			auto hover_cube = cubeManager.getCube(x, y, z);
+			for (int plane = 0; plane < 6; plane++)
+				hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
+			cubeManager.setCube(x, y, z, hover_cube);
+		}
+
+
+
 		/*
 		-----------------------------------------------------------------------------------
 		    move cubes
