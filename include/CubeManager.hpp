@@ -116,6 +116,12 @@ class CubeManager {
         void rotateVertical(const GLfloat & offset);
 
         void setRotateSensivity(const GLfloat & rotateSensivitiy);
+
+        glm::mat4 getModelMat4(
+            unsigned int x,
+            unsigned int y,
+            unsigned int z
+        );
 };
 
 #endif /* CubeManager_hpp */
