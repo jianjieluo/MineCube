@@ -21,7 +21,7 @@ static Camera* camera = Camera::getInstance();
 bool isFpsMode = true;
 
 // lighting
-glm::vec3 lightPos(0.8f, 1.0f, 1.0f);
+glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
@@ -32,6 +32,12 @@ float shininess = 32.0f;
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+// util functions
+void ScreenPosToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, \
+						glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, glm::vec3& out_origin, glm::vec3& out_direction);
+bool TestRayOBBIntersection(glm::vec3 ray_origin, glm::vec3 ray_direction, glm::vec3 aabb_min, glm::vec3 aabb_max, \
+							glm::mat4 ModelMatrix, float& intersection_distance);
 
 int main()
 {
@@ -66,7 +72,8 @@ int main()
 	}
 	glEnable(GL_DEPTH_TEST);
 
-	Shader phongShader("../src/Shader/phongvs2.vs", "../src/Shader/phongfs2.fs");
+	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
+	Shader depthShader("../src/Shader/depthvs.vs", "../src/Shader/depthfs.fs");
     
 	Gui gui(window);
 
@@ -141,21 +148,66 @@ int main()
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
-        //phongShader.setVec3("material.ambient",  objectColor);
-        //phongShader.setVec3("material.diffuse",  objectColor);
         phongShader.setVec3("material.specular", specular);
         phongShader.setFloat("material.shininess", shininess);
         // light
         phongShader.setVec3("light.position",  lightPos);
-        phongShader.setVec3("light.ambient",  0.1f, 0.1f, 0.1f);
+        phongShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f); // a little darker to match the scene
-        phongShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
+        phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
 		glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
+		/*
+		-----------------------------------------------------------------------------------
+			set cubes
+		-----------------------------------------------------------------------------------
+		*/
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		glm::vec3 ray_origin;
+		glm::vec3 ray_direction;
+		ScreenPosToWorldRay(xpos, screenHeight - ypos, screenWidth, screenHeight, \
+							view, projection, ray_origin, ray_direction);
+		//std::cout << ray_origin.x << ' ' << ray_origin.y << ' ' << ray_origin.z << '\n';
+		//std::cout << ray_direction.x << ' ' << ray_direction.y << ' ' << ray_direction.z << '\n';
+		//ray_direction = ray_direction*20.0f;
+
+		int cube_num = -1;
+
+		// Test each Oriented Bounding Box (OBB).
+		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+
+			float intersection_distance; // Output of TestRayOBBIntersection()
+			// Original vertices Coordinate
+			glm::vec3 aabb_min(-0.1f, -0.1f, -0.1f);
+			glm::vec3 aabb_max(0.1f, 0.1f, 0.1f);
+
+			// The ModelMatrix transforms :
+			// - Model transformation for each cube
+			// - but also the AABB (defined with aabb_min and aabb_max) into an OBB
+			glm::mat4 model_mat = glm::mat4();
+			// glm::mat4 model_mat = model_vec[index];
+
+			if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
+				model_mat, intersection_distance)) {
+				cube_num = index;
+				break;
+			}
+		}
+		if (cube_num == -1)
+			std::cout << "Background\n";
+		else
+			std::cout << "Cube No." << cube_num << "is selected\n";
+		/*
+		-----------------------------------------------------------------------------------
+		    move cubes
+		-----------------------------------------------------------------------------------
+		*/
 		if (camera->isRotateX()) {
 			cubeManager.setRotateSensivity(rotateSensivitiy);
 			cubeManager.rotateHorizontal(camera->getRotateX());
@@ -172,13 +224,14 @@ int main()
 			cubeManager.setRotateSensivity(lookAroundSensivitiy);
 			double x, y;
 			glfwGetCursorPos(window, &x, &y);
-			glm::vec2 offset = camera->updateXYoffset((float)x, -(float)y);
+			glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
 			cubeManager.rotateHorizontal(offset.x);
 			cubeManager.rotateVertical(offset.y);
 		}
 
 		// draw
 //        craftManger.draw();
+		cubeManager.setAllShaderId(phongShader.ID);
         cubeManager.draw();
 		gui.render();
 
