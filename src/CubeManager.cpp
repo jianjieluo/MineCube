@@ -28,6 +28,9 @@ CubeManager::CubeManager(
 
     // 初始化cubes数组
     cubes = vector<shared_ptr<Cube>>(totalCube);
+
+    rotateAngleAroundY = 0;
+    rotateAngleAroundX = 0;
 }
 
 CubeManager::~CubeManager() {
@@ -66,7 +69,6 @@ void CubeManager::deleteCube(
  * We should optimize here later.
  */
 void CubeManager::draw() {
-    cout << totalCube << endl;
     for (unsigned int i = 0; i < totalCube; ++i) {
         if (cubes[i] != nullptr) {
             // cout << "draw " << i << endl;
@@ -124,5 +126,39 @@ void CubeManager::refreshModelMat4(const unsigned int & id) {
 
 glm::mat4 CubeManager::calculateModelMat4(const unsigned int & id) {
     glm::mat4 model;
+    model = glm::rotate(model, glm::radians(rotateAngleAroundY), yAxis);
+    model = glm::rotate(model, glm::radians(rotateAngleAroundX), xAxis);
     return glm::translate(model, cubesPosition[id]);
 }
+
+void CubeManager::setAllShaderId(const GLuint & shaderID) {
+    for (unsigned int i = 0; i < totalCube; ++i) {
+        if (cubes[i] != nullptr) {
+            cubes[i]->setShaderId(shaderID);
+        }
+    }
+}
+
+void CubeManager::rotateVertical(const GLfloat & offset) {
+    rotateAngleAroundX += offset * rotateSensivitiy;
+    this->refreshModelMat4();
+}
+
+void CubeManager::rotateHorizontal(const GLfloat & offset) {
+    rotateAngleAroundY += offset * rotateSensivitiy;
+    this->refreshModelMat4();    
+}
+
+void CubeManager::setRotateSensivity(const GLfloat & rotateSensivitiy) {
+    this->rotateSensivitiy = rotateSensivitiy;
+}
+
+glm::mat4 CubeManager::getModelMat4(
+    unsigned int x,
+    unsigned int y,
+    unsigned int z
+) {
+    return calculateModelMat4(this->getId(x, y, z));
+}
+const glm::vec3 CubeManager::yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+const glm::vec3 CubeManager::xAxis = glm::vec3(1.0f, 0.0f, 0.0f);

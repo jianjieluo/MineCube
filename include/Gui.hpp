@@ -19,6 +19,8 @@ private:
 	GLFWwindow* window;
 	bool isFirstDraw;
 	bool colorBar;
+	bool editBar;
 	void showAppMainMenuBar();
+	void showEditBar();
 	void showColorBar();
 };

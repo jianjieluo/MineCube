@@ -21,7 +21,7 @@ Cube::Cube(
     * Preprocess attrisize
     * vertex coordinate and normal vector are default attribute
     */
-//    attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
+   attrisize.insert(attrisize.begin(), COLOR_DIMENSION);
    attrisize.insert(attrisize.begin(), NOR_VECTOR_DIMENSION);
    attrisize.insert(attrisize.begin(), COOR_DIMENSION);
    glBufferManager = GLBufferManager::getNewInstance(attrisize, VERTEX_PER_CUBE);
@@ -34,7 +34,7 @@ Cube::Cube(
    // Normal Vector attri
    glBufferManager->setAttriArray(NOR_VECTOR_ATTRI_OFFSET, NOR_VECTOR_DIMENSION, Cube::cubeNormal);
    // Color attri
-//    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
+    glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, initCubeColor);
 
    // make one cube has its own color
    cubeColor = initCubeColor;
@@ -121,6 +121,11 @@ void Cube::useModelMat4() {
     glUniformMatrix4fv(glGetUniformLocation(shaderID, modelMat4Name.c_str()), 1,
 		GL_FALSE, glm::value_ptr(model));
 }
+
+void Cube::setShaderId(const GLuint & shaderID) {
+    this->shaderID = shaderID;
+}
+
 // 36 triangles make up a cube
 const vector<GLfloat> Cube::cubeVertex = {
     1.0f, -1.0f, -1.0f, 

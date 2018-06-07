@@ -88,6 +88,8 @@ class Cube {
         );
 
         virtual void setModelMat4(const glm::mat4 &);
+
+        virtual void setShaderId(const GLuint & shaderID);
 };
 
 
