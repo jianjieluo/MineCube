@@ -4,16 +4,21 @@
 #include "Gui.hpp"
 #include "CraftManager.hpp"
 #include "CubeManager.hpp"
+
 // interactive variables
 int screenWidth = 1080;
 int screenHeight = 960;
 
+// About cubes
 GLfloat sizePerCube = 0.1f;
 unsigned int numPerEdge = 10;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
 GLfloat lookAroundSensivitiy = 1.0f;
+
+// hover color
+glm::vec3 hoverColor(1.0f, 0.0f, 0.0f);
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -34,10 +39,17 @@ void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 // util functions
-void ScreenPosToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, \
-						glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, glm::vec3& out_origin, glm::vec3& out_direction);
-bool TestRayOBBIntersection(glm::vec3 ray_origin, glm::vec3 ray_direction, glm::vec3 aabb_min, glm::vec3 aabb_max, \
-							glm::mat4 ModelMatrix, float& intersection_distance);
+void PickOneCube(
+	int xpos, int ypos,
+	int screenWidth, int screenHeight,
+	const glm::mat4& view,
+	const glm::mat4& projection,
+	unsigned int numPerEdge,
+	float sizePerCube,
+	CubeManager cubeManager,
+	const glm::vec3& hoverColor
+);
+
 
 int main()
 {
@@ -79,67 +91,10 @@ int main()
 	// to normalize
 	attriSize.push_back(3);
 	CraftManager craftManger(sizePerCube, numPerEdge, phongShader.ID, mat4Name, attriSize);
-	float data[108] = {
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
 
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f
-	};
-	vector<float> vertexAttrArray(data, data + 108);
-
-    craftManger.setAttriArray(0, 3, vertexAttrArray);
     CubeManager cubeManager(numPerEdge, numPerEdge, numPerEdge, sizePerCube);
-    cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
-	/*
-		testing color editor
-	*/
-	//for (int i = 0; i < 10; i++) {
-	//	for (int j = 0; j < 10; j++) {
-	//		for (int k = 0; k < 1; k++) {
-	//			auto hover_cube = cubeManager.getCube(i, j, k);
-	//			for (int plane = 0; plane < 6; plane++)
-	//				hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
-	//		}
-	//	}
-	//}
+	cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
 	// main loop
 	while (!glfwWindowShouldClose(window))
@@ -165,7 +120,7 @@ int main()
         // light
         phongShader.setVec3("light.position",  lightPos);
         phongShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f); // a little darker to match the scene
+        phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
         phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 view = camera->getViewMatrix();
@@ -175,23 +130,9 @@ int main()
 
 		/*
 		-----------------------------------------------------------------------------------
-			set cubes
+			set/reset cubes
 		-----------------------------------------------------------------------------------
 		*/
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-
-		glm::vec3 ray_origin;
-		glm::vec3 ray_direction;
-		ScreenPosToWorldRay(xpos, screenHeight - ypos, screenWidth, screenHeight, \
-							view, projection, ray_origin, ray_direction);
-		//std::cout << ray_origin.x << ' ' << ray_origin.y << ' ' << ray_origin.z << '\n';
-		//std::cout << ray_direction.x << ' ' << ray_direction.y << ' ' << ray_direction.z << '\n';
-		//ray_direction = ray_direction*20.0f;
-
-		int cube_num = -1;
-
-		// Test each Oriented Bounding Box (OBB).
 		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
 			int t_index = index;
 			int x = t_index / (int)glm::pow(numPerEdge, 2);
@@ -200,45 +141,25 @@ int main()
 			t_index -= y * (int)glm::pow(numPerEdge, 1);
 			int z = t_index;
 
-			float intersection_distance; // Output of TestRayOBBIntersection()
-			// Original vertices Coordinate
-			// TODO: relative to {sizePerCube}
-			glm::vec3 aabb_min(-0.05f, -0.05f, -0.05f);
-			glm::vec3 aabb_max(0.05f, 0.05f, 0.05f);
-
-			// The ModelMatrix transforms :
-			// - Model transformation for each cube
-			// - but also the AABB (defined with aabb_min and aabb_max) into an OBB
-			glm::mat4 model_mat = cubeManager.getModelMat4(x, y, z);
-
-			if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
-				model_mat, intersection_distance)) {
-				cube_num = index;
-				std::cout << "detect: " << x << ' ' << y << ' ' << z << '\n';
-				break;
-			}
-		}
-
-		//if (cube_num == -1)
-		//	std::cout << "background\n";
-		//else
-		//	std::cout << "cube no." << cube_num << "is selected\n";
-
-		// hit
-		if (cube_num != -1) {
-			int x = cube_num / (int)glm::pow(numPerEdge, 2);
-			cube_num -= x * (int)glm::pow(numPerEdge, 2);
-			int y = cube_num / glm::pow(numPerEdge, 1);
-			cube_num -= y * (int)glm::pow(numPerEdge, 1);
-			int z = cube_num;
-
-			auto hover_cube = cubeManager.getCube(x, y, z);
+			auto cube = cubeManager.getCube(x, y, z);
 			for (int plane = 0; plane < 6; plane++)
-				hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
-			std::cout << "edit: " << x << ' ' << y << ' ' << z << '\n';
+				cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
 		}
 
-
+		/*
+		-----------------------------------------------------------------------------------
+			OBB-ray hitting test
+		-----------------------------------------------------------------------------------
+		*/
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		PickOneCube(
+			(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
+			view, projection, 
+			numPerEdge, sizePerCube, 
+			cubeManager, 
+			hoverColor
+		);
 
 		/*
 		-----------------------------------------------------------------------------------
@@ -266,8 +187,6 @@ int main()
 			cubeManager.rotateVertical(offset.y);
 		}
 
-		// draw
-//        craftManger.draw();
 		cubeManager.setAllShaderId(phongShader.ID);
         cubeManager.draw();
 		gui.render();

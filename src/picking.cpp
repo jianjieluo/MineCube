@@ -1,5 +1,4 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "CubeManager.hpp"
 
 void ScreenPosToWorldRay(
 	int mouseX, int mouseY,             // Mouse position, in pixels, from bottom-left corner of the window
@@ -171,4 +170,56 @@ bool TestRayOBBIntersection(
 	intersection_distance = tMin;
 	return true;
 
+}
+
+void PickOneCube(
+	int xpos, int ypos,
+	int screenWidth, int screenHeight,
+	const glm::mat4& view,
+	const glm::mat4& projection,
+	unsigned int numPerEdge,
+	float sizePerCube,
+	CubeManager cubeManager,
+	const glm::vec3& hoverColor
+) {
+	glm::vec3 ray_origin;
+	glm::vec3 ray_direction;
+	ScreenPosToWorldRay(xpos, screenHeight - ypos, screenWidth, screenHeight, \
+						view, projection, ray_origin, ray_direction);
+	ray_direction = ray_direction * 20.0f;
+
+	int cube_num = -1, hit_x = -1, hit_y = -1, hit_z = -1;
+	float min_distance = 100000.0f;
+	// Test each Oriented Bounding Box (OBB).
+	for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+		int t_index = index;
+		int x = t_index / (int)glm::pow(numPerEdge, 2);
+		t_index -= x * (int)glm::pow(numPerEdge, 2);
+		int y = t_index / glm::pow(numPerEdge, 1);
+		t_index -= y * (int)glm::pow(numPerEdge, 1);
+		int z = t_index;
+
+		float intersection_distance; // Output of TestRayOBBIntersection()
+		
+		// Original vertices Coordinate
+		glm::vec3 aabb_min = glm::vec3(-0.5f, -0.5f, -0.5f) * sizePerCube;
+		glm::vec3 aabb_max = glm::vec3(0.5f, 0.5f, 0.5f) * sizePerCube;
+
+		glm::mat4 model_mat = cubeManager.getModelMat4(x, y, z);
+
+		if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
+			model_mat, intersection_distance) && intersection_distance < min_distance) {
+			min_distance = intersection_distance;
+			hit_x = x;
+			hit_y = y;
+			hit_z = z;
+		}
+	}
+
+	// hit
+	if (hit_x != -1) {
+		auto hover_cube = cubeManager.getCube(hit_x, hit_y, hit_z);
+		for (int plane = 0; plane < 6; plane++)
+			hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, plane);
+	}
 }
