@@ -128,6 +128,20 @@ int main()
     CubeManager cubeManager(numPerEdge, numPerEdge, numPerEdge, sizePerCube);
     cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
+	/*
+		testing color editor
+	*/
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int k = 0; k < 1; k++) {
+				auto hover_cube = cubeManager.getCube(i, j, k);
+				for (int plane = 0; plane < 6; plane++)
+					hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
+				cubeManager.setCube(i, j, k, hover_cube);
+			}
+		}
+	}
+
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -209,19 +223,20 @@ int main()
 		//	std::cout << "background\n";
 		//else
 		//	std::cout << "cube no." << cube_num << "is selected\n";
-		// hit
-		if (cube_num != -1) {
-			int x = cube_num / (int)glm::pow(numPerEdge, 2);
-			cube_num -= x * (int)glm::pow(numPerEdge, 2);
-			int y = cube_num / glm::pow(numPerEdge, 1);
-			cube_num -= y * (int)glm::pow(numPerEdge, 1);
-			int z = cube_num;
 
-			auto hover_cube = cubeManager.getCube(x, y, z);
-			for (int plane = 0; plane < 6; plane++)
-				hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
-			cubeManager.setCube(x, y, z, hover_cube);
-		}
+		// hit
+		//if (cube_num != -1) {
+		//	int x = cube_num / (int)glm::pow(numPerEdge, 2);
+		//	cube_num -= x * (int)glm::pow(numPerEdge, 2);
+		//	int y = cube_num / glm::pow(numPerEdge, 1);
+		//	cube_num -= y * (int)glm::pow(numPerEdge, 1);
+		//	int z = cube_num;
+
+		//	auto hover_cube = cubeManager.getCube(x, y, z);
+		//	for (int plane = 0; plane < 6; plane++)
+		//		hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
+		//	cubeManager.setCube(x, y, z, hover_cube);
+		//}
 
 
 
