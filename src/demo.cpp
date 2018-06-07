@@ -203,8 +203,8 @@ int main()
 			float intersection_distance; // Output of TestRayOBBIntersection()
 			// Original vertices Coordinate
 			// TODO: relative to {sizePerCube}
-			glm::vec3 aabb_min(-0.1f, -0.1f, -0.1f);
-			glm::vec3 aabb_max(0.1f, 0.1f, 0.1f);
+			glm::vec3 aabb_min(-0.05f, -0.05f, -0.05f);
+			glm::vec3 aabb_max(0.05f, 0.05f, 0.05f);
 
 			// The ModelMatrix transforms :
 			// - Model transformation for each cube
@@ -233,10 +233,9 @@ int main()
 			int z = cube_num;
 
 			auto hover_cube = cubeManager.getCube(x, y, z);
-			for (int plane = 0; plane < 1; plane++)
+			for (int plane = 0; plane < 6; plane++)
 				hover_cube->editColor(1.0f, 0.0f, 0.0f, plane);
 			std::cout << "edit: " << x << ' ' << y << ' ' << z << '\n';
-			Sleep(5000);
 		}
 
 
