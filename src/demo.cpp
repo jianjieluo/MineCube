@@ -264,6 +264,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, depthMap);
         // RenderQuad();
 #endif
+
 		/*
 		-----------------------------------------------------------------------------------
 			set/reset cubes
