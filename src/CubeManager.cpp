@@ -152,5 +152,13 @@ void CubeManager::rotateHorizontal(const GLfloat & offset) {
 void CubeManager::setRotateSensivity(const GLfloat & rotateSensivitiy) {
     this->rotateSensivitiy = rotateSensivitiy;
 }
+
+glm::mat4 CubeManager::getModelMat4(
+    unsigned int x,
+    unsigned int y,
+    unsigned int z
+) {
+    return calculateModelMat4(this->getId(x, y, z));
+}
 const glm::vec3 CubeManager::yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 const glm::vec3 CubeManager::xAxis = glm::vec3(1.0f, 0.0f, 0.0f);

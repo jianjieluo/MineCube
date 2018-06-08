@@ -13,12 +13,16 @@
 int screenWidth = 960;
 int screenHeight = 960;
 
-GLfloat sizePerCube = 0.1;
+// About cubes
+GLfloat sizePerCube = 0.1f;
 unsigned int numPerEdge = 10;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
 GLfloat lookAroundSensivitiy = 1.0f;
+
+// hover color
+glm::vec3 hoverColor(1.0f, 0.0f, 0.0f);
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -26,7 +30,7 @@ static Camera* camera = Camera::getInstance();
 bool isFpsMode = true;
 
 // lighting
-glm::vec3 lightPos(0.8f, 1.0f, 1.0f);
+glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
@@ -44,6 +48,19 @@ GLuint planeVAO;
 #endif
 
 void RenderScene(Shader &phongShader, CubeManager & cubeManager);
+
+// util functions
+void PickOneCube(
+	int xpos, int ypos,
+	int screenWidth, int screenHeight,
+	const glm::mat4& view,
+	const glm::mat4& projection,
+	unsigned int numPerEdge,
+	float sizePerCube,
+	CubeManager cubeManager,
+	const glm::vec3& hoverColor
+);
+
 
 int main()
 {
@@ -161,54 +178,10 @@ int main()
 	// to normalize
 	attriSize.push_back(3);
 	CraftManager craftManger(sizePerCube, numPerEdge, phongShader.ID, mat4Name, attriSize);
-	float data[108] = {
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, -1.0f,
 
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-		0.0f,  0.0f, 1.0f,
-
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-		-1.0f, 0.0f,  0.0f,
-
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-		0.0f, -1.0f,  0.0f,
-
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f
-	};
-	vector<float> vertexAttrArray(data, data + 108);
-
-    craftManger.setAttriArray(0, 3, vertexAttrArray);
     CubeManager cubeManager(numPerEdge, numPerEdge, numPerEdge, sizePerCube);
-    cubeManager.defalut_init_all(phongShader.ID, mat4Name);
+
+	cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
 	// main loop
 	while (!glfwWindowShouldClose(window))
@@ -263,15 +236,13 @@ int main()
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
-        //phongShader.setVec3("material.ambient",  objectColor);
-        //phongShader.setVec3("material.diffuse",  objectColor);
         phongShader.setVec3("material.specular", specular);
         phongShader.setFloat("material.shininess", shininess);
         // light
         phongShader.setVec3("light.position",  lightPos);
-        phongShader.setVec3("light.ambient",  0.1f, 0.1f, 0.1f);
-        phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f); // a little darker to match the scene
-        phongShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
+        phongShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
+        phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
@@ -281,7 +252,7 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        RenderScene(phongShader, cubeManager);
+		RenderScene(phongShader, cubeManager);
 
 #ifdef SHADOW
 		// render Depth map to quad for visual debugging
@@ -293,6 +264,44 @@ int main()
         glBindTexture(GL_TEXTURE_2D, depthMap);
         // RenderQuad();
 #endif
+		/*
+		-----------------------------------------------------------------------------------
+			set/reset cubes
+		-----------------------------------------------------------------------------------
+		*/
+		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+			int t_index = index;
+			int x = t_index / (int)glm::pow(numPerEdge, 2);
+			t_index -= x * (int)glm::pow(numPerEdge, 2);
+			int y = t_index / glm::pow(numPerEdge, 1);
+			t_index -= y * (int)glm::pow(numPerEdge, 1);
+			int z = t_index;
+
+			auto cube = cubeManager.getCube(x, y, z);
+			for (int plane = 0; plane < 6; plane++)
+				cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+		}
+
+		/*
+		-----------------------------------------------------------------------------------
+			OBB-ray hitting test
+		-----------------------------------------------------------------------------------
+		*/
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		PickOneCube(
+			(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
+			view, projection, 
+			numPerEdge, sizePerCube, 
+			cubeManager, 
+			hoverColor
+		);
+
+		/*
+		-----------------------------------------------------------------------------------
+		    move cubes
+		-----------------------------------------------------------------------------------
+		*/
 		if (camera->isRotateX()) {
 			cubeManager.setRotateSensivity(rotateSensivitiy);
 			cubeManager.rotateHorizontal(camera->getRotateX());
@@ -309,13 +318,14 @@ int main()
 			cubeManager.setRotateSensivity(lookAroundSensivitiy);
 			double x, y;
 			glfwGetCursorPos(window, &x, &y);
-			glm::vec2 offset = camera->updateXYoffset((float)x, -(float)y);
+			glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
 			cubeManager.rotateHorizontal(offset.x);
 			cubeManager.rotateVertical(offset.y);
 		}
 
-		// draw
-        // cubeManager.draw();
+		cubeManager.setAllShaderId(phongShader.ID);
+		// RenderScene(phongShader, cubeManager);
+		// cubeManager.draw();
 		gui.render();
 
 		glfwSwapBuffers(window);

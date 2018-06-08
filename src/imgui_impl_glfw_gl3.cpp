@@ -215,13 +215,12 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 	}
 	
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
-		//std::cout << "right press\n";
 		camera->isMoving = true;
 	}
 	
 	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT) {
-		//std::cout << "right release\n";
 		camera->isMoving = false;
+		camera->isFirstMove = true;
 	}
 }
 

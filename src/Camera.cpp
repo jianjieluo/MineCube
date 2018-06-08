@@ -13,7 +13,7 @@ Camera* Camera::getInstance() {
 	return instance;
 }
 Camera::Camera() {
-    cameraPosition = glm::vec3(0.0f, 0.7f, 4.0f);
+    cameraPosition = glm::vec3(0.0f, 0.6f, 3.5f);
     targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     yaw = YAW;
