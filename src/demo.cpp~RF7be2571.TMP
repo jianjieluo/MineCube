@@ -6,7 +6,7 @@
 #include "CubeManager.hpp"
 
 #define SHADOW
-//#define PLANE
+#define PLANE
 #define DEBUG
 
 // interactive variables
@@ -43,7 +43,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLuint planeVAO;
 #endif
 
-void RenderScene(Shader &phongShader, CubeManager & cubeManager);
 
 int main()
 {
@@ -79,7 +78,7 @@ int main()
 
     // Define the viewport dimensions
 #ifdef SHADOW
-    glViewport(0, 0, screenWidth, screenHeight);
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #endif
 
 	glEnable(GL_DEPTH_TEST);
@@ -147,11 +146,11 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // phongShader configuration
+    // shader configuration
     // --------------------
-    phongShader.use();
-    phongShader.setInt("diffuseTexture", 0);
-    phongShader.setInt("shadowMap", 1);
+    shader.use();
+    shader.setInt("diffuseTexture", 0);
+    shader.setInt("shadowMap", 1);
     debugDepthQuad.use();
     debugDepthQuad.setInt("depthMap", 0);
 #endif
@@ -246,18 +245,18 @@ int main()
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
-        RenderScene(simpleDepthShader, cubeManager);
+        RenderScene(simpleDepthShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glCullFace(GL_BACK); // 不要忘记设回原先的culling face
 
         // -----------------------------------------
         // reset viewport
-        glViewport(0, 0, screenWidth, screenHeight);
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #endif
 
-		glViewport(0, 0, screenWidth, screenHeight);
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		phongShader.use();
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
@@ -281,7 +280,7 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        RenderScene(phongShader, cubeManager);
+        RenderScene(phongShader);
 
 #ifdef SHADOW
 		// render Depth map to quad for visual debugging
@@ -338,20 +337,19 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void RenderScene(Shader &shader, CubeManager & cubeManager)
 {
-#ifdef PLANE
     // Floor
     glm::mat4 model;
     shader.setMat4("model", model);
+    shader.setFloat3("objectColor", glm::value_ptr(glm::vec3(0.7f, 0.7f, 0.7f)));
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
-#endif // PLANE
     // Cubes
     cubeManager.draw();
     // model = glm::mat4();
     // //model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
-    // phongShader.setMat4("model", glm::value_ptr(model));
-    // phongShader.setFloat3("objectColor", glm::value_ptr(glm::vec3(1.0f, 0.5f, 0.31f)));
+    // shader.setMat4("model", glm::value_ptr(model));
+    // shader.setFloat3("objectColor", glm::value_ptr(glm::vec3(1.0f, 0.5f, 0.31f)));
     // glBindVertexArray(cubeVAO);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // glBindVertexArray(0);
