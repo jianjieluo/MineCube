@@ -231,7 +231,7 @@ int main()
 #endif
 
 		glViewport(0, 0, screenWidth, screenHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		phongShader.use();
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
@@ -345,6 +345,8 @@ void glfw_error_callback(int error, const char* description) {
 }
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
+	screenWidth = width;
+	screenHeight = height;
 }
 
 void RenderScene(Shader &shader, CubeManager & cubeManager)
