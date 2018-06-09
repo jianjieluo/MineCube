@@ -47,12 +47,6 @@ class Cube {
         static const unsigned int FRONT_PLANE_BEGIN = 0;
         static const unsigned int BACK_PLANE_BEGIN = 0;
 
-        static const unsigned int LEFT = 0;
-        static const unsigned int RIGHT = 1;
-        static const unsigned int UP = 2;
-        static const unsigned int BOTTOM = 3;
-        static const unsigned int FRONT = 4;
-        static const unsigned int BACK = 5;
 
         glm::mat4 model;
         string modelMat4Name;
@@ -90,6 +84,13 @@ class Cube {
         virtual void setModelMat4(const glm::mat4 &);
 
         virtual void setShaderId(const GLuint & shaderID);
+
+        static const unsigned int LEFT = 0;
+        static const unsigned int RIGHT = 1;
+        static const unsigned int UP = 2;
+        static const unsigned int BOTTOM = 3;
+        static const unsigned int FRONT = 4;
+        static const unsigned int BACK = 5;
 };
 
 
