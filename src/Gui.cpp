@@ -103,9 +103,9 @@ void Gui::showEditBar() {
 	}
 
 	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-	if (ImGui::ArrowButton("##left", ImGuiDir_Left)) {}
+	if (ImGui::ArrowButton("left", ImGuiDir_Left)) {}
 	ImGui::SameLine(0.0f, spacing);
-	if (ImGui::ArrowButton("##left", ImGuiDir_Right)) {}
+	if (ImGui::ArrowButton("right", ImGuiDir_Right)) {}
 	ImGui::SameLine(0.0f, 4 * spacing);
 
 	if (ImGui::Button(" + ")) {};
@@ -115,8 +115,6 @@ void Gui::showEditBar() {
 	const char* listbox_items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
 	static int listbox_item_current = 1;
 	ImGui::ListBox("History", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items));
-
-	ImGui::SameLine();
 
 	ImGui::End();
 }
