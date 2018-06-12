@@ -11,14 +11,14 @@ void ScreenPosToWorldRay(
 
 	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
 	glm::vec4 lRayStart_NDC(
-		((float)mouseX / (float)screenWidth - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
-		((float)mouseY / (float)screenHeight - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
+		(static_cast<float>(mouseX) / static_cast<float>(screenWidth) - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
+		(static_cast<float>(mouseY) / static_cast<float>(screenHeight) - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
 		-1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
 		1.0f
 	);
 	glm::vec4 lRayEnd_NDC(
-		((float)mouseX / (float)screenWidth - 0.5f) * 2.0f,
-		((float)mouseY / (float)screenHeight - 0.5f) * 2.0f,
+		(static_cast<float>(mouseX) / static_cast<float>(screenWidth) - 0.5f) * 2.0f,
+		(static_cast<float>(mouseY) / static_cast<float>(screenHeight) - 0.5f) * 2.0f,
 		0.0,
 		1.0f
 	);
@@ -180,7 +180,9 @@ void PickOneCube(
 	unsigned int numPerEdge,
 	float sizePerCube,
 	CubeManager cubeManager,
-	const glm::vec3& hoverColor
+	const glm::vec3& hoverColor,
+	const glm::vec3& objectColor,
+	glm::vec3& lastHoverCubePos
 ) {
 	glm::vec3 ray_origin;
 	glm::vec3 ray_direction;
@@ -193,10 +195,10 @@ void PickOneCube(
 	// Test each Oriented Bounding Box (OBB).
 	for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
 		int t_index = index;
-		int x = t_index / (int)glm::pow(numPerEdge, 2);
-		t_index -= x * (int)glm::pow(numPerEdge, 2);
+		int x = t_index / static_cast<int>(glm::pow(numPerEdge, 2));
+		t_index -= x * static_cast<int>(glm::pow(numPerEdge, 2));
 		int y = t_index / glm::pow(numPerEdge, 1);
-		t_index -= y * (int)glm::pow(numPerEdge, 1);
+		t_index -= y * static_cast<int>(glm::pow(numPerEdge, 1));
 		int z = t_index;
 
 		float intersection_distance; // Output of TestRayOBBIntersection()
@@ -216,10 +218,21 @@ void PickOneCube(
 		}
 	}
 
+	// reset last hover cube
+	auto last_hover_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
+	for (int plane = 0; plane < 6; plane++)
+		last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+
+
 	// hit
 	if (hit_x != -1) {
 		auto hover_cube = cubeManager.getCube(hit_x, hit_y, hit_z);
 		for (int plane = 0; plane < 6; plane++)
 			hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, plane);
+		lastHoverCubePos.x = static_cast<float>(hit_x);
+		lastHoverCubePos.y = static_cast<float>(hit_y);
+		lastHoverCubePos.z = static_cast<float>(hit_z);
 	}
+
+
 }

@@ -21,8 +21,9 @@ vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
 GLfloat lookAroundSensivitiy = 1.0f;
 
-// hover color
+// About picking
 glm::vec3 hoverColor(1.0f, 0.0f, 0.0f);
+glm::vec3 lastHoverCubePos(0.0f, 0.0f, 0.0f);
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -34,6 +35,8 @@ glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
+glm::vec3 objectColorLast(cubes_color[0], cubes_color[1], cubes_color[2]);
+
 glm::vec3 specular(0.2f, 0.2f, 0.2f);  // test material
 // parameters
 float shininess = 32.0f;
@@ -58,9 +61,11 @@ void PickOneCube(
 	unsigned int numPerEdge,
 	float sizePerCube,
 	CubeManager cubeManager,
-	const glm::vec3& hoverColor
+	const glm::vec3& hoverColor,
+	const glm::vec3& objectColor,
+	glm::vec3& lastHoverCubePos
 );
-
+void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color);
 
 int main()
 {
@@ -270,19 +275,11 @@ int main()
 			set/reset cubes
 		-----------------------------------------------------------------------------------
 		*/
-		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
-			int t_index = index;
-			int x = t_index / (int)glm::pow(numPerEdge, 2);
-			t_index -= x * (int)glm::pow(numPerEdge, 2);
-			int y = t_index / glm::pow(numPerEdge, 1);
-			t_index -= y * (int)glm::pow(numPerEdge, 1);
-			int z = t_index;
-
-			auto cube = cubeManager.getCube(x, y, z);
-			for (int plane = 0; plane < 6; plane++)
-				cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+		if (objectColor.x != objectColorLast.x || objectColor.y != objectColorLast.y || objectColor.z != objectColorLast.z) {
+			setAllCubesColor(cubeManager, objectColor);
+			objectColorLast = objectColor;
 		}
-
+		
 		/*
 		-----------------------------------------------------------------------------------
 			OBB-ray hitting test
@@ -295,7 +292,9 @@ int main()
 			view, projection, 
 			numPerEdge, sizePerCube, 
 			cubeManager, 
-			hoverColor
+			hoverColor,
+			objectColor,
+			lastHoverCubePos
 		);
 
 		/*
@@ -368,4 +367,19 @@ void RenderScene(Shader &shader, CubeManager & cubeManager)
     // glBindVertexArray(cubeVAO);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // glBindVertexArray(0);
+}
+
+void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color) {
+	for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+		int t_index = index;
+		int x = t_index / (int)glm::pow(numPerEdge, 2);
+		t_index -= x * (int)glm::pow(numPerEdge, 2);
+		int y = t_index / glm::pow(numPerEdge, 1);
+		t_index -= y * (int)glm::pow(numPerEdge, 1);
+		int z = t_index;
+
+		auto cube = cubeManager.getCube(x, y, z);
+		for (int plane = 0; plane < 6; plane++)
+			cube->editColor(color.x, color.y, color.z, plane);
+	}
 }
