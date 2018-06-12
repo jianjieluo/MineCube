@@ -32,16 +32,15 @@ void ScreenPosToWorldRay(
 	// So inverse(ViewMatrix) goes from Camera Space to World Space.
 	glm::mat4 InverseViewMatrix = glm::inverse(ViewMatrix);
 
-	glm::vec4 lRayStart_camera = InverseProjectionMatrix * lRayStart_NDC;    lRayStart_camera /= lRayStart_camera.w;
-	glm::vec4 lRayStart_world = InverseViewMatrix * lRayStart_camera; lRayStart_world /= lRayStart_world.w;
-	glm::vec4 lRayEnd_camera = InverseProjectionMatrix * lRayEnd_NDC;      lRayEnd_camera /= lRayEnd_camera.w;
-	glm::vec4 lRayEnd_world = InverseViewMatrix * lRayEnd_camera;   lRayEnd_world /= lRayEnd_world.w;
-
+	//glm::vec4 lRayStart_camera = InverseProjectionMatrix * lRayStart_NDC;    lRayStart_camera /= lRayStart_camera.w;
+	//glm::vec4 lRayStart_world = InverseViewMatrix * lRayStart_camera; lRayStart_world /= lRayStart_world.w;
+	//glm::vec4 lRayEnd_camera = InverseProjectionMatrix * lRayEnd_NDC;      lRayEnd_camera /= lRayEnd_camera.w;
+	//glm::vec4 lRayEnd_world = InverseViewMatrix * lRayEnd_camera;   lRayEnd_world /= lRayEnd_world.w;
 
 	// Faster way (just one inverse)
-	//glm::mat4 M = glm::inverse(ProjectionMatrix * ViewMatrix);
-	//glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world/=lRayStart_world.w;
-	//glm::vec4 lRayEnd_world   = M * lRayEnd_NDC  ; lRayEnd_world  /=lRayEnd_world.w;
+	glm::mat4 M = glm::inverse(ProjectionMatrix * ViewMatrix);
+	glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world/=lRayStart_world.w;
+	glm::vec4 lRayEnd_world   = M * lRayEnd_NDC  ; lRayEnd_world  /=lRayEnd_world.w;
 
 
 	glm::vec3 lRayDir_world(lRayEnd_world - lRayStart_world);
@@ -59,7 +58,8 @@ bool TestRayOBBIntersection(
 	glm::vec3 aabb_min,          // Minimum X,Y,Z coords of the mesh when not transformed at all.
 	glm::vec3 aabb_max,          // Maximum X,Y,Z coords. Often aabb_min*-1 if your mesh is centered, but it's not always the case.
 	glm::mat4 ModelMatrix,       // Transformation applied to the mesh (which will thus be also applied to its bounding box)
-	float& intersection_distance // Output : distance between ray_origin and the intersection with the OBB
+	float& intersection_distance, // Output : distance between ray_origin and the intersection with the OBB
+	int& plane_num
 ) {
 
 	// Intersection method from Real-Time Rendering and Essential Mathematics for Games
@@ -82,19 +82,22 @@ bool TestRayOBBIntersection(
 			float t1 = (e + aabb_min.x) / f; // Intersection with the "left" plane
 			float t2 = (e + aabb_max.x) / f; // Intersection with the "right" plane
 											 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
-
+			int left = 2, right = 3;
 											 // We want t1 to represent the nearest intersection, 
 											 // so if it's not the case, invert t1 and t2
 			if (t1>t2) {
 				float w = t1; t1 = t2; t2 = w; // swap t1 and t2
+				int t = left; left = right; right = t;
 			}
 
 			// tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
 			if (t2 < tMax)
 				tMax = t2;
 			// tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
-			if (t1 > tMin)
+			if (t1 > tMin) {
 				tMin = t1;
+				plane_num = left;
+			}
 
 			// And here's the trick :
 			// If "far" is closer than "near", then there is NO intersection.
@@ -121,13 +124,20 @@ bool TestRayOBBIntersection(
 
 			float t1 = (e + aabb_min.y) / f;
 			float t2 = (e + aabb_max.y) / f;
+			
+			int up = 4, bottom = 5;
 
-			if (t1>t2) { float w = t1; t1 = t2; t2 = w; }
+			if (t1>t2) {
+				float w = t1; t1 = t2; t2 = w;
+				int t = up; up = bottom; bottom = t;
+			}
 
 			if (t2 < tMax)
 				tMax = t2;
-			if (t1 > tMin)
+			if (t1 > tMin) {
 				tMin = t1;
+				plane_num = up;
+			}
 			if (tMin > tMax)
 				return false;
 
@@ -151,12 +161,19 @@ bool TestRayOBBIntersection(
 			float t1 = (e + aabb_min.z) / f;
 			float t2 = (e + aabb_max.z) / f;
 
-			if (t1>t2) { float w = t1; t1 = t2; t2 = w; }
+			int front = 0, back = 1;
+
+			if (t1>t2) {
+				float w = t1; t1 = t2; t2 = w; // swap t1 and t2
+				int t = front; front = back; back = t;
+			}
 
 			if (t2 < tMax)
 				tMax = t2;
-			if (t1 > tMin)
+			if (t1 > tMin) {
 				tMin = t1;
+				plane_num = front;
+			}
 			if (tMin > tMax)
 				return false;
 
@@ -166,7 +183,7 @@ bool TestRayOBBIntersection(
 				return false;
 		}
 	}
-
+	
 	intersection_distance = tMin;
 	return true;
 
@@ -182,7 +199,9 @@ bool PickOneCube(
 	CubeManager cubeManager,
 	const glm::vec3& hoverColor,
 	const glm::vec3& objectColor,
-	glm::vec3& lastHoverCubePos
+	glm::vec3& lastHoverCubePos,
+	int& plane_num_current,
+	int& plane_num_last
 ) {
 	glm::vec3 ray_origin;
 	glm::vec3 ray_direction;
@@ -190,7 +209,7 @@ bool PickOneCube(
 						view, projection, ray_origin, ray_direction);
 	ray_direction = ray_direction * 20.0f;
 
-	int cube_num = -1, hit_x = -1, hit_y = -1, hit_z = -1;
+	int cube_num = -1, hit_x = -1, hit_y = -1, hit_z = -1, pick_plane_num = -1;
 	float min_distance = 100000.0f;
 	// Test each Oriented Bounding Box (OBB).
 	for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
@@ -211,29 +230,30 @@ bool PickOneCube(
 		auto this_cube = cubeManager.getCube(x, y, z);
 
 		if (this_cube && TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
-			model_mat, intersection_distance) && intersection_distance < min_distance) {
+			model_mat, intersection_distance, plane_num_current) && intersection_distance < min_distance) {
 			min_distance = intersection_distance;
 			hit_x = x;
 			hit_y = y;
 			hit_z = z;
+			pick_plane_num = plane_num_current;
 		}
 	}
 
 	// reset last hover cube
 	auto last_hover_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
-	if (last_hover_cube)
-		for (int plane = 0; plane < 6; plane++)
-			last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+	if (last_hover_cube && plane_num_last != -1)
+		last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane_num_last);
 
 
 	// hit
 	if (hit_x != -1) {
 		auto hover_cube = cubeManager.getCube(hit_x, hit_y, hit_z);
-		for (int plane = 0; plane < 6; plane++)
-			hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, plane);
+		hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, pick_plane_num);
 		lastHoverCubePos.x = static_cast<float>(hit_x);
 		lastHoverCubePos.y = static_cast<float>(hit_y);
 		lastHoverCubePos.z = static_cast<float>(hit_z);
+		plane_num_last = pick_plane_num;
+		plane_num_current = pick_plane_num;
 		return true;
 	}
 	else {

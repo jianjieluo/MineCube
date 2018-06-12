@@ -267,6 +267,12 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, in
 	else if (io.KeysDown[GLFW_KEY_D]) {
 		camera->moveCamera(RIGHT, deltaTime);
 	}
+
+	if (io.KeysDown[GLFW_KEY_Z]) {
+		createMode = !createMode;
+		deleteMode = !deleteMode;
+	}
+
 }
 
 void ImGui_ImplGlfw_CharCallback(GLFWwindow*, unsigned int c)
