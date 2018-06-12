@@ -39,6 +39,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "Global.hpp"
 #include "Camera.hpp"
 #include <iostream>
 // GL3W/GLFW
@@ -207,11 +208,13 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 	ImGuiIO& io = ImGui::GetIO();
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
-		//std::cout << "left press\n";
+		mouseJustClick = true;
+		mouseJustRelease = false;
 	}
 
 	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
-		//std::cout << "left release\n";
+		mouseJustClick = false;
+		mouseJustRelease = true;
 	}
 	
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {

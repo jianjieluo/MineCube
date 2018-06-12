@@ -23,7 +23,8 @@ GLfloat lookAroundSensivitiy = 1.0f;
 
 // About picking
 glm::vec3 hoverColor(1.0f, 0.0f, 0.0f);
-glm::vec3 lastHoverCubePos(0.0f, 0.0f, 0.0f);
+glm::vec3 hoverCubePosCurrent(0.0f, 0.0f, 0.0f);
+glm::vec3 hoverCubePosLast(0.0f, 0.0f, 0.0f);
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -53,7 +54,7 @@ GLuint planeVAO;
 void RenderScene(Shader &phongShader, CubeManager & cubeManager);
 
 // util functions
-void PickOneCube(
+bool PickOneCube(
 	int xpos, int ypos,
 	int screenWidth, int screenHeight,
 	const glm::mat4& view,
@@ -63,7 +64,7 @@ void PickOneCube(
 	CubeManager cubeManager,
 	const glm::vec3& hoverColor,
 	const glm::vec3& objectColor,
-	glm::vec3& lastHoverCubePos
+	glm::vec3& hoverCubeCurrent
 );
 void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color);
 
@@ -192,7 +193,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
+		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
 
 		gui.createNewFrame();
@@ -272,14 +273,14 @@ int main()
 
 		/*
 		-----------------------------------------------------------------------------------
-			set/reset cubes
+			set/reset all cubes
 		-----------------------------------------------------------------------------------
 		*/
 		if (objectColor.x != objectColorLast.x || objectColor.y != objectColorLast.y || objectColor.z != objectColorLast.z) {
 			setAllCubesColor(cubeManager, objectColor);
 			objectColorLast = objectColor;
 		}
-		
+
 		/*
 		-----------------------------------------------------------------------------------
 			OBB-ray hitting test
@@ -287,19 +288,42 @@ int main()
 		*/
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		PickOneCube(
+		bool hit = PickOneCube(
 			(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
 			view, projection, 
 			numPerEdge, sizePerCube, 
 			cubeManager, 
 			hoverColor,
 			objectColor,
-			lastHoverCubePos
+			hoverCubePosCurrent
 		);
 
 		/*
 		-----------------------------------------------------------------------------------
-		    move cubes
+			deal with some cubes
+		-----------------------------------------------------------------------------------
+		*/
+		if (hit) {
+			if (mouseJustClick && !mouseIsDown) {
+				// 记录当前悬浮方块
+				//auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
+				hoverCubePosLast = hoverCubePosCurrent;
+				mouseIsDown = true;
+			}
+			if (mouseJustRelease && mouseIsDown) {
+				// 获取当前悬浮方块，计算消除
+				for (unsigned int i = static_cast<int>(hoverCubePosLast.x); i <= static_cast<int>(hoverCubePosCurrent.x); i++)
+					for (unsigned int j = static_cast<int>(hoverCubePosLast.y); j <= static_cast<int>(hoverCubePosCurrent.y); j++)
+						for (unsigned int k = static_cast<int>(hoverCubePosLast.z); k <= static_cast<int>(hoverCubePosCurrent.z); k++)
+							cubeManager.deleteCube(i, j, k);
+				mouseIsDown = false;
+			}
+		}
+
+
+		/*
+		-----------------------------------------------------------------------------------
+		    move all cubes
 		-----------------------------------------------------------------------------------
 		*/
 		if (camera->isRotateX()) {
@@ -379,7 +403,8 @@ void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color) {
 		int z = t_index;
 
 		auto cube = cubeManager.getCube(x, y, z);
-		for (int plane = 0; plane < 6; plane++)
-			cube->editColor(color.x, color.y, color.z, plane);
+		if (cube)
+			for (int plane = 0; plane < 6; plane++)
+				cube->editColor(color.x, color.y, color.z, plane);
 	}
 }

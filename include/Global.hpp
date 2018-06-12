@@ -15,5 +15,10 @@ extern float cubes_color[4];
 extern float background_color[4];
 extern float deltaTime;
 extern float lastFrame;
+extern bool createMode;
+extern bool deleteMode;
+extern bool mouseJustClick;
+extern bool mouseJustRelease;
+extern bool mouseIsDown;
 
 #endif  // GLOBAL_HPP

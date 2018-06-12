@@ -172,7 +172,7 @@ bool TestRayOBBIntersection(
 
 }
 
-void PickOneCube(
+bool PickOneCube(
 	int xpos, int ypos,
 	int screenWidth, int screenHeight,
 	const glm::mat4& view,
@@ -208,10 +208,11 @@ void PickOneCube(
 		glm::vec3 aabb_max = glm::vec3(0.5f, 0.5f, 0.5f) * sizePerCube;
 
 		glm::mat4 model_mat = cubeManager.getModelMat4(x, y, z);
+		auto this_cube = cubeManager.getCube(x, y, z);
 
-		if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
+		if (this_cube && TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
 			model_mat, intersection_distance) && intersection_distance < min_distance) {
-			min_distance = intersection_distance;
+			//auto this_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
 			hit_x = x;
 			hit_y = y;
 			hit_z = z;
@@ -220,8 +221,9 @@ void PickOneCube(
 
 	// reset last hover cube
 	auto last_hover_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
-	for (int plane = 0; plane < 6; plane++)
-		last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+	if (last_hover_cube)
+		for (int plane = 0; plane < 6; plane++)
+			last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
 
 
 	// hit
@@ -232,7 +234,9 @@ void PickOneCube(
 		lastHoverCubePos.x = static_cast<float>(hit_x);
 		lastHoverCubePos.y = static_cast<float>(hit_y);
 		lastHoverCubePos.z = static_cast<float>(hit_z);
+		return true;
 	}
-
-
+	else {
+		return false;
+	}
 }
