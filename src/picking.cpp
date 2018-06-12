@@ -212,7 +212,7 @@ bool PickOneCube(
 
 		if (this_cube && TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
 			model_mat, intersection_distance) && intersection_distance < min_distance) {
-			//auto this_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
+			min_distance = intersection_distance;
 			hit_x = x;
 			hit_y = y;
 			hit_z = z;

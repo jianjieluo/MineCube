@@ -311,11 +311,21 @@ int main()
 				mouseIsDown = true;
 			}
 			if (mouseJustRelease && mouseIsDown) {
+				std::cout << hoverCubePosLast.x << ' ' << hoverCubePosLast.y << ' ' << hoverCubePosLast.z << std::endl;
+				std::cout << hoverCubePosCurrent.x << ' ' << hoverCubePosCurrent.y << ' ' << hoverCubePosCurrent.z << std::endl;
+				std::cout << std::endl;
 				// 获取当前悬浮方块，计算消除
-				for (unsigned int i = static_cast<int>(hoverCubePosLast.x); i <= static_cast<int>(hoverCubePosCurrent.x); i++)
-					for (unsigned int j = static_cast<int>(hoverCubePosLast.y); j <= static_cast<int>(hoverCubePosCurrent.y); j++)
-						for (unsigned int k = static_cast<int>(hoverCubePosLast.z); k <= static_cast<int>(hoverCubePosCurrent.z); k++)
+				unsigned int x_low_bound = glm::min(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosCurrent.x));
+				unsigned int y_low_bound = glm::min(static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosCurrent.y));
+				unsigned int z_low_bound = glm::min(static_cast<int>(hoverCubePosLast.z), static_cast<int>(hoverCubePosCurrent.z));
+				unsigned int x_high_bound = glm::max(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosCurrent.x));
+				unsigned int y_high_bound = glm::max(static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosCurrent.y));
+				unsigned int z_high_bound = glm::max(static_cast<int>(hoverCubePosLast.z), static_cast<int>(hoverCubePosCurrent.z));
+				for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+					for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+						for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 							cubeManager.deleteCube(i, j, k);
+						}
 				mouseIsDown = false;
 			}
 		}
