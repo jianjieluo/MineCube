@@ -21,8 +21,12 @@ vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
 GLfloat lookAroundSensivitiy = 1.0f;
 
-// hover color
+// About picking
 glm::vec3 hoverColor(1.0f, 0.0f, 0.0f);
+glm::vec3 hoverCubePosCurrent(0.0f, 0.0f, 0.0f);
+glm::vec3 hoverCubePosLast(0.0f, 0.0f, 0.0f);
+int hoverPlaneCurrent = -1;
+int hoverPlaneLast = -1;
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -34,6 +38,8 @@ glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
+glm::vec3 objectColorLast(cubes_color[0], cubes_color[1], cubes_color[2]);
+
 glm::vec3 specular(0.2f, 0.2f, 0.2f);  // test material
 // parameters
 float shininess = 32.0f;
@@ -50,7 +56,7 @@ GLuint planeVAO;
 void RenderScene(Shader &phongShader, CubeManager & cubeManager);
 
 // util functions
-void PickOneCube(
+bool PickOneCube(
 	int xpos, int ypos,
 	int screenWidth, int screenHeight,
 	const glm::mat4& view,
@@ -58,9 +64,13 @@ void PickOneCube(
 	unsigned int numPerEdge,
 	float sizePerCube,
 	CubeManager cubeManager,
-	const glm::vec3& hoverColor
+	const glm::vec3& hoverColor,
+	const glm::vec3& objectColor,
+	glm::vec3& hoverCubeCurrent,
+	int& plane_num_current,
+	int& plane_num_last
 );
-
+void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color);
 
 int main()
 {
@@ -187,7 +197,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
+		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
 
 		gui.createNewFrame();
@@ -267,20 +277,12 @@ int main()
 
 		/*
 		-----------------------------------------------------------------------------------
-			set/reset cubes
+			set/reset all cubes
 		-----------------------------------------------------------------------------------
 		*/
-		for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
-			int t_index = index;
-			int x = t_index / (int)glm::pow(numPerEdge, 2);
-			t_index -= x * (int)glm::pow(numPerEdge, 2);
-			int y = t_index / glm::pow(numPerEdge, 1);
-			t_index -= y * (int)glm::pow(numPerEdge, 1);
-			int z = t_index;
-
-			auto cube = cubeManager.getCube(x, y, z);
-			for (int plane = 0; plane < 6; plane++)
-				cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
+		if (objectColor.x != objectColorLast.x || objectColor.y != objectColorLast.y || objectColor.z != objectColorLast.z) {
+			setAllCubesColor(cubeManager, objectColor);
+			objectColorLast = objectColor;
 		}
 
 		/*
@@ -290,17 +292,70 @@ int main()
 		*/
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		PickOneCube(
+		bool hit = PickOneCube(
 			(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
-			view, projection, 
-			numPerEdge, sizePerCube, 
-			cubeManager, 
-			hoverColor
+			view, projection,
+			numPerEdge, sizePerCube,
+			cubeManager,
+			hoverColor,
+			objectColor,
+			hoverCubePosCurrent,
+			hoverPlaneCurrent,
+			hoverPlaneLast
 		);
 
 		/*
 		-----------------------------------------------------------------------------------
-		    move cubes
+			deal with some cubes
+		-----------------------------------------------------------------------------------
+		*/
+		if (hit) {
+			if (mouseJustClick && !mouseIsDown) {
+				if (deleteMode) {
+					// 记录当前悬浮方块
+					hoverCubePosLast = hoverCubePosCurrent;
+				}
+				if (createMode) {
+					// 获取交点所在的面
+					auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
+					int new_x = static_cast<int>(hoverCubePosCurrent.x), new_y = static_cast<int>(hoverCubePosCurrent.y), new_z = static_cast<int>(hoverCubePosCurrent.z);
+					switch (hoverPlaneCurrent) {
+						case 0: new_z -= 1; break;
+						case 1: new_z += 1; break;
+						case 2: new_x -= 1; break;
+						case 3: new_x += 1; break;
+						case 4: new_y -= 1; break;
+						case 5: new_y += 1; break;
+						default: break;
+					}
+					if (new_x > -1 && new_y > -1 && new_z > -1 && new_x < numPerEdge && new_y < numPerEdge && new_z < numPerEdge)
+						cubeManager.setCube(new_x, new_y, new_z, sptr);
+				}
+				mouseIsDown = true;
+			}
+			if (mouseJustRelease && mouseIsDown) {
+				if (deleteMode) {
+					// 获取当前悬浮方块，计算消除
+					unsigned int x_low_bound = glm::min(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosCurrent.x));
+					unsigned int y_low_bound = glm::min(static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosCurrent.y));
+					unsigned int z_low_bound = glm::min(static_cast<int>(hoverCubePosLast.z), static_cast<int>(hoverCubePosCurrent.z));
+					unsigned int x_high_bound = glm::max(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosCurrent.x));
+					unsigned int y_high_bound = glm::max(static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosCurrent.y));
+					unsigned int z_high_bound = glm::max(static_cast<int>(hoverCubePosLast.z), static_cast<int>(hoverCubePosCurrent.z));
+					for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+						for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+							for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
+								cubeManager.deleteCube(i, j, k);
+							}
+				}
+				mouseIsDown = false;
+			}
+		}
+
+
+		/*
+		-----------------------------------------------------------------------------------
+		    move all cubes
 		-----------------------------------------------------------------------------------
 		*/
 		if (camera->isRotateX()) {
@@ -368,4 +423,20 @@ void RenderScene(Shader &shader, CubeManager & cubeManager)
     // glBindVertexArray(cubeVAO);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // glBindVertexArray(0);
+}
+
+void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color) {
+	for (int index = 0; index < glm::pow(numPerEdge, 3); index++) {
+		int t_index = index;
+		int x = t_index / (int)glm::pow(numPerEdge, 2);
+		t_index -= x * (int)glm::pow(numPerEdge, 2);
+		int y = t_index / glm::pow(numPerEdge, 1);
+		t_index -= y * (int)glm::pow(numPerEdge, 1);
+		int z = t_index;
+
+		auto cube = cubeManager.getCube(x, y, z);
+		if (cube)
+			for (int plane = 0; plane < 6; plane++)
+				cube->editColor(color.x, color.y, color.z, plane);
+	}
 }
