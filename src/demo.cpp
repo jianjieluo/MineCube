@@ -5,13 +5,12 @@
 #include "CraftManager.hpp"
 #include "CubeManager.hpp"
 
+#include <iostream>
+using namespace std;
+
 #define SHADOW
 //#define PLANE
 #define DEBUG
-
-// interactive variables
-int screenWidth = 960;
-int screenHeight = 960;
 
 // About cubes
 GLfloat sizePerCube = 0.1f;
@@ -311,11 +310,11 @@ int main()
 		*/
 		if (hit) {
 			if (mouseJustClick && !mouseIsDown) {
-				if (deleteMode) {
+				if (mode == ERASE_MODE || mode == PAINT_MODE) {
 					// 记录当前悬浮方块
 					hoverCubePosLast = hoverCubePosCurrent;
 				}
-				if (createMode) {
+				if (mode == CREATE_MODE) {
 					// 获取交点所在的面
 					auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
 					int new_x = static_cast<int>(hoverCubePosCurrent.x), new_y = static_cast<int>(hoverCubePosCurrent.y), new_z = static_cast<int>(hoverCubePosCurrent.z);
@@ -334,7 +333,7 @@ int main()
 				mouseIsDown = true;
 			}
 			if (mouseJustRelease && mouseIsDown) {
-				if (deleteMode) {
+				if (mode == ERASE_MODE || mode == PAINT_MODE) {
 					// 获取当前悬浮方块，计算消除
 					unsigned int x_low_bound = glm::min(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosCurrent.x));
 					unsigned int y_low_bound = glm::min(static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosCurrent.y));
@@ -345,7 +344,15 @@ int main()
 					for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 						for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 							for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-								cubeManager.deleteCube(i, j, k);
+								if (mode == ERASE_MODE)  cubeManager.deleteCube(i, j, k);
+								if (mode == PAINT_MODE) {
+									auto cube = cubeManager.getCube(i, j, k);
+									if (cube) {
+										glm::vec3 currentColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+										for (int plane = 0; plane < 6; plane++)
+											cube->editColor(currentColor.x, currentColor.y, currentColor.z, plane);
+									}
+								}
 							}
 				}
 				mouseIsDown = false;
