@@ -405,10 +405,12 @@ int main()
 void glfw_error_callback(int error, const char* description) {
 	fprintf(stderr, "Error %d: %s\n", error, description);
 }
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 	screenWidth = width;
 	screenHeight = height;
+	isFirstDraw = true;
 }
 
 void RenderScene(Shader &shader, CubeManager & cubeManager)
