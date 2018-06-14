@@ -1,5 +1,5 @@
 #ifndef SKYBOX_HPP
-#define SKUBOX_HPP
+#define SKYBOX_HPP
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
