@@ -1,0 +1,27 @@
+#include "OperationManager.hpp"
+
+
+void OperationManager::executeOp(EditOperationInterface* new_op) {
+    new_op->execute();
+    ops.push(shard_ptr<EditOperationInterface>(new_op));
+    // init undo_history
+    undo_history = stack<shared_ptr<EditOperationInterface>>();
+}
+
+void OperationManager::undo() {
+    if (!history.empty()) {
+        auto to_undo = history.top();
+        history.pop();
+        to_undo->undo();
+        undo_history.push(to_undo);
+    }
+}
+
+void OperationManager::cancle_undo() {
+    if (!undo_history.empty()) {
+        auto undo_to_cancle = undo_history.top();
+        undo_history.pop();
+        undo_to_cancle.execute();
+        history.push(undo_to_cancle);
+    }
+}
