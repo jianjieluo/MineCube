@@ -1,4 +1,5 @@
 #include "Gui.hpp"
+#include <iostream>
 
 Gui::Gui(GLFWwindow* theWindow) {
 	// ImGui initialization and bindings
@@ -10,7 +11,9 @@ Gui::Gui(GLFWwindow* theWindow) {
 	ImGui_ImplGlfwGL3_Init(window, true);
 	ImGui::StyleColorsDark();
 
-	isFirstDraw = true;
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowRounding = 0.0f;
+	style.WindowBorderSize = 0.0f;
 }
 
 void Gui::createNewFrame() {
@@ -86,7 +89,7 @@ void Gui::showAppMainMenuBar()
 
 		if (ImGui::BeginMenu("Help"))
 		{
-			ImGui::Text("Hint: Press 'V' to switch Camera View");
+			ImGui::Text("Hint: Press 'Z' to switch Edit Mode");
 			ImGui::EndMenu();
 		}
 
@@ -98,34 +101,82 @@ void Gui::showEditBar() {
 	ImGui::Begin("Edit Bar", &editBar, ImGuiWindowFlags_NoScrollbar);
 
 	if (isFirstDraw) {
-		ImGui::SetWindowSize(ImVec2(260, 300));
-		ImGui::SetWindowPos(ImVec2(800, 20));
+		ImGui::SetWindowSize(ImVec2(260, 700));
+		ImGui::SetWindowPos(ImVec2(screenWidth - 260, 18));
 	}
 
-	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-	if (ImGui::ArrowButton("##left", ImGuiDir_Left)) {}
-	ImGui::SameLine(0.0f, spacing);
-	if (ImGui::ArrowButton("##left", ImGuiDir_Right)) {}
-	ImGui::SameLine(0.0f, 4 * spacing);
+	switch (mode)
+	{
+	case ERASE_MODE:
+		ImGui::Text("Mode: Erase");
+		break;
+	case CREATE_MODE:
+		ImGui::Text("Mode: Add");
+		break;
+	case PAINT_MODE:
+		ImGui::Text("Mode: Paint");
+		break;
+	default:
+		break;
+	}
 
-	if (ImGui::Button(" + ")) {};
-	ImGui::SameLine(0.0f, spacing);
-	if (ImGui::Button(" - ")) {};
-	// List box
-	const char* listbox_items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
-	static int listbox_item_current = 1;
-	ImGui::ListBox("History", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items));
-
+	if (ImGui::Button("  Add  ", ImVec2(ImGui::GetWindowWidth()* 0.29, 20.0f))) {
+		setMode_add();
+	};
 	ImGui::SameLine();
+	if (ImGui::Button(" Erase ", ImVec2(ImGui::GetWindowWidth()* 0.29, 20.0f))) {
+		setMode_erase();
+	};
+	ImGui::SameLine();
+	if (ImGui::Button(" Paint ", ImVec2(ImGui::GetWindowWidth()* 0.29, 20.0f))) {
+		setMode_print();
+	};
+
+	ImGui::Text("");
+	ImGui::Text("History:");
+	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
+
+	static int his_selected = -1;
+	for (int n = 0; n < 5; n++)
+	{
+		char buf[32];
+		sprintf(buf, "Object %d", n);
+		if (ImGui::Selectable(buf, his_selected == n))
+			his_selected = n;
+	}
+	ImGui::TreePop();
+
+	ImGui::EndChild();
+
+	if (ImGui::Button("Undo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {}
+	ImGui::SameLine();
+	if (ImGui::Button("Redo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {}
+
+	ImGui::Text("");
+	ImGui::Text("Default:");
+	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
+	
+	static int def_selected = -1;
+	for (int n = 0; n < 5; n++)
+	{
+		char buf[32];
+		sprintf(buf, "Object %d", n);
+		if (ImGui::Selectable(buf, def_selected == n))
+			def_selected = n;
+	}
+	ImGui::TreePop();
+
+	ImGui::EndChild();
 
 	ImGui::End();
 }
 
 void Gui::showColorBar() {
-	ImGui::Begin("File Bar", &colorBar, 0);
+	ImGui::Begin("Color Bar", &colorBar, 0);
+
 	if (isFirstDraw) {
-		ImGui::SetWindowSize(ImVec2(260, 750));
-		ImGui::SetWindowPos(ImVec2(0, 20));
+		ImGui::SetWindowSize(ImVec2(260, screenHeight));
+		ImGui::SetWindowPos(ImVec2(0, 18));
 	}
 	static bool alpha_preview = true;
 	static bool alpha_half_preview = false;
@@ -136,7 +187,7 @@ void Gui::showColorBar() {
 
 	ImGui::ColorPicker4("MyColor##4", (float*)&cubes_color, flags, NULL);
 
-	// Color buttons, demonstrate using PushID() to add unique identifier in the ID stack, and changing style.
+	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * 0.65), true);
 	for (int i = 0; i < 100; i++)
 	{
 		if (i % 5 != 0) ImGui::SameLine();
@@ -144,7 +195,7 @@ void Gui::showColorBar() {
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 100.0f, 0.6f, 0.6f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 100.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 100.0f, 0.8f, 0.8f));
-		if (ImGui::Button("     ")) {
+		if (ImGui::Button("     ", ImVec2(ImGui::GetWindowWidth() * 0.15, 20.0f))) {
 			static ImVec4 saved_palette;
 			ImGui::ColorConvertHSVtoRGB(i / 100.0f, 0.6f, 0.6f, saved_palette.x, saved_palette.y, saved_palette.z);
 			cubes_color[0] = saved_palette.x;
@@ -154,16 +205,24 @@ void Gui::showColorBar() {
 		ImGui::PopStyleColor(3);
 		ImGui::PopID();
 	}
+	ImGui::EndChild();
 
 	ImGui::End();
 }
 
+void Gui::showWorkBar() {
+	ImGui::Begin("Work Bar", &workBar, 0);
+	
+
+	ImGui::End();
+}
 
 
 void Gui::draw() {
 	showAppMainMenuBar();
 	if (colorBar) showColorBar();
 	if (editBar) showEditBar();
+	//if (workBar) showWorkBar();
 	if (isFirstDraw) isFirstDraw = false;
 }
 
@@ -176,4 +235,20 @@ void Gui::clear() {
 	ImGui_ImplGlfwGL3_Shutdown();
 	ImGui::DestroyContext();
 	window = nullptr;
+}
+
+void Gui::autoRePos() {
+	isFirstDraw = true;
+}
+
+void Gui::setMode_add() {
+	mode = CREATE_MODE;
+}
+
+void Gui::setMode_print() {
+	mode = PAINT_MODE;
+}
+
+void Gui::setMode_erase() {
+	mode = ERASE_MODE;
 }
