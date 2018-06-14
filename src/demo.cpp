@@ -4,6 +4,7 @@
 #include "Gui.hpp"
 #include "CraftManager.hpp"
 #include "CubeManager.hpp"
+#include "SkyBox.hpp"
 
 #define SHADOW
 //#define PLANE
@@ -119,6 +120,8 @@ int main()
 #endif
 
 	Gui gui(window);
+
+	SkyBox skybox(window, camera);
 
 #ifdef PLANE
 	// set floor
@@ -382,6 +385,7 @@ int main()
 		cubeManager.setAllShaderId(phongShader.ID);
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
+		skybox.render();
 		gui.render();
 
 		glfwSwapBuffers(window);
