@@ -6,13 +6,13 @@ GroupEditOperation::GroupEditOperation(const vector<shared_ptr<EditOperationInte
 
 void GroupEditOperation::excute() {
     for (auto begin = ops.begin(); begin != ops.end(); ++begin) {
-        *begin->excute();        
+        (*begin)->execute();
     }
 }
 
 void GroupEditOperation::undo() {
     // undo should be in the reverse order of excute
     for (auto rbegin = ops.rbegin(); rbegin != ops.rend(); ++rbegin) {
-        *rbegin->undo();        
+        (*rbegin)->undo();
     }
 }

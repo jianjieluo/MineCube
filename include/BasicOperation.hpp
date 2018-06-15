@@ -2,7 +2,7 @@
 #define BasicOperation_hpp
 #include "EditOperationInterface.hpp"
 #include <functional>
-using std::function
+using std::function;
 
 /**
  * This class aim to construct operation
