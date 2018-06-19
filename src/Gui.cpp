@@ -148,7 +148,7 @@ void Gui::showEditBar() {
 		if (ImGui::Selectable(buf, his_selected == n))
 			his_selected = n;
 	}
-	ImGui::TreePop();
+	// ImGui::TreePop();
 
 	ImGui::EndChild();
 
@@ -168,7 +168,7 @@ void Gui::showEditBar() {
 		if (ImGui::Selectable(buf, def_selected == n))
 			def_selected = n;
 	}
-	ImGui::TreePop();
+	//ImGui::TreePop();
 
 	ImGui::EndChild();
 

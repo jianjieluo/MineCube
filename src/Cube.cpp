@@ -113,6 +113,10 @@ void Cube::editColor(
     glBufferManager->setAttriArray(COLOR_ATTRI_OFFSET, COLOR_DIMENSION, cubeColor);
 }
 
+glm::vec3 Cube::getColor() {
+	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
+}
+
 void Cube::setModelMat4(const glm::mat4 & model) {
     this->model = model;
 }

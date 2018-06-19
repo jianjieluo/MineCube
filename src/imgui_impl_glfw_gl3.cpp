@@ -267,6 +267,10 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, in
 	else if (io.KeysDown[GLFW_KEY_D]) {
 		camera->moveCamera(RIGHT, deltaTime);
 	}
+
+	if (io.KeysDown[GLFW_KEY_V]) {
+		camera->isFpsMode = !camera->isFpsMode;
+	}
 }
 
 void ImGui_ImplGlfw_CharCallback(GLFWwindow*, unsigned int c)
@@ -274,6 +278,11 @@ void ImGui_ImplGlfw_CharCallback(GLFWwindow*, unsigned int c)
     ImGuiIO& io = ImGui::GetIO();
     if (c > 0 && c < 0x10000)
         io.AddInputCharacter((unsigned short)c);
+}
+
+void ImGui_ImplGlfw_MousePosCallback(GLFWwindow* window, double xpos, double ypos) {
+	if (camera->isFpsMode)
+		camera->lookAround((float)xpos, (float)ypos);
 }
 
 bool ImGui_ImplGlfwGL3_CreateFontsTexture()
@@ -399,6 +408,7 @@ static void ImGui_ImplGlfw_InstallCallbacks(GLFWwindow* window)
     glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
     glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
+	glfwSetCursorPosCallback(window, ImGui_ImplGlfw_MousePosCallback);
 }
 
 bool    ImGui_ImplGlfwGL3_Init(GLFWwindow* window, bool install_callbacks, const char* glsl_version)

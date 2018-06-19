@@ -85,6 +85,8 @@ class Cube {
 
         virtual void setShaderId(const GLuint & shaderID);
 
+        virtual glm::vec3 getColor();
+
         static const unsigned int LEFT = 0;
         static const unsigned int RIGHT = 1;
         static const unsigned int UP = 2;
