@@ -42,6 +42,7 @@ class Camera {
 
 		bool isMoving;
 		bool isFirstMove;
+		bool isFpsMode;
 	private:
 		// instance
 		static Camera* instance;

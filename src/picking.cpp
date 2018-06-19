@@ -198,10 +198,8 @@ bool PickOneCube(
 	float sizePerCube,
 	CubeManager cubeManager,
 	const glm::vec3& hoverColor,
-	const glm::vec3& objectColor,
-	glm::vec3& lastHoverCubePos,
-	int& plane_num_current,
-	int& plane_num_last
+	glm::vec3& hoverCubePosCurrent,
+	int& plane_num_current
 ) {
 	glm::vec3 ray_origin;
 	glm::vec3 ray_direction;
@@ -239,20 +237,13 @@ bool PickOneCube(
 		}
 	}
 
-	// reset last hover cube
-	auto last_hover_cube = cubeManager.getCube(static_cast<int>(lastHoverCubePos.x), static_cast<int>(lastHoverCubePos.y), static_cast<int>(lastHoverCubePos.z));
-	if (last_hover_cube && plane_num_last != -1)
-		last_hover_cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane_num_last);
-
-
 	// hit
 	if (hit_x != -1) {
 		auto hover_cube = cubeManager.getCube(hit_x, hit_y, hit_z);
 		hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, pick_plane_num);
-		lastHoverCubePos.x = static_cast<float>(hit_x);
-		lastHoverCubePos.y = static_cast<float>(hit_y);
-		lastHoverCubePos.z = static_cast<float>(hit_z);
-		plane_num_last = pick_plane_num;
+		hoverCubePosCurrent.x = static_cast<float>(hit_x);
+		hoverCubePosCurrent.y = static_cast<float>(hit_y);
+		hoverCubePosCurrent.z = static_cast<float>(hit_z);
 		plane_num_current = pick_plane_num;
 		return true;
 	}
