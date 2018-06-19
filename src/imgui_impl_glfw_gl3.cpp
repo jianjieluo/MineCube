@@ -270,6 +270,7 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, in
 
 	if (io.KeysDown[GLFW_KEY_V]) {
 		camera->isFpsMode = !camera->isFpsMode;
+		camera->pause();
 	}
 }
 

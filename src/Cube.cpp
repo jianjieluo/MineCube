@@ -117,6 +117,10 @@ glm::vec3 Cube::getColor() {
 	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
 }
 
+glm::vec3 Cube::getColorOfPLane(unsigned int plane) {
+	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
+}
+
 void Cube::setModelMat4(const glm::mat4 & model) {
     this->model = model;
 }
