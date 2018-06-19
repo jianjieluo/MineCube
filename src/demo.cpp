@@ -44,6 +44,8 @@ glm::vec3 specular(0.2f, 0.2f, 0.2f);  // test material
 // parameters
 float shininess = 32.0f;
 
+int main();
+
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -186,6 +188,35 @@ int main()
 #endif
 
 
+/*-------------------Work Bar--------------------------*/
+	GLuint workBarFBO = 0;
+	glGenFramebuffers(1, &workBarFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
+
+	//create a color attachment texture
+	unsigned int workBarColorBuffer;
+	glGenTextures(1, &workBarColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// 将它附加到当前绑定的帧缓冲对象
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, workBarColorBuffer, 0);
+
+	GLuint workBarRBO;
+	glGenRenderbuffers(1, &workBarRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, workBarRBO); // now actually attach it
+
+	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+/*----------------------end edit view----------------*/
 
 	// to normalize
 	attriSize.push_back(3);
@@ -201,9 +232,6 @@ int main()
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
-
-		gui.createNewFrame();
-		gui.draw();
 
 		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
@@ -232,7 +260,17 @@ int main()
         glClear(GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
         RenderScene(simpleDepthShader, cubeManager);
+
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// bind to framebuffer and draw scene as we normally would to color texture 
+		//glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
+		//glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+
+
+
         glCullFace(GL_BACK); // 不要忘记设回原先的culling face
 
         // -----------------------------------------
@@ -295,7 +333,7 @@ int main()
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		bool hit = PickOneCube(
-			(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
+			(int)(xpos), (int)(ypos), (int)screenWidth, (int)screenHeight,
 			view, projection,
 			numPerEdge, sizePerCube,
 			cubeManager,
@@ -390,9 +428,26 @@ int main()
 		}
 
 		cubeManager.setAllShaderId(phongShader.ID);
+
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
+
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+		//						  // clear all relevant buffers
+		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+		//glClear(GL_COLOR_BUFFER_BIT);
+
+
+		gui.createNewFrame();
+		gui.draw();
+
+		/*ImGui::Begin("Work Bar");
+		ImGui::Image((void*)(intptr_t)workBarColorBuffer, ImVec2(SCR_WIDTH, SCR_HEIGHT), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+		ImGui::End();*/
+
 		gui.render();
 
 		glfwSwapBuffers(window);

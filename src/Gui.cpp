@@ -14,6 +14,10 @@ Gui::Gui(GLFWwindow* theWindow) {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowRounding = 0.0f;
 	style.WindowBorderSize = 0.0f;
+
+	colorBar = true;
+	editBar = true;
+	workBar = true;
 }
 
 void Gui::createNewFrame() {
@@ -101,7 +105,7 @@ void Gui::showEditBar() {
 	ImGui::Begin("Edit Bar", &editBar, ImGuiWindowFlags_NoScrollbar);
 
 	if (isFirstDraw) {
-		ImGui::SetWindowSize(ImVec2(260, 700));
+		ImGui::SetWindowSize(ImVec2(260, screenWidth));
 		ImGui::SetWindowPos(ImVec2(screenWidth - 260, 18));
 	}
 
@@ -172,7 +176,7 @@ void Gui::showEditBar() {
 }
 
 void Gui::showColorBar() {
-	ImGui::Begin("Color Bar", &colorBar, 0);
+	ImGui::Begin("Color Bar", &colorBar, 0 | ImGuiWindowFlags_NoScrollbar);
 
 	if (isFirstDraw) {
 		ImGui::SetWindowSize(ImVec2(260, screenHeight));
@@ -190,39 +194,59 @@ void Gui::showColorBar() {
 	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * 0.65), true);
 	for (int i = 0; i < 100; i++)
 	{
-		if (i % 5 != 0) ImGui::SameLine();
-		ImGui::PushID(i);
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 100.0f, 0.6f, 0.6f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 100.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 100.0f, 0.8f, 0.8f));
-		if (ImGui::Button("     ", ImVec2(ImGui::GetWindowWidth() * 0.15, 20.0f))) {
-			static ImVec4 saved_palette;
-			ImGui::ColorConvertHSVtoRGB(i / 100.0f, 0.6f, 0.6f, saved_palette.x, saved_palette.y, saved_palette.z);
-			cubes_color[0] = saved_palette.x;
-			cubes_color[1] = saved_palette.y;
-			cubes_color[2] = saved_palette.z;
+		for (int j = 0; j < 5; j++)
+		{
+			if (j != 0) ImGui::SameLine();
+			ImGui::PushID(i * 5 + j);
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 100.0f, 0.5f + j * 0.1f, 0.5f + j * 0.1f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 100.0f, 0.5f + j * 0.1f + 0.05f, 0.5f + j * 0.1f + 0.05f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 100.0f, 0.5f + j * 0.1f + 0.1f, 0.5f + j * 0.1f + 0.1f));
+			if (ImGui::Button("     ", ImVec2(ImGui::GetWindowWidth() * 0.15, 20.0f))) {
+				static ImVec4 saved_palette;
+				ImGui::ColorConvertHSVtoRGB(i / 100.0f, 0.5f + j * 0.1f, 0.5f + j * 0.1f, saved_palette.x, saved_palette.y, saved_palette.z);
+				cubes_color[0] = saved_palette.x;
+				cubes_color[1] = saved_palette.y;
+				cubes_color[2] = saved_palette.z;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
 		}
-		ImGui::PopStyleColor(3);
-		ImGui::PopID();
 	}
 	ImGui::EndChild();
 
 	ImGui::End();
 }
 
-void Gui::showWorkBar() {
-	ImGui::Begin("Work Bar", &workBar, 0);
-	
-
+void Gui::showWorkBar(unsigned int textureColorbuffer) {
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImGui::Begin("Work Bar", &workBar, 0 | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
+	if (isFirstDraw) {
+		ImGui::SetWindowSize(ImVec2(screenWidth / 2 + style.WindowPadding.x * 2, screenHeight / 2 + style.WindowPadding.y * 2 + 24));
+		ImGui::SetWindowPos(ImVec2(260, 18));
+	}
+	workBarPos[0] = ImGui::GetWindowPos().x;
+	workBarPos[1] = ImGui::GetWindowPos().y;
+	ImGui::Image((void*)(intptr_t)textureColorbuffer, ImVec2(screenWidth / 2, screenHeight / 2), ImVec2(0, 1), ImVec2(1, 0), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 	ImGui::End();
 }
 
+float* Gui::getWorkBarPos() {
+	return workBarPos;
+}
+
+
+void Gui::draw(unsigned int textureColorbuffer) {
+	showAppMainMenuBar();
+	if (colorBar) showColorBar();
+	if (editBar) showEditBar();
+	if (workBar) showWorkBar(textureColorbuffer);
+	if (isFirstDraw) isFirstDraw = false;
+}
 
 void Gui::draw() {
 	showAppMainMenuBar();
 	if (colorBar) showColorBar();
 	if (editBar) showEditBar();
-	//if (workBar) showWorkBar();
 	if (isFirstDraw) isFirstDraw = false;
 }
 
