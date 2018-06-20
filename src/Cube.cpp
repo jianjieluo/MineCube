@@ -118,7 +118,8 @@ glm::vec3 Cube::getColor() {
 }
 
 glm::vec3 Cube::getColorOfPLane(unsigned int plane) {
-	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
+	unsigned int totalOffset = plane * COLOR_DIMENSION * VERTEX_PER_PLANE;
+	return glm::vec3(cubeColor[totalOffset], cubeColor[totalOffset + 1], cubeColor[totalOffset + 2]);
 }
 
 void Cube::setModelMat4(const glm::mat4 & model) {
