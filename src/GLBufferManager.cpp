@@ -1,59 +1,59 @@
 #include "GLBufferManager.hpp"
 
-GLBufferManager::GLBufferManager(const vector<GLuint> & attriSize, const GLuint & numRecord):numRecord(numRecord) {
+GLBufferManager::GLBufferManager() {
     /**
-	* 分配缓冲空间
-	*/
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    totalLengthPerVertex = std::accumulate(attriSize.begin(), attriSize.end(), 0);    
-    data = vector<GLfloat>(totalLengthPerVertex * numRecord);
-    this->bufferData();
-    for (GLuint i = 0, offset = 0; i < attriSize.size(); offset += attriSize[i], ++i) {
-        glVertexAttribPointer(i, attriSize[i], GL_FLOAT, GL_FALSE,
-                                totalLengthPerVertex * sizeof (GLfloat),
-                                (void*)(offset * sizeof(GLfloat)));
-        glEnableVertexAttribArray(i);
-    }
-    glBindVertexArray(0);
-}
-
-GLBufferManager::~GLBufferManager() {
-    /**
-     * 销毁buffer
-     */
-    glDeleteVertexArrays(1, &VAO);
-	glDeleteVertexArrays(1, &VBO);
-}
-
-void GLBufferManager::setAttriArray(GLuint offset, GLuint size, const vector<GLfloat> & in_data) {
-    for (unsigned int i = 0; i < numRecord; ++i) {
-        unsigned int startIndex = i * totalLengthPerVertex;
-        unsigned dataIndex = i * size;
-        for (unsigned int j = 0; j < size; ++j) {
-            data[startIndex + j + offset] = in_data[dataIndex + j];
-        }
-    }
-    this->bufferData();
-}
-
-void GLBufferManager::bind() {
-    glBindVertexArray(VAO);
-}
-
-void GLBufferManager::unbind() {
-    glBindVertexArray(0);
+    * 单例模式
+        * 分配缓冲空间
+        */
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &cubeVBO);
+    glGenBuffers(1, &colorInstanceVBO);
+    glGenBuffers(1, &modelInstanceVBO);
 }
 
 void GLBufferManager::bufferData() {
-    // update
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data.front(), GL_STATIC_DRAW);
+    GLBufferManager::updateCubeBufferData();
+    GLBufferManager::updateColorBufferData();
+    GLBufferManager::updateModelBufferData();
 }
 
-shared_ptr<GLBufferManager> GLBufferManager::getNewInstance(const vector<GLuint> & attrisize, const GLuint & numRecord) {
-    return shared_ptr<GLBufferManager>(new GLBufferManager(attrisize, numRecord));
+void GLBufferManager::updateCubeBufferData() {
+    this->bind();
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, aCubeData.size() * sizeof(GLfloat),
+                 &aCubeData.front(), GL_STATIC_DRAW);
+
+    // 在这里set属性分布
+    this->unbind();
 }
+
+void GLBufferManager::updateColorBufferData() {
+    this->bind();
+    glBindBuffer(GL_ARRAY_BUFFER, colorInstanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, colorVecs.size() * sizeof(glm::vec3),
+                 &colorVecs.front(), GL_STATIC_DRAW);
+
+    // 在这里set属性分布
+    this->unbind();
+}
+
+void GLBufferManager::updateModelBufferData() {
+    this->bind();
+
+    glBindBuffer(GL_ARRAY_BUFFER, modelInstanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4),
+                 &modelMatrices.front(), GL_STATIC_DRAW);
+
+    // 在这里set属性分布
+    this->unbind();
+}
+
+void GLBufferManager::init(const int _totalCubeNum) {
+    aCubeData.resize(36 * 3 + 36 * 3);
+    colorVecs.resize(_totalCubeNum);
+    modelMatrices.resize(_totalCubeNum);
+}
+
+void GLBufferManager::bind() { glBindVertexArray(VAO); }
+
+void GLBufferManager::unbind() { glBindVertexArray(0); }

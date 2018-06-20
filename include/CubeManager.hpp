@@ -2,8 +2,9 @@
 //  CubeManager.hpp
 //
 //  Created by 吴博文 on 2018/5/22.
-//  Copyright © 2018年 吴博文. All rights reserved.
-//
+//  Modified by 罗剑杰 on 2018/6/23
+
+//  Use instances array to manage the voxel cube
 
 #ifndef CubeManager_hpp
 #define CubeManager_hpp
@@ -30,8 +31,18 @@ class CubeManager {
         unsigned int depth; // z
         unsigned int totalCube;
         GLfloat sizePerCube;
+
+
+        // instance array related
+        shared_ptr<GLBufferManager> glBufferManager;
+
         vector<glm::vec3> cubesPosition;
         vector<shared_ptr<Cube>> cubes;
+
+        vector<glm::mat4> modelMatrices;
+        vector<glm::vec3> colorVecs;
+
+
         // glm::vec3 rotateAngle;
         GLfloat rotateAngleAroundX;
         GLfloat rotateAngleAroundY;
@@ -39,6 +50,9 @@ class CubeManager {
         void refreshModelMat4();
         void refreshModelMat4(const unsigned int & id);
         glm::mat4 calculateModelMat4(const unsigned int & id);
+
+        void beforeDraw();
+        void afterDraw();
 
 
     public:
