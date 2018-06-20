@@ -2,7 +2,6 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Gui.hpp"
-#include "CraftManager.hpp"
 #include "CubeManager.hpp"
 #include "SkyBox.hpp"
 
