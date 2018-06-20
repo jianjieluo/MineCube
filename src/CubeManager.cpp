@@ -27,15 +27,7 @@ CubeManager::CubeManager(
     }
 
     // 初始化cubes数组
-    modelMatrices = vector<glm::mat4>(totalCube);
-    colorVecs = vector<glm::vec3>(totalCube);
     cubes = vector<shared_ptr<Cube>>(totalCube);
-
-    // 初始化 buffer 
-    glBufferManager = GLBufferManager::getNewInstance();
-    glBufferManager->updateCubeVertexAttri(cubes[0].getVertexAttri());
-    glBufferManager->updateColorVecs(colorVecs);
-    glBufferManager->updateModelMatrices(modelMatrices);
 
     rotateAngleAroundY = 0;
     rotateAngleAroundX = 0;
@@ -72,27 +64,17 @@ void CubeManager::deleteCube(
     cubes[getId(x, y, z)] = nullptr;
 }
 
-
+/**
+ * This may be a bottleneck of performance.
+ * We should optimize here later.
+ */
 void CubeManager::draw() {
-    this->beforDraw();
-    glDrawElementsInstanced(
-        GL_TRIANGLES, 0, 36, totalCube
-    );
-    this->afterDraw();
-}
-
-void CubeManager::beforeDraw() {
-    // if it need update, add flag later
-    if (true) {
-        glBufferManager->updateCubeVertexAttri(cubes[0].getVertexAttri());
-        glBufferManager->updateColorVecs(colorVecs);
-        glBufferManager->updateModelMatrices(modelMatrices);
+    for (unsigned int i = 0; i < totalCube; ++i) {
+        if (cubes[i] != nullptr) {
+            // cout << "draw " << i << endl;
+            cubes[i]->drawAll();
+        }
     }
-    glBufferManager->bind();
-}
-
-void CubeManager::afterDraw() {
-    glBufferManager->unbind();
 }
 
 unsigned int CubeManager::getId(
