@@ -30,6 +30,7 @@ int hoverPlaneLast = -1;
 
 // add/delete/paint
 glm::vec3 startCubePos(0.0f, 0.0f, 0.0f);
+glm::vec3 farCubePose(0.0f, 0.0f, 0.0f);
 
 // Camera class
 static Camera* camera = Camera::getInstance();
@@ -75,9 +76,9 @@ bool PickOneCube(
 void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color);
 
 // CRUD
-void createCube(CubeManager& cubeManager, const int phongShaderID);
-void eraseCube(CubeManager& cubeManager);
-void paintCube(CubeManager& cubeManager);
+void createCube(CubeManager& cubeManager, const int phongShaderID, const glm::vec3& cubePos, const int plane, glm::vec3& color);
+void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
+void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color);
 
 int main()
 {
@@ -321,6 +322,13 @@ int main()
         glBindTexture(GL_TEXTURE_2D, depthMap);
         // RenderQuad();
 #endif
+
+		// reset last hovered plane
+		auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
+		if (last_hover_cube && hoverPlaneLast != -1) {
+			last_hover_cube->editColor(objectColorLast.x, objectColorLast.y, objectColorLast.z, hoverPlaneLast);
+		}
+
 		if (camera->isFpsMode) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
@@ -362,11 +370,7 @@ int main()
 			//	objectColorLast = objectColor;
 			//}
 
-			// reset last hovered plane
-			auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
-			if (last_hover_cube && hoverPlaneLast != -1) {
-				last_hover_cube->editColor(objectColorLast.x, objectColorLast.y, objectColorLast.z, hoverPlaneLast);
-			}
+
 
 			// set hovered plane
 			auto hover_cube = cubeManager.getCube(hoverCubePosCurrent.x, hoverCubePosCurrent.y, hoverCubePosCurrent.z);
@@ -387,22 +391,31 @@ int main()
 					if (mode == ERASE_MODE || mode == PAINT_MODE) {
 						// 记录当前悬浮方块
 						startCubePos = hoverCubePosCurrent;
+						farCubePose = hoverCubePosCurrent;
 					}
 					if (mode == CREATE_MODE) {
-						createCube(cubeManager, phongShader.ID);
+						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+						createCube(cubeManager, phongShader.ID, hoverCubePosCurrent, hoverPlaneCurrent, objectColor);
 					}
 					mouseIsDown = true;
 				}
-				if (mouseJustRelease && mouseIsDown) {
-					if (mode == ERASE_MODE) {
-						eraseCube(cubeManager);
+				if (mouseIsDown) {
+					if (mouseJustRelease) {
+						if (mode == ERASE_MODE) {
+							eraseCube(cubeManager, startCubePos, hoverCubePosCurrent);
+						}
+						if (mode == PAINT_MODE) {
+							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+							paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
+							objectColorLast = objectColor;
+						}
+						mouseIsDown = false;
 					}
-					if (mode == PAINT_MODE) {
-						paintCube(cubeManager);
-					}
+					else {
 
-					mouseIsDown = false;
+					}
 				}
+
 			}
 
 
@@ -509,15 +522,14 @@ void RenderScene(Shader &shader, CubeManager & cubeManager)
     // glBindVertexArray(0);
 }
 
-void createCube(CubeManager& cubeManager, const int phongShaderID) {
+void createCube(CubeManager& cubeManager, const int phongShaderID, const glm::vec3& cubePos, const int plane, glm::vec3& color) {
 	// 获取交点所在的面
 	auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShaderID, mat4Name, attriSize));
-	objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 	for (int i = 0; i < 6; i++)
-		sptr->editColor(objectColor.x, objectColor.y, objectColor.z, i);
+		sptr->editColor(color.x, color.y, color.z, i);
 
-	int new_x = static_cast<int>(hoverCubePosCurrent.x), new_y = static_cast<int>(hoverCubePosCurrent.y), new_z = static_cast<int>(hoverCubePosCurrent.z);
-	switch (hoverPlaneCurrent) {
+	int new_x = static_cast<int>(cubePos.x), new_y = static_cast<int>(cubePos.y), new_z = static_cast<int>(cubePos.z);
+	switch (plane) {
 	case 0: new_z -= 1; break;
 	case 1: new_z += 1; break;
 	case 2: new_x -= 1; break;
@@ -530,40 +542,37 @@ void createCube(CubeManager& cubeManager, const int phongShaderID) {
 		cubeManager.setCube(new_x, new_y, new_z, sptr);
 }
 
-void eraseCube(CubeManager& cubeManager) {
-	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(hoverCubePosCurrent.x));
-	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(hoverCubePosCurrent.y));
-	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(hoverCubePosCurrent.z));
-	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(hoverCubePosCurrent.x));
-	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(hoverCubePosCurrent.y));
-	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(hoverCubePosCurrent.z));
+void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
+	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
-			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-				if (mode == ERASE_MODE)  cubeManager.deleteCube(i, j, k);
-			}
+			for (unsigned int k = z_low_bound; k <= z_high_bound; k++)
+				cubeManager.deleteCube(i, j, k);
 }
 
-void paintCube(CubeManager& cubeManager) {
-	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(hoverCubePosCurrent.x));
-	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(hoverCubePosCurrent.y));
-	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(hoverCubePosCurrent.z));
-	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(hoverCubePosCurrent.x));
-	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(hoverCubePosCurrent.y));
-	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(hoverCubePosCurrent.z));
+void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color) {
+	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-				if (mode == PAINT_MODE) {
-					auto cube = cubeManager.getCube(i, j, k);
-					if (cube) {
-						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-						for (int plane = 0; plane < 6; plane++)
-							cube->editColor(objectColor.x, objectColor.y, objectColor.z, plane);
-					}
+				auto cube = cubeManager.getCube(i, j, k);
+				if (cube) {
+					for (int plane = 0; plane < 6; plane++)
+						cube->editColor(color.x, color.y, color.z, plane);
 				}
 			}
-	objectColorLast = objectColor;
 }
 
 void setAllCubesColor(CubeManager& cubeManager, glm::vec3 color) {
