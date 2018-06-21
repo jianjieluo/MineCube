@@ -114,7 +114,19 @@ void Cube::editColor(
 }
 
 glm::vec3 Cube::getColor() {
-	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
+	unsigned int totalOffset0 = 0 * COLOR_DIMENSION * VERTEX_PER_PLANE;
+	unsigned int totalOffset1 = 1 * COLOR_DIMENSION * VERTEX_PER_PLANE;
+	unsigned int totalOffset2 = 2 * COLOR_DIMENSION * VERTEX_PER_PLANE;
+	glm::vec3 color0(cubeColor[totalOffset0], cubeColor[totalOffset0 + 1], cubeColor[totalOffset0 + 2]);
+	glm::vec3 color1(cubeColor[totalOffset1], cubeColor[totalOffset1 + 1], cubeColor[totalOffset1 + 2]);
+	glm::vec3 color2(cubeColor[totalOffset2], cubeColor[totalOffset2 + 1], cubeColor[totalOffset2 + 2]);
+	if (color0 == color1 && color1 == color2)
+		return color0;
+	else if (color0 == color1 || color0 == color2)
+		return color0;
+	else
+		return color1;
+//	return glm::vec3(cubeColor[0], cubeColor[1], cubeColor[2]);
 }
 
 glm::vec3 Cube::getColorOfPLane(unsigned int plane) {

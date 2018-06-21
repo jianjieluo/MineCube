@@ -3,7 +3,7 @@
 unsigned int loadCubemap(std::vector<std::string> faces);
 
 SkyBox::SkyBox(GLFWwindow* theWindow, Camera* theCamera) {
-	std::cout << "init Skybox" << std::endl;
+	//::cout << "init Skybox" << std::endl;
 
 	window = theWindow;
 	camera = theCamera;
@@ -113,7 +113,7 @@ void SkyBox::clean() {
 // -------------------------------------------------------
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
-	std::cout << "load Texture" << std::endl;
+	//std::cout << "load Texture" << std::endl;
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

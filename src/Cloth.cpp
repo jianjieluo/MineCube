@@ -2,7 +2,7 @@
 
 
 Cloth::Cloth(GLFWwindow* theWindow, glm::vec3 theLightPos, glm::vec3 theLightColor, float width, float height) {
-	std::cout << "init cloth" << std::endl;
+	//std::cout << "init cloth" << std::endl;
 
 	window = theWindow;
 	lightPos = theLightPos;
@@ -25,7 +25,7 @@ Cloth::Cloth(GLFWwindow* theWindow, glm::vec3 theLightPos, glm::vec3 theLightCol
 
 void Cloth::render(Camera* camera, int step) {
     // code
-	std::cout << "cloth simulate" << std::endl;
+	//std::cout << "cloth simulate" << std::endl;
 	float timeStep = 0.001;
 	int n = static_cast<int>(ceil(0.01 / timeStep));
 	for (int i = 0; i < n; i++) {
@@ -108,7 +108,7 @@ void Cloth::clean() {
 
 void Cloth::initMesh() {
 	// code
-	std::cout << "build mesh" << std::endl;
+	//std::cout << "build mesh" << std::endl;
 
 	for (int i = 0; i < meshResolution; i++) {
 		for (int j = 0; j < meshResolution; j++) {
@@ -161,7 +161,7 @@ void Cloth::setVelocity(int i, int j, glm::vec3 value) {
 }
 
 void Cloth::computeNormals() {
-	std::cout << "compute normals" << std::endl;
+	//std::cout << "compute normals" << std::endl;
 	int dx[6] = { 1, 1, 0, -1, -1, 0 }, dy[6] = { 0, 1, 1, 0, -1, -1 };
 	glm::vec3 e1, e2;
 	int k = 0;
