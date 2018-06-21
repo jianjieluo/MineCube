@@ -5,6 +5,7 @@
 #include "CraftManager.hpp"
 #include "CubeManager.hpp"
 #include "SkyBox.hpp"
+#include "Cloth.hpp"
 
 #include <iostream>
 using namespace std;
@@ -121,6 +122,9 @@ int main()
 	Gui gui(window);
 
 	SkyBox skybox(window, camera);
+
+	Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
+	int timestep = 0;
 
 #ifdef PLANE
 	// set floor
@@ -462,6 +466,7 @@ int main()
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
+		cloth.render(camera, timestep++);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
