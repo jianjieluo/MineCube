@@ -11,12 +11,12 @@ SkyBox::SkyBox(GLFWwindow* theWindow, Camera* theCamera) {
 
 	std::vector<std::string> faces
 	{
-		"../src/Asset/skybox/right.jpg",
-		"../src/Asset/skybox/left.jpg",
-		"../src/Asset/skybox/top.jpg",
-		"../src/Asset/skybox/bottom.jpg",
-		"../src/Asset/skybox/front.jpg",
-		"../src/Asset/skybox/back.jpg"
+		"../src/Asset/skybox/city/left.tga",
+		"../src/Asset/skybox/city/right.tga",
+		"../src/Asset/skybox/city/top.tga",
+		"../src/Asset/skybox/city/bottom.tga",
+		"../src/Asset/skybox/city/front.tga",
+		"../src/Asset/skybox/city/back.tga"
 	};
 	cubemapTexture = loadCubemap(faces);
 

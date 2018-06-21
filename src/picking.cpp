@@ -197,7 +197,6 @@ bool PickOneCube(
 	unsigned int numPerEdge,
 	float sizePerCube,
 	CubeManager cubeManager,
-	const glm::vec3& hoverColor,
 	glm::vec3& hoverCubePosCurrent,
 	int& plane_num_current
 ) {
@@ -239,8 +238,6 @@ bool PickOneCube(
 
 	// hit
 	if (hit_x != -1) {
-		auto hover_cube = cubeManager.getCube(hit_x, hit_y, hit_z);
-		hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, pick_plane_num);
 		hoverCubePosCurrent.x = static_cast<float>(hit_x);
 		hoverCubePosCurrent.y = static_cast<float>(hit_y);
 		hoverCubePosCurrent.z = static_cast<float>(hit_z);
