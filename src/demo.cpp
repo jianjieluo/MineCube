@@ -89,6 +89,7 @@ void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, c
 void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int constHoverPlane);
 void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const vector<shared_ptr<Cube>> saveEraseCubes, list<glm::vec3> savedColorList);
 vector<shared_ptr<Cube>> getCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
+void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec3> savedColorList);
 
 int main()
 {
@@ -406,6 +407,7 @@ int main()
 							[&cubeManager, objectColor, phongShader]() {
 								auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
 								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, sptr, numPerEdge);
+								savedColorList.clear();
 							},
 							//	undo
 							[&cubeManager, constCubePos, constHoverPlane]() {
@@ -423,23 +425,39 @@ int main()
 							const glm::vec3 constStartCubePos = startCubePos;
 							const glm::vec3 constEndCubePos = hoverCubePosCurrent;
 							const vector<shared_ptr<Cube>> saveEraseCubes = getCubes(cubeManager, constStartCubePos, constEndCubePos);
+							list<glm::vec3> constColorList = savedColorList;
 							auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
 								//	do 
 								[&cubeManager, constStartCubePos, constEndCubePos]() {
 									eraseCube(cubeManager, constStartCubePos, constEndCubePos);
+									savedColorList.clear();
 								},
 								//	undo
-								[&cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes]() {
-									undoErase(cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, savedColorList);
+								[&cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, constColorList]() {
+									undoErase(cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, constColorList);
 								}
 							));
 							operationManager.executeOp(eraseOP);
 						}
 						if (mode == PAINT_MODE) {
-							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-							paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
-							objectColorLast = objectColor;
-							savedColorList.clear();
+							// 保全当前全局变量
+							const glm::vec3 constStartCubePos = startCubePos;
+							const glm::vec3 constEndCubePos = hoverCubePosCurrent;
+							list<glm::vec3> constColorList = savedColorList;
+							auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
+								//	do 
+								[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
+									objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+									paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
+									objectColorLast = objectColor;
+									savedColorList.clear();
+								},
+								//	undo
+								[&cubeManager, constStartCubePos, constEndCubePos, constColorList]() {
+									undoPaint(cubeManager, constStartCubePos, constEndCubePos, constColorList);
+								}
+							));
+							operationManager.executeOp(paintOP);
 						}
 						mouseIsDown = false;
 					}
@@ -453,8 +471,7 @@ int main()
 						}
 					}
 				}
-
-			}
+			} 
 
 			/**********************************************************************************
 			*

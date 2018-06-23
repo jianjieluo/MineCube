@@ -152,9 +152,13 @@ void Gui::showEditBar() {
 
 	ImGui::EndChild();
 
-	if (ImGui::Button("Undo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {}
+	if (ImGui::Button("Undo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+		operationManager.undo();
+	}
 	ImGui::SameLine();
-	if (ImGui::Button("Redo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {}
+	if (ImGui::Button("Redo", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {\
+		operationManager.cancle_undo();
+	}
 
 	ImGui::Text("");
 	ImGui::Text("Default:");
