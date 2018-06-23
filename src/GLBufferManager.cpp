@@ -143,24 +143,32 @@ void GLBufferManager::setAllColor(const vector<glm::vec4>& _colorVecs) {
            _colorVecs.size());  // The size of two data is not the same
     colorVecs.assign(_colorVecs.begin(), _colorVecs.end());
 
-    this->isColorDataNeedUpdate = true;
+    if (!this->isColorDataNeedUpdate) {
+        this->isColorDataNeedUpdate = true;
+    }
+    
 }
 void GLBufferManager::setAllModel(const vector<glm::mat4>& _modelMatrices) {
     assert(modelMatrices.size() ==
            _modelMatrices.size());  // The size of two data is not the same
     modelMatrices.assign(_modelMatrices.begin(), _modelMatrices.end());
-
-    this->isModelDataNeedUpdate = true;
+    if (!this->isModelDataNeedUpdate) {
+        this->isModelDataNeedUpdate = true;
+    }
 }
 
 void GLBufferManager::setColor(const int _id, const glm::vec4 _aColor) {
     colorVecs[_id] = _aColor;
-    this->isColorDataNeedUpdate = true;
+    if (!this->isColorDataNeedUpdate) {
+        this->isColorDataNeedUpdate = true;
+    }
 }
 
 void GLBufferManager::setModel(const int _id, const glm::mat4 _aModel) {
     modelMatrices[_id] = _aModel;
-    this->isModelDataNeedUpdate = true;
+    if (!this->isModelDataNeedUpdate) {
+        this->isModelDataNeedUpdate = true;
+    }
 }
 
 void GLBufferManager::bind() { glBindVertexArray(VAO); }
