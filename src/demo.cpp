@@ -8,6 +8,7 @@
 #include "Cloth.hpp"
 #include "BasicOperation.hpp"
 #include "OperationManager.hpp"
+#include "crud.h"
 
 #include <iostream>
 #include <list>
@@ -36,7 +37,7 @@ int hoverPlaneLast = -1;
 // add/delete/paint
 glm::vec3 startCubePos(0.0f, 0.0f, 0.0f);
 glm::vec3 farCubePos(0.0f, 0.0f, 0.0f);
-list<glm::vec3> savedColorList;
+list<glm::vec4> savedColorList;
 glm::vec3 auxColor(0.9f, 0.9f, 1.0f);
 
 // Camera class
@@ -80,17 +81,6 @@ bool PickOneCube(
 	glm::vec3& hoverCubeCurrent,
 	int& plane_num_current
 );
-
-// CRUD
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, glm::vec3& color, const unsigned int shaderID, int numPerEdge);
-void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
-void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color);
-void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, list<glm::vec3>& savedColorList);
-void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, list<glm::vec3>& savedColorList);
-void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int constHoverPlane);
-void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const vector<shared_ptr<Cube>> saveEraseCubes, list<glm::vec3> savedColorList);
-vector<shared_ptr<Cube>> getCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
-void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec3> savedColorList);
 
 int main()
 {
@@ -411,7 +401,6 @@ int main()
 						auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
 							[&cubeManager, &objectColor, phongShader]() {
-								/*auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));*/
 								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, phongShader.ID, numPerEdge);
 								savedColorList.clear();
 							},
@@ -447,19 +436,21 @@ int main()
 						// 保全当前全局变量
 						const glm::vec3 constStartCubePos = startCubePos;
 						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						const vector<shared_ptr<Cube>> saveEraseCubes = getCubes(cubeManager, constStartCubePos, constEndCubePos);
-						list<glm::vec3> constColorList = savedColorList;
+						list<glm::vec4> constColorList = savedColorList;
+						const vector<bool> saveCubesIsDeleted = getCubesIsDeleted(cubeManager, constStartCubePos, constEndCubePos);
 						auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
 							[&cubeManager, constStartCubePos, constEndCubePos]() {
-							recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
-							savedColorList.clear();
-							eraseCube(cubeManager, constStartCubePos, constEndCubePos);
-						},
+								//	去除辅助色
+								recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
+								savedColorList.clear();
+
+								eraseCube(cubeManager, constStartCubePos, constEndCubePos);
+							},
 							//	undo
-							[&cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, constColorList]() {
-							undoErase(cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, constColorList);
-						}
+							[&cubeManager, constStartCubePos, constEndCubePos, saveCubesIsDeleted, constColorList]() {
+								undoErase(cubeManager, constStartCubePos, constEndCubePos, saveCubesIsDeleted, constColorList);
+							}
 						));
 						operationManager.executeOp(eraseOP);
 					}
@@ -467,19 +458,22 @@ int main()
 						// 保全当前全局变量
 						const glm::vec3 constStartCubePos = startCubePos;
 						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						list<glm::vec3> constColorList = savedColorList;
+						list<glm::vec4> constColorList = savedColorList;
 						auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
 							[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
-							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-							paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
-							objectColorLast = objectColor;
-							savedColorList.clear();
-						},
+								//	去除辅助色
+								recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
+								savedColorList.clear();
+
+								objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+								paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
+								objectColorLast = objectColor;
+							},
 							//	undo
 							[&cubeManager, constStartCubePos, constEndCubePos, constColorList]() {
-							undoPaint(cubeManager, constStartCubePos, constEndCubePos, constColorList);
-						}
+								undoPaint(cubeManager, constStartCubePos, constEndCubePos, constColorList);
+							}
 						));
 						operationManager.executeOp(paintOP);
 					}
