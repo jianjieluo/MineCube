@@ -4,6 +4,7 @@
 #include "Global.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "Camera.hpp"
 
 class Gui {
 public:
@@ -20,6 +21,7 @@ public:
 	float* getWorkBarPos();
 
 private:
+	Camera* camera;
 	GLFWwindow* window;
 	float workBarPos[2];
 	bool colorBar;

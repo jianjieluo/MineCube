@@ -230,8 +230,6 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow*, double xoffset, double yoffset)
     ImGuiIO& io = ImGui::GetIO();
     io.MouseWheelH += (float)xoffset;
     io.MouseWheel += (float)yoffset;
-
-	camera->zoomInOrOut((float)yoffset);
 }
 
 void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, int mods)
@@ -251,25 +249,6 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int, int action, in
 	// process keyboard input
 	if (io.KeysDown[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, true);
-
-	if (io.KeysDown[GLFW_KEY_W]) {
-		camera->moveCamera(FORWARD, deltaTime);
-	}
-	else if (io.KeysDown[GLFW_KEY_S]) {
-		camera->moveCamera(BACKWARD, deltaTime);
-	}
-
-	if (io.KeysDown[GLFW_KEY_A]) {
-		camera->moveCamera(LEFT, deltaTime);
-	}
-	else if (io.KeysDown[GLFW_KEY_D]) {
-		camera->moveCamera(RIGHT, deltaTime);
-	}
-
-	if (io.KeysDown[GLFW_KEY_V]) {
-		camera->isFpsMode = !camera->isFpsMode;
-		camera->pause();
-	}
 }
 
 void ImGui_ImplGlfw_CharCallback(GLFWwindow*, unsigned int c)
