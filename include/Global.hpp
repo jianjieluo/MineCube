@@ -25,9 +25,6 @@ extern float background_color[4];
 extern float deltaTime;
 extern float lastFrame;
 extern int mode;
-extern bool mouseJustClick;
-extern bool mouseJustRelease;
-extern bool mouseIsDown;
 extern bool isFirstDraw;
 
 // interactive variables

@@ -83,7 +83,7 @@ void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, c
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
-				if (cube) {
+				if (!cube->isDeleted()) {
 					glm::vec3 color = savedColorList.front();
 					for (int plane = 0; plane < 6; plane++)
 						cube->editColor(color.x, color.y, color.z, plane);
@@ -104,7 +104,7 @@ void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, c
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
-				if (cube) {
+				if (!cube->isDeleted()) {
 					savedColorList.push_back(cube->getColor());
 				}
 			}
@@ -169,7 +169,7 @@ void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
-				if (cube) {
+				if (!cube->isDeleted()) {
 					glm::vec3 color = savedColorList.front();
 					for (int plane = 0; plane < 6; plane++)
 						cube->editColor(color.x, color.y, color.z, plane);

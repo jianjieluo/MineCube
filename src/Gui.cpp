@@ -6,7 +6,6 @@ Gui::Gui(GLFWwindow* theWindow) {
 	window = theWindow;
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
 
 	ImGui_ImplGlfwGL3_Init(window, true);
 	ImGui::StyleColorsDark();

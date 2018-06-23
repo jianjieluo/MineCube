@@ -207,15 +207,13 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 	// process mouse input
 	ImGuiIO& io = ImGui::GetIO();
 
-	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
-		mouseJustClick = true;
+	/*if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
 		mouseJustRelease = false;
 	}
 
 	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
-		mouseJustClick = false;
 		mouseJustRelease = true;
-	}
+	}*/
 	
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
 		camera->isMoving = true;
