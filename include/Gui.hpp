@@ -32,4 +32,5 @@ private:
 	void setMode_add();
 	void setMode_print();
 	void setMode_erase();
+	void captureKey();
 };

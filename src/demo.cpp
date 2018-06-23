@@ -337,7 +337,7 @@ int main()
 		// reset last hovered plane
 		auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
 		if (last_hover_cube && hoverPlaneLast != -1) {
-			last_hover_cube->editColor(objectColorLast.x, objectColorLast.y, objectColorLast.z, hoverPlaneLast);
+			last_hover_cube->editColor(objectColorLast.x, objectColorLast.y, objectColorLast.z, 1);
 		}
 
 		if (camera->isFpsMode) {
@@ -382,7 +382,7 @@ int main()
 				if (hover_cube) {
 					hoverCubePosLast = hoverCubePosCurrent;
 					objectColorLast = hover_cube->getColorOfPLane(hoverPlaneCurrent);
-					hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, hoverPlaneCurrent);
+					hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, 1);
 				}
 			}
 

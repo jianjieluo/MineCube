@@ -65,7 +65,7 @@ void Gui::showAppMainMenuBar()
 			}
 			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) 
 			{
-				// TODO
+				operationManager.cancle_undo();
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("Cut", "CTRL+X")) 

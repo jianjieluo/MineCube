@@ -80,7 +80,7 @@ void CubeManager::setCube(unsigned int x, unsigned int y, unsigned int z,
 
 bool CubeManager::isThereACube(unsigned int x, unsigned int y, unsigned int z) {
     unsigned int&& id = getId(x, y, z);
-    return this->cubes[id]->isDeleted();
+    return !this->cubes[id]->isDeleted();
 }
 
 void CubeManager::deleteCube(unsigned int x, unsigned int y, unsigned int z) {
@@ -134,7 +134,7 @@ void CubeManager::defalut_init_all(const GLuint& shaderID,
 
 void CubeManager::refreshModelMat4() {
     for (unsigned int i = 0; i < totalCube; ++i) {
-        if (cubes[i] != nullptr) {
+        if (!cubes[i]->isDeleted()) {
             cubes[i]->setModelMat4(calculateModelMat4(i));
         }
     }

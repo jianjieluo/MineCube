@@ -1,4 +1,5 @@
 #include "CubeManager.hpp"
+#include "Cube.hpp"
 
 void ScreenPosToWorldRay(
 	int mouseX, int mouseY,             // Mouse position, in pixels, from bottom-left corner of the window
@@ -226,7 +227,7 @@ bool PickOneCube(
 		glm::mat4 model_mat = cubeManager.getModelMat4(x, y, z);
 		auto this_cube = cubeManager.getCube(x, y, z);
 
-		if (this_cube && TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
+		if (!this_cube->isDeleted() && TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max,
 			model_mat, intersection_distance, plane_num_current) && intersection_distance < min_distance) {
 			min_distance = intersection_distance;
 			hit_x = x;
