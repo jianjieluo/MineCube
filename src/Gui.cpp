@@ -5,7 +5,6 @@ Gui::Gui(GLFWwindow* theWindow) {
 	// ImGui initialization and bindings
 	window = theWindow;
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
 
 	ImGui_ImplGlfwGL3_Init(window, true);
 	ImGui::StyleColorsDark();
@@ -140,12 +139,12 @@ void Gui::showEditBar() {
 	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
 
 	static int his_selected = -1;
-	for (int n = 0; n < 5; n++)
+	for (int i = 0; i < operationManager.getIndexOfHistory(); i++)
 	{
 		char buf[32];
-		sprintf(buf, "Object %d", n);
-		if (ImGui::Selectable(buf, his_selected == n))
-			his_selected = n;
+		sprintf(buf, operationManager.str_history[i].c_str());
+		if (ImGui::Selectable(buf, his_selected == i))
+			his_selected = i;
 	}
 	// ImGui::TreePop();
 
@@ -254,6 +253,7 @@ void Gui::draw() {
 }
 
 void Gui::render() {
+	captureKeys();
 	ImGui::Render();
 	ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -278,4 +278,16 @@ void Gui::setMode_print() {
 
 void Gui::setMode_erase() {
 	mode = ERASE_MODE;
+}
+
+void Gui::captureKeys() {
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.KeyCtrl) {
+		if (ImGui::IsKeyReleased(90)) {
+			operationManager.undo();
+		}
+		if (ImGui::IsKeyReleased(89)) {
+			operationManager.cancle_undo();
+		}
+	}
 }

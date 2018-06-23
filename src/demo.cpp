@@ -409,7 +409,7 @@ int main()
 								undoAdd(cubeManager, constCubePos, constHoverPlane);
 							}
 						));
-						operationManager.executeOp(createOP);
+						operationManager.executeOp(createOP, "Create a cube");
 					}
 				}
 				//若按着左键
@@ -452,7 +452,7 @@ int main()
 								undoErase(cubeManager, constStartCubePos, constEndCubePos, saveCubesIsDeleted, constColorList);
 							}
 						));
-						operationManager.executeOp(eraseOP);
+						operationManager.executeOp(eraseOP, "Erase a cubes");
 					}
 					if (mode == PAINT_MODE) {
 						// 保全当前全局变量
@@ -475,7 +475,7 @@ int main()
 								undoPaint(cubeManager, constStartCubePos, constEndCubePos, constColorList);
 							}
 						));
-						operationManager.executeOp(paintOP);
+						operationManager.executeOp(paintOP, "Change cubes color");
 					}
 				}
 			} 
