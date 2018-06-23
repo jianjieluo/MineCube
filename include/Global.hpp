@@ -8,9 +8,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "OperationManager.hpp"
+
 #define ERASE_MODE 0
 #define CREATE_MODE 1
 #define PAINT_MODE 2
+
+// global manager controls operation
+extern OperationManager operationManager;
 
 // global variables for gui.cpp and main.cpp are declared here.
 extern bool showGuiWindow;

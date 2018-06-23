@@ -61,7 +61,7 @@ void Gui::showAppMainMenuBar()
 		{
 			if (ImGui::MenuItem("Undo", "CTRL+Z")) 
 			{
-				// TODO
+				operationManager.undo();
 			}
 			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) 
 			{
@@ -102,10 +102,10 @@ void Gui::showAppMainMenuBar()
 }
 
 void Gui::showEditBar() {
-	ImGui::Begin("Edit Bar", &editBar, ImGuiWindowFlags_NoScrollbar);
+	ImGui::Begin("Edit Bar", &editBar, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 
 	if (isFirstDraw) {
-		ImGui::SetWindowSize(ImVec2(260, screenWidth));
+		ImGui::SetWindowSize(ImVec2(260, screenHeight));
 		ImGui::SetWindowPos(ImVec2(screenWidth - 260, 18));
 	}
 
@@ -176,7 +176,7 @@ void Gui::showEditBar() {
 }
 
 void Gui::showColorBar() {
-	ImGui::Begin("Color Bar", &colorBar, 0 | ImGuiWindowFlags_NoScrollbar);
+	ImGui::Begin("Color Bar", &colorBar, 0 | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 
 	if (isFirstDraw) {
 		ImGui::SetWindowSize(ImVec2(260, screenHeight));

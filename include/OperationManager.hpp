@@ -16,7 +16,7 @@ class OperationManager {
         stack<shared_ptr<EditOperationInterface>> undo_history;
     public:
         OperationManager() {}
-        void executeOp(EditOperationInterface*);
+        void executeOp(shared_ptr<EditOperationInterface>);
 
         /**
          * If there is nothing to undo, nothing happen

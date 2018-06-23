@@ -1,7 +1,7 @@
 #include "OperationManager.hpp"
 
 
-void OperationManager::executeOp(EditOperationInterface* new_op) {
+void OperationManager::executeOp(shared_ptr<EditOperationInterface> new_op) {
     new_op->execute();
     history.push(shared_ptr<EditOperationInterface>(new_op));
     // init undo_history
@@ -11,9 +11,9 @@ void OperationManager::executeOp(EditOperationInterface* new_op) {
 void OperationManager::undo() {
     if (!history.empty()) {
         auto to_undo = history.top();
-        history.pop();
         to_undo->undo();
         undo_history.push(to_undo);
+		history.pop();
     }
 }
 

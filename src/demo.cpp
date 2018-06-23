@@ -5,6 +5,8 @@
 #include "CubeManager.hpp"
 #include "SkyBox.hpp"
 #include "Cloth.hpp"
+#include "BasicOperation.hpp"
+#include "OperationManager.hpp"
 
 #include <iostream>
 #include <list>
@@ -79,11 +81,14 @@ bool PickOneCube(
 );
 
 // CRUD
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, glm::vec3& color, shared_ptr<Cube>& sptr, int numPerEdge);
+void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, const glm::vec3& color, shared_ptr<Cube>& sptr, int numPerEdge);
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color);
 void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, list<glm::vec3>& savedColorList);
 void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, list<glm::vec3>& savedColorList);
+void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int constHoverPlane);
+void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const vector<shared_ptr<Cube>> saveEraseCubes, list<glm::vec3> savedColorList);
+vector<shared_ptr<Cube>> getCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 
 int main()
 {
@@ -135,7 +140,7 @@ int main()
 
 	SkyBox skybox(window, camera);
 
-	Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
+	//Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
 	int timestep = 0;
 
 #ifdef PLANE
@@ -393,15 +398,42 @@ int main()
 					}
 					if (mode == CREATE_MODE) {
 						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-						auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
-						createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, sptr, numPerEdge);
+						// 保全当前全局变量
+						const int constHoverPlane = hoverPlaneCurrent;
+						const glm::vec3 constCubePos = hoverCubePosCurrent;
+						auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
+							//	do 
+							[&cubeManager, objectColor, phongShader]() {
+								auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
+								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, sptr, numPerEdge);
+							},
+							//	undo
+							[&cubeManager, constCubePos, constHoverPlane]() {
+								undoAdd(cubeManager, constCubePos, constHoverPlane);
+							}
+						));
+						operationManager.executeOp(createOP);
 					}
 					mouseIsDown = true;
 				}
 				if (mouseIsDown) {
 					if (mouseJustRelease) {
 						if (mode == ERASE_MODE) {
-							eraseCube(cubeManager, startCubePos, hoverCubePosCurrent);
+							// 保全当前全局变量
+							const glm::vec3 constStartCubePos = startCubePos;
+							const glm::vec3 constEndCubePos = hoverCubePosCurrent;
+							const vector<shared_ptr<Cube>> saveEraseCubes = getCubes(cubeManager, constStartCubePos, constEndCubePos);
+							auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
+								//	do 
+								[&cubeManager, constStartCubePos, constEndCubePos]() {
+									eraseCube(cubeManager, constStartCubePos, constEndCubePos);
+								},
+								//	undo
+								[&cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes]() {
+									undoErase(cubeManager, constStartCubePos, constEndCubePos, saveEraseCubes, savedColorList);
+								}
+							));
+							operationManager.executeOp(eraseOP);
 						}
 						if (mode == PAINT_MODE) {
 							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
@@ -463,7 +495,7 @@ int main()
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
-		cloth.render(camera, timestep++);
+		//cloth.render(camera, timestep++);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
