@@ -1,3 +1,10 @@
+/**
+ * @brief Cube class definition.
+ * 
+ * @file Cube.hpp
+ * @author Johnny Law, Bob Wu
+ * @date 2018-06-23
+ */
 #ifndef Cube_hpp
 #define Cube_hpp
 
@@ -59,6 +66,14 @@ class Cube {
     Cube(const Cube&) = delete;
     ~Cube();
 
+    /**
+     * @brief edit this cube color.
+     * 
+     * @param r 
+     * @param g 
+     * @param b 
+     * @param alpha Default is 1.0
+     */
     virtual void editColor(GLfloat r, GLfloat g, GLfloat b,
                            GLfloat alpha = 1.0);
 
