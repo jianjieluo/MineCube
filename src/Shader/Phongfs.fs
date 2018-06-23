@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 in vec3 FragPos;
-in vec3 OurColor;
+in vec4 OurColor;
 in vec3 Normal;
 in vec4 FragPosLightSpace;
 
@@ -72,14 +72,17 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
 void main()
 {
+    vec3 rgbColor = vec3(OurColor[0], OurColor[1], OurColor[2]);
+    float alpha = OurColor[3];
+    
     // ambient
-    vec3 ambient = light.ambient * OurColor;
+    vec3 ambient = light.ambient * rgbColor;
   	
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * (diff * OurColor);
+    vec3 diffuse = light.diffuse * (diff * rgbColor);
     
     // specular
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -89,7 +92,7 @@ void main()
     
     // calculate shadow
     float shadow = ShadowCalculation(FragPosLightSpace);                      
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * OurColor;    
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * rgbColor;    
 
-    FragColor = vec4(lighting, 1.0);
+    FragColor = vec4(lighting, alpha);
 } 

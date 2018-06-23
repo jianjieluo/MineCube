@@ -1,9 +1,8 @@
 #include "CubeManager.hpp"
+#include "Cube.hpp"
 #include <list>
 
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, const glm::vec3& color, shared_ptr<Cube>& sptr, int numPerEdge) {
-	for (int i = 0; i < 6; i++)
-		sptr->editColor(color.x, color.y, color.z, i);
+void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, glm::vec3& color, const unsigned int shaderID, int numPerEdge) {
 
 	int new_x = static_cast<int>(cubePos.x), new_y = static_cast<int>(cubePos.y), new_z = static_cast<int>(cubePos.z);
 	switch (plane) {
@@ -16,7 +15,7 @@ void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int pl
 	default: break;
 	}
 	if (new_x > -1 && new_y > -1 && new_z > -1 && new_x < numPerEdge && new_y < numPerEdge && new_z < numPerEdge)
-		cubeManager.setCube(new_x, new_y, new_z, sptr);
+		cubeManager.setCube(new_x, new_y, new_z, color, shaderID);
 }
 
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
@@ -140,11 +139,16 @@ void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-				if (saveEraseCubes[index]) {
+                /*
+                Now you can use 2 method to determine whether a cube is deleted.
+                1. A cube can call `isDeleted()` to check whether itself is deleted.    `share_ptr<Cube> -> isDeleted()`
+                2. Use  `CubeManager::isThereACube(x, y, z)` to check whether in the position (x, y, z) has a Cube now.
+                */
+				if (saveEraseCubes[index]->isDeleted()) {
 					glm::vec3 color = savedColorList.front();
-					for (int plane = 0; plane < 6; plane++)
-						saveEraseCubes[index]->editColor(color.x, color.y, color.z, plane);
-					cubeManager.setCube(i, j, k, saveEraseCubes[index]);
+                    // now you don't need to use 6 plane.  Just `share_ptr<Cube>->editColor(r, g, b, alpha=1.0)` is ok
+				    saveEraseCubes[index]->editColor(color.x, color.y, color.z);
+					//cubeManager.setCube(i, j, k, saveEraseCubes[index]);
 					savedColorList.pop_front();
 					index++;
 				}

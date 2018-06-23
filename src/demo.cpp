@@ -3,6 +3,7 @@
 #include "Camera.hpp"
 #include "Gui.hpp"
 #include "CubeManager.hpp"
+#include "Cube.hpp"
 #include "SkyBox.hpp"
 #include "Cloth.hpp"
 #include "BasicOperation.hpp"
@@ -18,8 +19,8 @@ using namespace std;
 #define DEBUG
 
 // About cubes
-GLfloat sizePerCube = 0.1f;
-unsigned int numPerEdge = 10;
+GLfloat sizePerCube = 0.05f;
+unsigned int numPerEdge = 20;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
@@ -81,7 +82,7 @@ bool PickOneCube(
 );
 
 // CRUD
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, const glm::vec3& color, shared_ptr<Cube>& sptr, int numPerEdge);
+void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, glm::vec3& color, const unsigned int shaderID, int numPerEdge);
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color);
 void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, list<glm::vec3>& savedColorList);
@@ -404,9 +405,9 @@ int main()
 						const glm::vec3 constCubePos = hoverCubePosCurrent;
 						auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
-							[&cubeManager, objectColor, phongShader]() {
-								auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));
-								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, sptr, numPerEdge);
+							[&cubeManager, &objectColor, phongShader]() {
+								/*auto sptr = shared_ptr<Cube>(new Cube(sizePerCube, phongShader.ID, mat4Name, attriSize));*/
+								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, phongShader.ID, numPerEdge);
 								savedColorList.clear();
 							},
 							//	undo
@@ -573,4 +574,3 @@ void RenderScene(Shader &shader, CubeManager & cubeManager)
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // glBindVertexArray(0);
 }
-
