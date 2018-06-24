@@ -19,10 +19,16 @@ Gui::Gui(GLFWwindow* theWindow) {
 	camera = Camera::getInstance();
 
 	latest_color = ImVec4(cubes_color[0], cubes_color[1], cubes_color[2], cubes_color[3]);
+
+	allowCloth = false;
 }
 
 void Gui::createNewFrame() {
 	ImGui_ImplGlfwGL3_NewFrame();
+}
+
+bool Gui::isClothAllow() {
+	return allowCloth;
 }
 
 // Demonstrate creating a fullscreen menu bar and populating it.
@@ -245,10 +251,18 @@ void Gui::showEditBar() {
 		if (ImGui::Selectable(buf, def_selected == n))
 			def_selected = n;
 	}
-	//ImGui::TreePop();
-
 	ImGui::EndChild();
 
+	if (allowCloth) {
+		if (ImGui::Button("Cloth Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+			allowCloth = false;
+		}
+	}
+	else {
+		if (ImGui::Button("Open Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+			allowCloth = true;
+		}
+	}
 	ImGui::End();
 }
 

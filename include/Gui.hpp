@@ -21,10 +21,13 @@ public:
 	void clear();
 	void autoRePos();
 
+	bool isClothAllow();
+
 	float* getWorkBarPos();
 
 private:
 	ImVec4 latest_color;
+	bool allowCloth;
 	Camera* camera;
 	GLFWwindow* window;
 	vector<ImVec4> colorHistory;

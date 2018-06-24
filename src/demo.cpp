@@ -134,7 +134,7 @@ int main()
 
 	SkyBox skybox(window, camera);
 
-	//Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
+	Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
 	int timestep = 0;
 
 #ifdef PLANE
@@ -497,7 +497,7 @@ int main()
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
-		//cloth.render(camera, timestep++);
+		if (gui.isClothAllow()) cloth.render(camera, timestep++);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
