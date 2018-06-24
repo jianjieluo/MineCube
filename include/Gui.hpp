@@ -5,6 +5,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include "Camera.hpp"
+#include <vector>
+
+using namespace std;
 
 class Gui {
 public:
@@ -18,11 +21,17 @@ public:
 	void clear();
 	void autoRePos();
 
+	bool isClothAllow();
+
 	float* getWorkBarPos();
 
 private:
+	ImVec4 latest_color;
+	bool allowCloth;
 	Camera* camera;
 	GLFWwindow* window;
+	vector<ImVec4> colorHistory;
+	void addColor2His(ImVec4 hisColor);
 	float workBarPos[2];
 	bool colorBar;
 	bool editBar;

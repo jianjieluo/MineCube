@@ -487,8 +487,8 @@ int main()
 				double x, y;
 				glfwGetCursorPos(window, &x, &y);
 				glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
-				cubeManager.rotateHorizontal(offset.x);
-				cubeManager.rotateVertical(offset.y);
+				cubeManager.rotateHorizontal(offset.x * 0.25);
+				cubeManager.rotateVertical(offset.y * 0.25);
 			}
 		}
 
@@ -497,9 +497,7 @@ int main()
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
-		if (timestep < 100) {
-			cloth.render(camera, timestep++);
-		}
+		if (gui.isClothAllow()) cloth.render(camera, timestep++);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);

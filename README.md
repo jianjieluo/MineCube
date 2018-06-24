@@ -18,6 +18,7 @@
 3. ~~GLFW Master 3.2.1~~ [GLFW Master branch](https://github.com/glfw/glfw)
 4. [GLM 0.9.8.5](https://github.com/g-truc/glm/releases/tag/0.9.8.5)
 5. [imgui v1.60](https://github.com/ocornut/imgui/releases/tag/v1.60)
+6. [nlohmann::json v3.1.2](https://github.com/nlohmann/json/releases/tag/v3.1.2) , 只需要下载 `json.hpp` 的 release 文件。
 
 
 
@@ -26,6 +27,7 @@
 1. Create a new directory  `3rd_party` at root.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
 3. Rename all the dependences' directories without certain version number.
+4. Download `nlohmann/json.hpp` file from the URL above.
 
 Now your `3rd_party` looks like:
 
@@ -35,9 +37,9 @@ Now your `3rd_party` looks like:
 ----glfw/
 ----glm/
 ----imgui/
+----nlohmann/json.hpp
 ```
 
-4. Modify the `imgui` opengl3 example file `3rd_party/imgui/examples/opengl3_example/imgui_impl_glfw_gl3.cpp:line 44`  , using `<glad/glad.h>` instead of `<GL/gl3w.h>` .
 5. Use Cmake to generate your project file.
 
 ### 2.1 Windows (Visual Studio 2015 or higher)
