@@ -363,22 +363,6 @@ int main()
 				hoverPlaneCurrent
 			);
 
-			///**********************************************************************************
-			//*
-			//*	set hovered cube
-			//*
-			//***********************************************************************************/
-
-			//if (hit) {
-			//	// set hovered plane
-			//	auto hover_cube = cubeManager.getCube(hoverCubePosCurrent.x, hoverCubePosCurrent.y, hoverCubePosCurrent.z);
-			//	if (!hover_cube->isDeleted()) {
-			//		hoverCubePosLast = hoverCubePosCurrent;
-			//		objectColorLast = hover_cube->getColorOfPLane(hoverPlaneCurrent);
-			//		hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, 1);
-			//	}
-			//}
-
 			/**********************************************************************************
 			*
 			*	deal with some cubes
