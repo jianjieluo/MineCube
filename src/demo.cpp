@@ -33,6 +33,7 @@ glm::vec3 hoverCubePosCurrent(0.0f, 0.0f, 0.0f);
 glm::vec3 hoverCubePosLast(0.0f, 0.0f, 0.0f);
 int hoverPlaneCurrent = -1;
 int hoverPlaneLast = -1;
+bool isHitBefore = false;
 
 // add/delete/paint
 glm::vec3 startCubePos(0.0f, 0.0f, 0.0f);
@@ -374,6 +375,9 @@ int main()
 						// 记录当前悬浮方块
 						startCubePos = hoverCubePosCurrent;
 						farCubePos = hoverCubePosCurrent;
+
+						//用于拉出框体的操作
+						isHitBefore = true;
 					}
 					if (mode == CREATE_MODE) {
 						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
@@ -398,7 +402,7 @@ int main()
 				}
 				//若按着左键
 				if (io.MouseDown[0]) {
-					if ((mode == PAINT_MODE || mode == ERASE_MODE) && farCubePos != hoverCubePosCurrent) {
+					if ((mode == PAINT_MODE || mode == ERASE_MODE) && farCubePos != hoverCubePosCurrent && isHitBefore) {
 						unselectCubes(cubeManager, startCubePos, farCubePos);
 						selectCubes(cubeManager, startCubePos, hoverCubePosCurrent);
 						farCubePos = hoverCubePosCurrent;
@@ -415,47 +419,50 @@ int main()
 
 			//若松开左键
 			if (ImGui::IsMouseReleased(0)) {
-				if (mode == ERASE_MODE) {
-					// 保全当前全局变量
-					const glm::vec3 constStartCubePos = startCubePos;
-					const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-					const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
-					auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
-						//	do 
-						[&cubeManager, constStartCubePos, constEndCubePos]() {
-						//	去除辅助色
-						unselectCubes(cubeManager, startCubePos, farCubePos);
+				if (isHitBefore) {
+					if (mode == ERASE_MODE) {
+						// 保全当前全局变量
+						const glm::vec3 constStartCubePos = startCubePos;
+						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
+						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
+						auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
+							//	do 
+							[&cubeManager, constStartCubePos, constEndCubePos]() {
+							//	去除辅助色
+							unselectCubes(cubeManager, startCubePos, farCubePos);
 
-						eraseCube(cubeManager, constStartCubePos, constEndCubePos);
-					},
-						//	undo
-						[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
-						undoErase(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
+							eraseCube(cubeManager, constStartCubePos, constEndCubePos);
+						},
+							//	undo
+							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
+							undoErase(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
+						}
+						));
+						operationManager.executeOp(eraseOP, "Erase a cubes");
 					}
-					));
-					operationManager.executeOp(eraseOP, "Erase a cubes");
-				}
-				if (mode == PAINT_MODE) {
-					// 保全当前全局变量
-					const glm::vec3 constStartCubePos = startCubePos;
-					const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-					const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
-					auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
-						//	do 
-						[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
-						//	去除辅助色
-						unselectCubes(cubeManager, startCubePos, farCubePos);
+					if (mode == PAINT_MODE) {
+						// 保全当前全局变量
+						const glm::vec3 constStartCubePos = startCubePos;
+						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
+						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
+						auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
+							//	do 
+							[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
+							//	去除辅助色
+							unselectCubes(cubeManager, startCubePos, farCubePos);
 
-						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-						paintCube(cubeManager, constStartCubePos, constEndCubePos, objectColor);
-					},
-						//	undo
-						[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
-						undoPaint(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
+							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+							paintCube(cubeManager, constStartCubePos, constEndCubePos, objectColor);
+						},
+							//	undo
+							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
+							undoPaint(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
+						}
+						));
+						operationManager.executeOp(paintOP, "Change cubes color");
 					}
-					));
-					operationManager.executeOp(paintOP, "Change cubes color");
 				}
+				isHitBefore = false;
 			}
 
 			/**********************************************************************************
