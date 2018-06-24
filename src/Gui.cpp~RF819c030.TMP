@@ -16,7 +16,6 @@ Gui::Gui(GLFWwindow* theWindow) {
 	colorBar = true;
 	editBar = true;
 	workBar = true;
-	saveWindow = false;
 	camera = Camera::getInstance();
 
 	latest_color = ImVec4(cubes_color[0], cubes_color[1], cubes_color[2], cubes_color[3]);
@@ -51,11 +50,11 @@ void Gui::showAppMainMenuBar()
 			}
 			if (ImGui::MenuItem("Save", "Ctrl+S"))
 			{
-				// TODO
+				showSaveWindow()
 			}
 			if (ImGui::MenuItem("Save As.."))
 			{
-				// TODO
+				showSaveWindow()
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("Quit", "Alt+F4")) 
@@ -277,60 +276,28 @@ void Gui::showEditBar() {
 		}
 	}
 
-	{	//Save button
-		if (ImGui::Button("Save", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f)))
-			ImGui::OpenPopup("Save");
-		if (ImGui::BeginPopupModal("Save", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-		{
-			saveWindow = true;
-			ImGui::Text("File name:\n");
-			static char buf[64] = "";
-			ImGui::InputText("", buf, 64);
-			ImGui::Text("\n");
-			ImGui::Separator();
-			if (ImGui::Button("OK", ImVec2(120, 0))) {
-				// TODO
-				ImGui::CloseCurrentPopup();
-				saveWindow = false;
-			}
-			ImGui::SetItemDefaultFocus();
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel", ImVec2(120, 0))) { 
-				ImGui::CloseCurrentPopup(); 
-				saveWindow = false;
-			}
-			ImGui::EndPopup();
-		}
-	}
-
-	ImGui::SameLine();
-	{	//Open button
-		if (ImGui::Button("Open", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f)))
-			ImGui::OpenPopup("Open");
-		if (ImGui::BeginPopupModal("Open", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-		{
-			saveWindow = true;
-			ImGui::Text("File name:\n");
-			static char buf[64] = "";
-			ImGui::InputText("", buf, 64);
-			ImGui::Text("\n");
-			ImGui::Separator();
-			if (ImGui::Button("OK", ImVec2(120, 0))) {
-				// TODO
-				ImGui::CloseCurrentPopup();
-				saveWindow = false;
-			}
-			ImGui::SetItemDefaultFocus();
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel", ImVec2(120, 0))) { 
-				ImGui::CloseCurrentPopup(); 
-				saveWindow = false;
-			}
-			ImGui::EndPopup();
-		}
-	}
-
 	ImGui::End();
+}
+
+void Gui::showSaveWindow() {
+	ImGui::OpenPopup("Save");
+	if (ImGui::BeginPopupModal("Save", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Give a name to your beautiful creation:\n");
+		static char buf[64] = "";
+		ImGui::InputText("", buf, 64);
+		ImGui::Separator();
+
+
+		if (ImGui::Button("OK", ImVec2(120, 0))) {
+			// TODO
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SetItemDefaultFocus();
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		ImGui::EndPopup();
+	}
 }
 
 void Gui::showColorBar() {
@@ -517,8 +484,4 @@ void Gui::addColor2His(ImVec4 hisColor) {
 		colorHistory[9] = hisColor;
 	}
 	latest_color = hisColor;
-}
-
-bool Gui::isSaveWindowShow() {
-	return saveWindow;
 }

@@ -368,7 +368,7 @@ int main()
 			*	以下代码执行顺序很重要，掉乱顺序有可能造成斑点
 			*
 			***********************************************************************************/
-			if (hit) {
+			if (hit && !gui.isSaveWindowShow()) {
 				//若点击左键
 				if (ImGui::IsMouseClicked(0)) {
 					if (mode == ERASE_MODE || mode == PAINT_MODE) {

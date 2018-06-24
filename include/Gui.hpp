@@ -22,8 +22,10 @@ public:
 	void autoRePos();
 
 	bool isClothAllow();
+	bool isSaveWindowShow();
 
 	float* getWorkBarPos();
+
 
 private:
 	ImVec4 latest_color;
@@ -36,6 +38,7 @@ private:
 	bool colorBar;
 	bool editBar;
 	bool workBar;
+	bool saveWindow;
 	void showAppMainMenuBar();
 	void showEditBar();
 	void showColorBar();
