@@ -72,7 +72,8 @@ void Cloth::render(Camera* camera, int step) {
 	float shininess = 32.0f;
 
 	clothShader->use();
-	clothShader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+
+	clothShader->setVec3("objectColor", 0.5f, 0.0f, 0.0f);
 	clothShader->setVec3("lightColor", lightColor);
 	clothShader->setVec3("lightPos", lightPos);
 	clothShader->setVec3("viewPos", camera->getCameraPosition());
@@ -89,7 +90,7 @@ void Cloth::render(Camera* camera, int step) {
 	glm::vec3 newPos(0.0f, curPos, -2.5f);  // 0.7f
 
 	model = glm::translate(model, newPos);
-	model = glm::scale(model, glm::vec3(0.22f));
+	model = glm::scale(model, glm::vec3(0.3f));
 	clothShader->setMat4("model", model);
 
 	glBindVertexArray(clothVAO);
@@ -207,9 +208,12 @@ void Cloth::simulate(float stepSize) {
 			setPosition(i, j, newPosition);
 		}
 	}
+	
+	glm::vec3 newPin1(pin1.x + stepSize*10, pin1.y, pin1.z);
+	glm::vec3 newPin2(pin2.x + stepSize*10, pin2.y, pin2.z);
 
-	setPosition(meshResolution - 1, 0, pin1);
-	setPosition(meshResolution - 1, meshResolution - 1, pin2);
+	setPosition(meshResolution - 1, 0, newPin1);
+	setPosition(meshResolution - 1, meshResolution - 1, newPin2);
 }
 
 glm::vec3 Cloth::getForce(int i, int j) {
