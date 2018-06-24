@@ -4,6 +4,7 @@
 #include <stack>
 #include <memory>
 #include <vector>
+#include <string>
 
 using std::stack;
 using std::vector;

@@ -1,6 +1,7 @@
 #include "CubeManager.hpp"
 #include <glm/gtx/transform.hpp>
 #include <iostream>
+#include <fstream>
 #include <stdexcept>
 #include "Cube.hpp"
 #include "GLBufferManager.hpp"
@@ -184,3 +185,81 @@ glm::mat4 CubeManager::getModelMat4(unsigned int x, unsigned int y,
 const glm::vec3 CubeManager::yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 const glm::vec3 CubeManager::xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
 const glm::vec3 CubeManager::infPos = glm::vec3(3000.0f, 3000.0f, 3000.0f);
+
+void CubeManager::dump(string model_path) {
+    json j;
+    j["width"] = width;
+    j["height"] = height;
+    j["depth"] = depth;
+    j["totalCube"] = totalCube;
+    j["sizePerCube"] = sizePerCube;
+    j["rotateAngleAroundX"] = rotateAngleAroundX;
+    j["rotateAngleAroundY"] = rotateAngleAroundY;
+    j["rotateSensivitiy"] = rotateSensivitiy;
+    json j_cubeOriginalPosition = json::array();
+    for (unsigned int i = 0; i < cubesOriginalPosition.size(); ++i) {
+        glm::vec3 & temp = cubesOriginalPosition[i];
+        j_cubeOriginalPosition.push_back({temp.x, temp.y, temp.z});
+    }
+    j["cubesOriginalPosition"] = j_cubeOriginalPosition;
+    json j_cubes = json::array();
+    for (unsigned int i = 0; i < cubes.size(); ++i) {
+        json cube;
+        auto ptr_cube = cubes[i];
+        cube["shaderID"] = ptr_cube->shaderID;
+        cube["id"] = ptr_cube->id;
+        cube["isInInf"] = ptr_cube->isInInf;
+        glm::vec4 color = ptr_cube->cubeColor;
+        cube["cubeColor"] = {color.x, color.y, color.z, color.y};
+        j_cubes.push_back(cube);
+    }
+    j["cubes"] = j_cubes;
+    // cout << j.dump() << endl;
+    std::ofstream out(model_path);
+    out << j.dump();
+    out.close();
+    cout << "Model Saved To " << model_path << endl;
+}
+
+void CubeManager::load(string model_path) {
+    std::ifstream in(model_path);
+    string in_data;
+    in >> in_data;
+    auto j = json::parse(in_data);
+    // recover from json
+
+    // basic variable
+    width = j["width"];
+    height = j["height"];
+    depth = j["depth"];
+    totalCube = j["totalCube"];
+    sizePerCube = j["sizePerCube"];
+    rotateAngleAroundX = j["rotateAngleAroundX"];
+    rotateAngleAroundY = j["rotateAngleAroundY"];
+    rotateSensivitiy = j["rotateSensivitiy"];
+
+    // recover origin positions
+    auto j_cubeOriginalPosition = j["cubesOriginalPosition"];
+    cubesOriginalPosition = vector<glm::vec3>(totalCube);
+    for (unsigned int i = 0; i < cubesOriginalPosition.size(); ++i) {
+        auto & temp = cubesOriginalPosition[i];
+        auto & in_data = j_cubeOriginalPosition[i];
+        temp.x = in_data[0];
+        temp.y = in_data[1];
+        temp.z = in_data[2];
+    }
+
+    // recover cubes
+    auto j_cubes = j["cubes"];
+    cubes = vector<shared_ptr<Cube>>(totalCube);
+    for (unsigned int i = 0; i < cubes.size(); ++i) {
+        auto j_c = j_cubes[i];
+        cubes[i] = shared_ptr<Cube>(new Cube(i, sizePerCube, j_c["shaderID"]));
+        cubes[i]->shaderID = j_c["id"];
+        cubes[i]->isInInf = j_c["isInInf"];
+        auto & in_data = j_c["cubeColor"];
+        cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
+        cubes[i]->cubeColor2Buffer();
+    }
+    refreshModelMat4();
+}

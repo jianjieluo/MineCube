@@ -13,6 +13,8 @@
 #include <vector>
 #include <json.hpp> // use nlohmann::json
 #include "Global.hpp"
+#include <string>
+#include <vector>
 
 using std::vector;
 using std::shared_ptr;
@@ -94,12 +96,20 @@ class CubeManager {
     ~CubeManager();
 
     /**
-     * @brief store the model to file, haven't implemented.
+     * @brief store the model to file
      * 
+     * @author Bob Wu
      * @param model_path 
      */
-    void dump(string model_path) {}
+    void dump(string model_path);
 
+    /**
+     * @brief load the model from file
+     * 
+     * @author Bob Wu
+     * @param model_path
+     */
+    void load(string model_path);
     /**
      * @brief Get the Cube object using the 3D coordinates (x, y, z).
      * 
