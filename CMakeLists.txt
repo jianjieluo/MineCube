@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.8)
 project(MineCube CXX)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -27,6 +27,9 @@ if (NOT WIN32)
     LIST(APPEND LIBS dl)
 endif()
 include_directories(3rd_party/glad/include)
+
+# config nlohmann::json
+include_directories(3rd_party/nlohmann)
 
 # config glm
 include_directories(3rd_party/glm)

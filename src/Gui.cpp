@@ -20,7 +20,7 @@ Gui::Gui(GLFWwindow* theWindow) {
 
 	latest_color = ImVec4(cubes_color[0], cubes_color[1], cubes_color[2], cubes_color[3]);
 
-	allowCloth = false;
+	allowCloth = true;
 }
 
 void Gui::createNewFrame() {
