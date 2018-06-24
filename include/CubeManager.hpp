@@ -11,11 +11,15 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <json.hpp> // use nlohmann::json
 #include "Global.hpp"
 
 using std::vector;
 using std::shared_ptr;
 using std::string;
+
+// test json
+using json = nlohmann::json;
 
 class GLBufferManager;
 class Cube;
