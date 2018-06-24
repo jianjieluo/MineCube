@@ -36,9 +36,12 @@ class Cube {
     static const unsigned int COLOR_DIMENSION = 3;
     static const unsigned int VERTEX_PER_CUBE = 36;
     static const unsigned int VERTEX_PER_PLANE = 6;
+
+    // Static variable
     static const vector<GLfloat> cubeVertex;
     static const vector<GLfloat> cubeNormal;
     static const glm::vec4 initCubeColor;
+    static const glm::vec4 hitColor;
 
     static const unsigned int POSITION_ATTRI_OFFSET = 0;
     static const unsigned int NOR_VECTOR_ATTRI_OFFSET = 3;
@@ -77,16 +80,51 @@ class Cube {
     virtual void editColor(GLfloat r, GLfloat g, GLfloat b,
                            GLfloat alpha = 1.0);
 
+    /**
+     * @brief Set the hitted cube's color as hitted color.
+     * 
+     */
+    virtual void hitted();
+
+    /**
+     * @brief Resume the cube original color.
+     * 
+     */
+    virtual void unhitted();
+    
+    /**
+     * @brief Set the cube's color as selected color.(decrease alpha 0.5) 
+     * 
+     */
+    virtual void selected();
+
+    /**
+     * @brief Resume the cube original color.
+     * 
+     */
+    virtual void unselected();
+
+    /**
+     * @brief Write the Cube::cubeColor to the glBufferManager
+     * 
+     */
+    virtual void cubeColor2Buffer();
+
+    virtual glm::vec4 getColor();
+    virtual glm::vec4 getColorOfPLane(unsigned int plane);
+
+    /**
+     * @brief Check whether the cube is deleted in the screen
+     * 
+     * @return true The cube does be deleted.
+     * @return false The cube is not deleted.
+     */
     bool isDeleted() const;
 
     virtual void setId(const unsigned int _id);
     virtual void setModelMat4(const glm::mat4&);
     virtual void setShaderId(const GLuint& shaderID);
 
-    virtual void refreshColor();
-
-    virtual glm::vec4 getColor();
-    virtual glm::vec4 getColorOfPLane(unsigned int plane);
 
     static const unsigned int LEFT = 0;
     static const unsigned int RIGHT = 1;
