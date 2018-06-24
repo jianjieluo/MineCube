@@ -63,7 +63,7 @@ void Cube::unhitted() {
 }
 
 void Cube::selected() {
-    this->glBufferManager.setColor(this->id, glm::vec4(cubeColor[0], cubeColor[1], cubeColor[2], cubeColor[3] - 0.5));    
+    this->glBufferManager.setColor(this->id, glm::vec4(cubeColor[0] + 0.1, cubeColor[1] + 0.1, cubeColor[2] + 0.1, cubeColor[3]));
 }
 
 void Cube::unselected() {

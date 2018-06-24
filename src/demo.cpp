@@ -37,7 +37,6 @@ int hoverPlaneLast = -1;
 // add/delete/paint
 glm::vec3 startCubePos(0.0f, 0.0f, 0.0f);
 glm::vec3 farCubePos(0.0f, 0.0f, 0.0f);
-list<glm::vec4> savedColorList;
 glm::vec3 auxColor(0.9f, 0.9f, 1.0f);
 
 // Camera class
@@ -48,7 +47,6 @@ glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
-glm::vec3 objectColorLast(cubes_color[0], cubes_color[1], cubes_color[2]);
 bool no_reset = false;
 
 
@@ -329,8 +327,8 @@ int main()
 
 		// reset last hovered plane
 		auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
-		if (last_hover_cube && hoverPlaneLast != -1) {
-			last_hover_cube->editColor(objectColorLast.x, objectColorLast.y, objectColorLast.z, 1);
+		if (last_hover_cube) {
+			last_hover_cube->unhitted();
 		}
 
 		if (camera->isFpsMode) {
@@ -386,7 +384,6 @@ int main()
 							//	do 
 							[&cubeManager, &objectColor, phongShader]() {
 								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, phongShader.ID, numPerEdge);
-								savedColorList.clear();
 							},
 							//	undo
 							[&cubeManager, constCubePos, constHoverPlane]() {
@@ -399,9 +396,8 @@ int main()
 				//若按着左键
 				if (io.MouseDown[0]) {
 					if ((mode == PAINT_MODE || mode == ERASE_MODE) && farCubePos != hoverCubePosCurrent) {
-						recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
-						saveRecoverColor(cubeManager, startCubePos, hoverCubePosCurrent, savedColorList);
-						paintCube(cubeManager, startCubePos, hoverCubePosCurrent, auxColor);
+						unselectCubes(cubeManager, startCubePos, farCubePos);
+						selectCubes(cubeManager, startCubePos, hoverCubePosCurrent);
 						farCubePos = hoverCubePosCurrent;
 					}
 				}
@@ -410,8 +406,7 @@ int main()
 				auto hover_cube = cubeManager.getCube(hoverCubePosCurrent.x, hoverCubePosCurrent.y, hoverCubePosCurrent.z);
 				if (!hover_cube->isDeleted()) {
 					hoverCubePosLast = hoverCubePosCurrent;
-					objectColorLast = hover_cube->getColorOfPLane(hoverPlaneCurrent);
-					hover_cube->editColor(hoverColor.x, hoverColor.y, hoverColor.z, 1);
+					hover_cube->hitted();
 				}
 
 				//若松开左键
@@ -420,20 +415,18 @@ int main()
 						// 保全当前全局变量
 						const glm::vec3 constStartCubePos = startCubePos;
 						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						list<glm::vec4> constColorList = savedColorList;
-						const vector<bool> saveCubesIsDeleted = getCubesIsDeleted(cubeManager, constStartCubePos, constEndCubePos);
+						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
 						auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
 							[&cubeManager, constStartCubePos, constEndCubePos]() {
 								//	去除辅助色
-								recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
-								savedColorList.clear();
+								unselectCubes(cubeManager, startCubePos, farCubePos);
 
 								eraseCube(cubeManager, constStartCubePos, constEndCubePos);
 							},
 							//	undo
-							[&cubeManager, constStartCubePos, constEndCubePos, saveCubesIsDeleted, constColorList]() {
-								undoErase(cubeManager, constStartCubePos, constEndCubePos, saveCubesIsDeleted, constColorList);
+							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
+								undoErase(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
 							}
 						));
 						operationManager.executeOp(eraseOP, "Erase a cubes");
@@ -442,21 +435,19 @@ int main()
 						// 保全当前全局变量
 						const glm::vec3 constStartCubePos = startCubePos;
 						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						list<glm::vec4> constColorList = savedColorList;
+						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
 						auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
 							//	do 
 							[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
 								//	去除辅助色
-								recoverCubeColor(cubeManager, startCubePos, farCubePos, savedColorList);
-								savedColorList.clear();
+								unselectCubes(cubeManager, startCubePos, farCubePos);
 
 								objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-								paintCube(cubeManager, startCubePos, hoverCubePosCurrent, objectColor);
-								objectColorLast = objectColor;
+								paintCube(cubeManager, constStartCubePos, constEndCubePos, objectColor);
 							},
 							//	undo
-							[&cubeManager, constStartCubePos, constEndCubePos, constColorList]() {
-								undoPaint(cubeManager, constStartCubePos, constEndCubePos, constColorList);
+							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
+								undoPaint(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
 							}
 						));
 						operationManager.executeOp(paintOP, "Change cubes color");
@@ -489,13 +480,6 @@ int main()
 				cubeManager.rotateHorizontal(offset.x);
 				cubeManager.rotateVertical(offset.y);
 			}
-
-			/**********************************************************************************
-			*
-			*	update variables
-			*
-			***********************************************************************************/
-			hoverPlaneLast = hoverPlaneCurrent;
 		}
 
 		cubeManager.setAllShaderId(phongShader.ID);

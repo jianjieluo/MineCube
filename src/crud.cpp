@@ -19,24 +19,6 @@ void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int pl
 		cubeManager.setCube(new_x, new_y, new_z, color, shaderID);
 }
 
-//void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, shared_ptr<vector<bool>>& saveCubesIsDeleted) {
-//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
-//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
-//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
-//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
-//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
-//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
-//
-//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
-//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
-//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-//				saveCubesIsDeleted->push_back(cubeManager.getCube(i, j, k)->isDeleted());
-//				if (cubeManager.isThereACube(i, j, k)) {
-//					cubeManager.deleteCube(i, j, k);
-//				}
-//			}
-//}
-
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
@@ -54,7 +36,7 @@ void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 			}
 }
 
-vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
+vector<CubeInfo> getCubesInfo(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
@@ -62,14 +44,18 @@ vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startC
 	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
 
-	vector<bool> saveCubesIsDeleted;
+	vector<CubeInfo> cubeInfos;
 
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
-			for (unsigned int k = z_low_bound; k <= z_high_bound; k++)
-				saveCubesIsDeleted.push_back(cubeManager.getCube(i, j, k)->isDeleted());
-	return saveCubesIsDeleted;
+			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
+				auto cube = cubeManager.getCube(i, j, k);
+				cubeInfos.push_back(CubeInfo(cube->isDeleted(), cube->getColor()));
+			}
+
+	return cubeInfos;
 }
+
 
 void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, const glm::vec3& color) {
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
@@ -89,9 +75,7 @@ void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 			}
 }
 
-void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec4>& savedColorList) {
-	if (savedColorList.empty())
-		return;
+void selectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
@@ -104,15 +88,12 @@ void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, c
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
 				if (!cube->isDeleted()) {
-					glm::vec3 color = savedColorList.front();
-					for (int plane = 0; plane < 6; plane++)
-						cube->editColor(color.x, color.y, color.z, plane);
-					savedColorList.pop_front();
+					cube->selected();
 				}
 			}
 }
 
-void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec4>& savedColorList) {
+void unselectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
@@ -125,7 +106,7 @@ void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, c
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
 				if (!cube->isDeleted()) {
-					savedColorList.push_back(cube->getColor());
+					cube->unselected();
 				}
 			}
 }
@@ -145,8 +126,8 @@ void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int c
 }
 
 void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, 
-	const vector<bool> saveCubesIsDeleted, std::list<glm::vec4> savedColorList) {
-	if (savedColorList.empty())
+	const std::vector<CubeInfo> constCubeInfos) {
+	if (constCubeInfos.empty())
 		return;
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
@@ -154,23 +135,22 @@ void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+
 	unsigned int index = 0;
 
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
-				if (!saveCubesIsDeleted[index]) {
-					glm::vec4 color = savedColorList.front();
-					//	shaderID no use
-					cubeManager.setCube(i, j, k, color, 0);
-					savedColorList.pop_front();
-					index++;
+				if (!constCubeInfos[index].isDelected) {
+					cubeManager.setCube(i, j, k, constCubeInfos[index].color, 0);
 				}
+				index++;
 			}
 }
 
-void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec4> savedColorList) {
-	if (savedColorList.empty())
+void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, 
+	const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos) {
+	if (constCubeInfos.empty())
 		return;
 	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
@@ -178,17 +158,111 @@ void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, const gl
 	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
 	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
 	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+
+	int index = 0;
 
 	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
 		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
 			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
 				auto cube = cubeManager.getCube(i, j, k);
 				if (!cube->isDeleted()) {
-					glm::vec4 color = savedColorList.front();
+					glm::vec4 color = constCubeInfos[index].color;
 					cube->editColor(color.x, color.y, color.z, 1);
-					savedColorList.pop_front();
 				}
+				index++;
 			}
 }
 
+//void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, shared_ptr<vector<bool>>& saveCubesIsDeleted) {
+//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//
+//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
+//				saveCubesIsDeleted->push_back(cubeManager.getCube(i, j, k)->isDeleted());
+//				if (cubeManager.isThereACube(i, j, k)) {
+//					cubeManager.deleteCube(i, j, k);
+//				}
+//			}
+//}
+
+//void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec4>& savedColorList) {
+//	if (savedColorList.empty())
+//		return;
+//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//
+//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
+//				auto cube = cubeManager.getCube(i, j, k);
+//				if (!cube->isDeleted()) {
+//					glm::vec3 color = savedColorList.front();
+//					for (int plane = 0; plane < 6; plane++)
+//						cube->editColor(color.x, color.y, color.z, plane);
+//					savedColorList.pop_front();
+//				}
+//			}
+//}
+//
+//void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos, std::list<glm::vec4>& savedColorList) {
+//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//
+//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++) {
+//				auto cube = cubeManager.getCube(i, j, k);
+//				if (!cube->isDeleted()) {
+//					savedColorList.push_back(cube->getColor());
+//				}
+//			}
+//}
+
+//vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
+//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//
+//	vector<bool> saveCubesIsDeleted;
+//
+//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++)
+//				saveCubesIsDeleted.push_back(cubeManager.getCube(i, j, k)->isDeleted());
+//	return saveCubesIsDeleted;
+//}
+//
+//vector<glm::vec4> getCubesColor(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos) {
+//	unsigned int x_low_bound = glm::min(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_low_bound = glm::min(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_low_bound = glm::min(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//	unsigned int x_high_bound = glm::max(static_cast<int>(startCubePos.x), static_cast<int>(endCubePos.x));
+//	unsigned int y_high_bound = glm::max(static_cast<int>(startCubePos.y), static_cast<int>(endCubePos.y));
+//	unsigned int z_high_bound = glm::max(static_cast<int>(startCubePos.z), static_cast<int>(endCubePos.z));
+//
+//	vector<glm::vec4> saveCubesColor;
+//
+//	for (unsigned int i = x_low_bound; i <= x_high_bound; i++)
+//		for (unsigned int j = y_low_bound; j <= y_high_bound; j++)
+//			for (unsigned int k = z_low_bound; k <= z_high_bound; k++)
+//				saveCubesColor.push_back(cubeManager.getCube(i, j, k)->getColor());
+//	return saveCubesColor;
+//}
 
