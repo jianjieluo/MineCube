@@ -127,7 +127,7 @@ void CubeManager::defalut_init_all(const GLuint& shaderID,
                                    const string& mat4Name) {
     for (unsigned int i = 0; i < totalCube; ++i) {
         cubes[i] = shared_ptr<Cube>(new Cube(i, sizePerCube, shaderID));
-        cubes[i]->refreshColor();
+        cubes[i]->cubeColor2Buffer();
     }
     refreshModelMat4();
 }

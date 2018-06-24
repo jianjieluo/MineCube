@@ -50,8 +50,24 @@ bool Cube::isDeleted() const { return this->isInInf; }
 void Cube::editColor(GLfloat r, GLfloat g, GLfloat b, GLfloat alpha) {
     cubeColor = glm::vec4(r, g, b, alpha);
     if (id != -1) {
-        refreshColor();
+        cubeColor2Buffer();
     }
+}
+
+void Cube::hitted() {
+    this->glBufferManager.setColor(this->id, Cube::hitColor);
+}
+
+void Cube::unhitted() {
+    this->cubeColor2Buffer();
+}
+
+void Cube::selected() {
+    this->glBufferManager.setColor(this->id, glm::vec4(cubeColor[0], cubeColor[1], cubeColor[2], cubeColor[3] - 0.5));    
+}
+
+void Cube::unselected() {
+    this->cubeColor2Buffer();
 }
 
 void Cube::setId(const unsigned int _id) { this->id = _id; }
@@ -64,7 +80,7 @@ void Cube::setModelMat4(const glm::mat4& model) {
     this->glBufferManager.setModel(this->id, model);
 }
 
-void Cube::refreshColor() { glBufferManager.setColor(this->id, cubeColor); }
+void Cube::cubeColor2Buffer() { glBufferManager.setColor(this->id, cubeColor); }
 
 void Cube::setShaderId(const GLuint& shaderID) { this->shaderID = shaderID; }
 
@@ -109,3 +125,4 @@ const vector<GLfloat> Cube::cubeNormal = {
     0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f};
 
 const glm::vec4 Cube::initCubeColor = glm::vec4(0.76f, 0.78f, 0.96f, 1.0f);
+const glm::vec4 Cube::hitColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
