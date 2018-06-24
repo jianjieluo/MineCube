@@ -3,6 +3,20 @@
 #include "crud.h"
 #include <list>
 
+bool canCreate(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, int numPerEdge) {
+	int new_x = static_cast<int>(cubePos.x), new_y = static_cast<int>(cubePos.y), new_z = static_cast<int>(cubePos.z);
+	switch (plane) {
+	case 0: new_z -= 1; break;
+	case 1: new_z += 1; break;
+	case 2: new_x -= 1; break;
+	case 3: new_x += 1; break;
+	case 4: new_y -= 1; break;
+	case 5: new_y += 1; break;
+	default: break;
+	}
+	return (new_x > -1 && new_y > -1 && new_z > -1 && new_x < numPerEdge && new_y < numPerEdge && new_z < numPerEdge);
+}
+
 void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, glm::vec3& color, const unsigned int shaderID, int numPerEdge) {
 
 	int new_x = static_cast<int>(cubePos.x), new_y = static_cast<int>(cubePos.y), new_z = static_cast<int>(cubePos.z);

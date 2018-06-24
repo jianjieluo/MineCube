@@ -38,6 +38,8 @@ void selectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const 
 
 void unselectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 
+bool canCreate(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, int numPerEdge);
+
 //vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startCubePos, 
 //	const glm::vec3& endCubePos);
 //
