@@ -12,12 +12,14 @@
 
 #include <iostream>
 #include <list>
+#include <ctime>
 
 using namespace std;
 
 #define SHADOW
 //#define PLANE
 #define DEBUG
+//#define CALTIME  // calculate time/efficiency
 
 // About cubes
 GLfloat sizePerCube = 0.05f;
@@ -244,6 +246,10 @@ int main()
 
 	bool hit = false;
 
+#ifdef CALTIME
+	clock_t tic, toc;
+#endif // CALTIME
+
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -351,6 +357,9 @@ int main()
 			*	OBB-ray hitting test
 			*
 			***********************************************************************************/
+#ifdef CALTIME
+			tic = clock();
+#endif // CALTIME
 
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
@@ -369,7 +378,12 @@ int main()
 				hoverCubePosCurrent,
 				hoverPlaneCurrent
 			);
-			//cout << hoverCubePosCurrent.x << ' ' << hoverCubePosCurrent.y << ' ' << hoverCubePosCurrent.z << endl;
+
+#ifdef CALTIME
+			toc = clock();
+			cout << "It took " << (double)(toc - tic) / CLOCKS_PER_SEC << "  millisecond(s) to pick." << endl;
+#endif // CALTIME
+
 
 			/**********************************************************************************
 			*
