@@ -35,6 +35,7 @@ class CubeManager {
     static const glm::vec3 yAxis;
     static const glm::vec3 xAxis;
     static const glm::vec3 infPos;
+    static const string model_saved_dir;
     unsigned int width;   // x
     unsigned int height;  // y
     unsigned int depth;   // z

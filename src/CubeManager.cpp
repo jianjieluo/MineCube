@@ -215,14 +215,14 @@ void CubeManager::dump(string model_path) {
     }
     j["cubes"] = j_cubes;
     // cout << j.dump() << endl;
-    std::ofstream out(model_path);
+    std::ofstream out(model_saved_dir + model_path);
     out << j.dump();
     out.close();
     cout << "Model Saved To " << model_path << endl;
 }
 
 void CubeManager::load(string model_path) {
-    std::ifstream in(model_path);
+    std::ifstream in(model_saved_dir + model_path);
     string in_data;
     in >> in_data;
     auto j = json::parse(in_data);
@@ -270,3 +270,5 @@ void CubeManager::load(string model_path) {
     }
     refreshModelMat4();
 }
+
+const string CubeManager::model_saved_dir = "../Asset/example/";
