@@ -25,6 +25,10 @@ class SkyBox {
 		unsigned int skyboxVAO, skyboxVBO;
 
 		float skyboxVertices[3 * 6 * 6];
+
+		std::string pictureDir;
+		std::string skyboxName;
+		std::string extName;
     public:
         SkyBox(GLFWwindow* theWindow, Camera* theCamera);
         void render();
