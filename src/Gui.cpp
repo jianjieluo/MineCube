@@ -471,7 +471,7 @@ void Gui::setMode_erase() {
 }
 
 void Gui::captureKeys() {
-	if (!ShowWindow) {
+	if (!saveWindow) {
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.KeyCtrl) {
 			//	ctrl + z
