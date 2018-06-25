@@ -238,6 +238,12 @@ void CubeManager::load(string model_path) {
     rotateAngleAroundY = j["rotateAngleAroundY"];
     rotateSensivitiy = j["rotateSensivitiy"];
 
+    totalCube = width * height * depth;
+    auto aCubeVertexDataSize = Cube::VERTEX_PER_CUBE * Cube::COOR_DIMENSION;
+    auto aCubeNormDataSize = Cube::VERTEX_PER_CUBE * Cube::NOR_VECTOR_DIMENSION;
+    this->glBufferManager.init(totalCube, aCubeVertexDataSize,
+                               aCubeNormDataSize);
+    
     // recover origin positions
     auto j_cubeOriginalPosition = j["cubesOriginalPosition"];
     cubesOriginalPosition = vector<glm::vec3>(totalCube);
