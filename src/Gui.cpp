@@ -471,40 +471,42 @@ void Gui::setMode_erase() {
 }
 
 void Gui::captureKeys() {
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.KeyCtrl) {
-		//	ctrl + z
-		if (ImGui::IsKeyReleased(GLFW_KEY_Z)) {
-			operationManager.undo();
+	if (!ShowWindow) {
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.KeyCtrl) {
+			//	ctrl + z
+			if (ImGui::IsKeyReleased(GLFW_KEY_Z)) {
+				operationManager.undo();
+			}
+			//	ctrl + y
+			if (ImGui::IsKeyReleased(GLFW_KEY_Y)) {
+				operationManager.cancle_undo();
+			}
 		}
-		//	ctrl + y
-		if (ImGui::IsKeyReleased(GLFW_KEY_Y)) {
-			operationManager.cancle_undo();
+
+		// release v
+		if (ImGui::IsKeyReleased(GLFW_KEY_V)) {
+			camera->isFpsMode = !camera->isFpsMode;
+			camera->pause();
 		}
-	}
 
-	// release v
-	if (ImGui::IsKeyReleased(GLFW_KEY_V)) {
-		camera->isFpsMode = !camera->isFpsMode;
-		camera->pause();
-	}
+		if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
+			camera->zoomInOrOut(io.MouseWheel);
+		}
 
-	if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
-		camera->zoomInOrOut(io.MouseWheel);
-	}
+		if (io.KeysDown[GLFW_KEY_W]) {
+			camera->moveCamera(FORWARD, deltaTime);
+		}
+		else if (io.KeysDown[GLFW_KEY_S]) {
+			camera->moveCamera(BACKWARD, deltaTime);
+		}
 
-	if (io.KeysDown[GLFW_KEY_W]) {
-		camera->moveCamera(FORWARD, deltaTime);
-	}
-	else if (io.KeysDown[GLFW_KEY_S]) {
-		camera->moveCamera(BACKWARD, deltaTime);
-	}
-
-	if (io.KeysDown[GLFW_KEY_A]) {
-		camera->moveCamera(LEFT, deltaTime);
-	}
-	else if (io.KeysDown[GLFW_KEY_D]) {
-		camera->moveCamera(RIGHT, deltaTime);
+		if (io.KeysDown[GLFW_KEY_A]) {
+			camera->moveCamera(LEFT, deltaTime);
+		}
+		else if (io.KeysDown[GLFW_KEY_D]) {
+			camera->moveCamera(RIGHT, deltaTime);
+		}
 	}
 }
 
