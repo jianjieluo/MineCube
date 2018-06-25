@@ -215,18 +215,24 @@ void CubeManager::dump(string model_path) {
     }
     j["cubes"] = j_cubes;
     // cout << j.dump() << endl;
+    try {
     std::ofstream out(model_saved_dir + model_path);
     out << j.dump();
     out.close();
     cout << "Model Saved To " << model_path << endl;
+    } catch(...) {
+        cout << "ERROR::OPEN_FILE_FAIL" << endl;
+        return;
+}
 }
 
-void CubeManager::load(string model_path) {
-    std::ifstream in(model_saved_dir + model_path);
+bool CubeManager::load(string model_path) {
     string in_data;
+    try {
+        std::ifstream in(model_saved_dir + model_path);
     in >> in_data;
+        // recover from json
     auto j = json::parse(in_data);
-    // recover from json
 
     // basic variable
     width = j["width"];
@@ -275,6 +281,11 @@ void CubeManager::load(string model_path) {
         cubes[i]->cubeColor2Buffer();
     }
     refreshModelMat4();
+        return true;
+    } catch(...) {
+        cout << "ERROR:OPEN::FILE::FAIL" << endl;
+        return false;
+    }
 }
 
 const string CubeManager::model_saved_dir = "../Asset/example/";

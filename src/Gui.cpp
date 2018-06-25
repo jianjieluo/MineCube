@@ -1,5 +1,6 @@
 #include "Gui.hpp"
 #include <iostream>
+#include "string.h"
 
 Gui::Gui(GLFWwindow* theWindow) {
 	// ImGui initialization and bindings
@@ -318,8 +319,14 @@ void Gui::showEditBar() {
 			ImGui::Separator();
 			if (ImGui::Button("OK", ImVec2(120, 0))) {
 				// TODO
-				ptr_cubeManager->load(buf);
-				ImGui::CloseCurrentPopup();
+				auto result = ptr_cubeManager->load(buf);
+				cout << result << endl;
+				if (result == false) {
+					strcpy(buf, "load fail");
+				}
+                if (result == true) {
+                    ImGui::CloseCurrentPopup();
+                }
 				saveWindow = false;
 			}
 			ImGui::SetItemDefaultFocus();

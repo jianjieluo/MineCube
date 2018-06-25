@@ -109,8 +109,9 @@ class CubeManager {
      * 
      * @author Bob Wu
      * @param model_path
+     * @return true if sucesss, otherwise false
      */
-    void load(string model_path);
+    bool load(string model_path);
     /**
      * @brief Get the Cube object using the 3D coordinates (x, y, z).
      * 
