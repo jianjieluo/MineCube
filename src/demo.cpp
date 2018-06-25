@@ -50,10 +50,9 @@ glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
 bool no_reset = false;
 
-
-glm::vec3 specular(0.2f, 0.2f, 0.2f);  // test material
 // parameters
-float shininess = 32.0f;
+glm::vec3 specular(0.7f, 0.7f, 0.07f);
+float shininess = 1024.0f;
 
 int main();
 
@@ -304,9 +303,9 @@ int main()
         phongShader.setFloat("material.shininess", shininess);
         // light
         phongShader.setVec3("light.position",  lightPos);
-        phongShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        phongShader.setVec3("light.ambient", 0.4f, 0.4f, 0.4f);
         phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
-        phongShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        phongShader.setVec3("light.specular", 0.3f, 0.3f, 0.3f);
 
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
@@ -473,25 +472,27 @@ int main()
 			*	move camera
 			*
 			***********************************************************************************/
-			if (camera->isRotateX()) {
-				cubeManager.setRotateSensivity(rotateSensivitiy);
-				cubeManager.rotateHorizontal(camera->getRotateX());
-				camera->resetRotateX();
-			}
+			if (!gui.isSaveWindowShow()) {
+				if (camera->isRotateX()) {
+					cubeManager.setRotateSensivity(rotateSensivitiy);
+					cubeManager.rotateHorizontal(camera->getRotateX());
+					camera->resetRotateX();
+				}
 
-			if (camera->isRotateY()) {
-				cubeManager.setRotateSensivity(rotateSensivitiy);
-				cubeManager.rotateHorizontal(camera->getRotateY());
-				camera->resetRotateY();
-			}
+				if (camera->isRotateY()) {
+					cubeManager.setRotateSensivity(rotateSensivitiy);
+					cubeManager.rotateHorizontal(camera->getRotateY());
+					camera->resetRotateY();
+				}
 
-			if (camera->isMoving) {
-				cubeManager.setRotateSensivity(lookAroundSensivitiy);
-				double x, y;
-				glfwGetCursorPos(window, &x, &y);
-				glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
-				cubeManager.rotateHorizontal(offset.x * 0.25);
-				cubeManager.rotateVertical(offset.y * 0.25);
+				if (camera->isMoving) {
+					cubeManager.setRotateSensivity(lookAroundSensivitiy);
+					double x, y;
+					glfwGetCursorPos(window, &x, &y);
+					glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
+					cubeManager.rotateHorizontal(offset.x * 0.25);
+					cubeManager.rotateVertical(offset.y * 0.25);
+				}
 			}
 		}
 
