@@ -26,6 +26,7 @@ extern float deltaTime;
 extern float lastFrame;
 extern int mode;
 extern bool isFirstDraw;
+extern unsigned int numPerEdge;
 
 // interactive variables
 extern int screenWidth;

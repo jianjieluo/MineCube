@@ -320,7 +320,7 @@ void Gui::showEditBar() {
 			if (ImGui::Button("OK", ImVec2(120, 0))) {
 				// TODO
 				auto result = ptr_cubeManager->load(buf);
-				cout << result << endl;
+				// cout << result << endl;
 				if (result == false) {
 					strcpy(buf, "load fail");
 				}

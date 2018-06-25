@@ -244,6 +244,8 @@ bool CubeManager::load(string model_path) {
     rotateAngleAroundY = j["rotateAngleAroundY"];
     rotateSensivitiy = j["rotateSensivitiy"];
 
+	numPerEdge = width;
+
     totalCube = width * height * depth;
     auto aCubeVertexDataSize = Cube::VERTEX_PER_CUBE * Cube::COOR_DIMENSION;
     auto aCubeNormDataSize = Cube::VERTEX_PER_CUBE * Cube::NOR_VECTOR_DIMENSION;

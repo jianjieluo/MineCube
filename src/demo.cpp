@@ -21,7 +21,6 @@ using namespace std;
 
 // About cubes
 GLfloat sizePerCube = 0.05f;
-unsigned int numPerEdge = 20;
 const string mat4Name = "model";
 vector<GLuint> attriSize;
 GLfloat rotateSensivitiy = 30.0f;
@@ -243,6 +242,8 @@ int main()
     // Open Face Culling
     glEnable(GL_CULL_FACE);
 
+	bool hit = false;
+
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -332,10 +333,12 @@ int main()
 #endif
 
 		// reset last hovered plane
-		auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
-		if (last_hover_cube) {
-			last_hover_cube->unhitted();
+		if (hit && static_cast<int>(hoverCubePosLast.x) < numPerEdge && static_cast<int>(hoverCubePosLast.y) < numPerEdge && static_cast<int>(hoverCubePosLast.z) < numPerEdge) {
+			auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
+			if (last_hover_cube)
+				last_hover_cube->unhitted();
 		}
+
 
 		if (camera->isFpsMode) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -358,7 +361,7 @@ int main()
 			hoverCubePosCurrent: glm::vec3, (x, y, z) of the hit cube
 			hoverPlaneLast: int, number of the plane of the hit cube
 			*/
-			bool hit = PickOneCube(
+			hit = PickOneCube(
 				(int)xpos, (int)ypos, (int)screenWidth, (int)screenHeight,
 				view, projection,
 				numPerEdge, sizePerCube,
@@ -366,6 +369,7 @@ int main()
 				hoverCubePosCurrent,
 				hoverPlaneCurrent
 			);
+			//cout << hoverCubePosCurrent.x << ' ' << hoverCubePosCurrent.y << ' ' << hoverCubePosCurrent.z << endl;
 
 			/**********************************************************************************
 			*
