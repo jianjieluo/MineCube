@@ -46,3 +46,7 @@ build/
 
 # doxygen output file
 docs/doxygen/
+
+# Windows temp file
+src/*.TMP
+include/*.TMP
