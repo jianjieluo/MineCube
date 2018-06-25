@@ -387,14 +387,15 @@ int main()
 					if (mode == CREATE_MODE) {
 						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 						// 保全当前全局变量
+						glm::vec3 savedColor = objectColor;
 						const int constHoverPlane = hoverPlaneCurrent;
 						const glm::vec3 constCubePos = hoverCubePosCurrent;
 						// 先判断能否创建再执行
 						if (canCreate(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, numPerEdge)) {
 							auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
 								//	do 
-								[&cubeManager, &objectColor, phongShader]() {
-								createCube(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, objectColor, phongShader.ID, numPerEdge);
+								[&cubeManager, savedColor, phongShader, constCubePos, constHoverPlane]() {
+								createCube(cubeManager, constCubePos, constHoverPlane, savedColor, phongShader.ID, numPerEdge);
 							},
 								//	undo
 								[&cubeManager, constCubePos, constHoverPlane]() {
