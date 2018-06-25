@@ -240,6 +240,9 @@ int main()
 
 	cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
+    // Open Face Culling
+    glEnable(GL_CULL_FACE);
+
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
