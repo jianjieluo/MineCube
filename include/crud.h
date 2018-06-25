@@ -12,7 +12,7 @@ struct CubeInfo
 };
 
 void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, 
-	glm::vec3& color, const unsigned int shaderID, int numPerEdge);
+	glm::vec3 color, const unsigned int shaderID, int numPerEdge);
 
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
 	const glm::vec3& endCubePos, const vector<bool> saveCubesIsDeleted);

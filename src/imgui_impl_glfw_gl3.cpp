@@ -207,6 +207,7 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int
 	// process mouse input
 	ImGuiIO& io = ImGui::GetIO();
 
+    // custom modification
 	/*if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
 		mouseJustRelease = false;
 	}
