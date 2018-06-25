@@ -290,6 +290,7 @@ void Gui::showEditBar() {
 			ImGui::Separator();
 			if (ImGui::Button("OK", ImVec2(120, 0))) {
 				// TODO
+				ptr_cubeManager->dump(buf);
 				ImGui::CloseCurrentPopup();
 				saveWindow = false;
 			}
@@ -317,6 +318,7 @@ void Gui::showEditBar() {
 			ImGui::Separator();
 			if (ImGui::Button("OK", ImVec2(120, 0))) {
 				// TODO
+				ptr_cubeManager->load(buf);
 				ImGui::CloseCurrentPopup();
 				saveWindow = false;
 			}
@@ -521,4 +523,9 @@ void Gui::addColor2His(ImVec4 hisColor) {
 
 bool Gui::isSaveWindowShow() {
 	return saveWindow;
+}
+
+
+void Gui::setPtrCubeManager(CubeManager* ptr) {
+	ptr_cubeManager = ptr;
 }

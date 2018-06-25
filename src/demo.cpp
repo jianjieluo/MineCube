@@ -236,6 +236,9 @@ int main()
 
     CubeManager cubeManager(numPerEdge, numPerEdge, numPerEdge, sizePerCube);
 
+	// for save/load model
+	gui.setPtrCubeManager(&cubeManager);
+
 	cubeManager.defalut_init_all(phongShader.ID, mat4Name);
 
 	// main loop

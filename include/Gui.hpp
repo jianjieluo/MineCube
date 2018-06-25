@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include "Camera.hpp"
+#include "CubeManager.hpp"
 #include <vector>
 
 using namespace std;
@@ -26,11 +27,13 @@ public:
 
 	float* getWorkBarPos();
 
+	void setPtrCubeManager(CubeManager*);
 
 private:
 	ImVec4 latest_color;
 	bool allowCloth;
 	Camera* camera;
+	CubeManager* ptr_cubeManager;
 	GLFWwindow* window;
 	vector<ImVec4> colorHistory;
 	void addColor2His(ImVec4 hisColor);
