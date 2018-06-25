@@ -8,15 +8,17 @@ SkyBox::SkyBox(GLFWwindow* theWindow, Camera* theCamera) {
 	window = theWindow;
 	camera = theCamera;
 	skyboxShader = new Shader("../src/Shader/skybox.vs", "../src/Shader/skybox.fs");
-
+	std::string pictureDir = "../Asset/skybox/";
+	std::string skyboxName = "city";
+	std::string extName = ".tga";
 	std::vector<std::string> faces
 	{
-		"../src/Asset/skybox/city/right.tga",
-		"../src/Asset/skybox/city/left.tga",
-		"../src/Asset/skybox/city/top.tga",
-		"../src/Asset/skybox/city/bottom.tga",
-		"../src/Asset/skybox/city/back.tga",
-		"../src/Asset/skybox/city/front.tga"
+		pictureDir + skyboxName + "/right" + extName,
+		pictureDir + skyboxName + "/left" + extName,
+		pictureDir + skyboxName + "/top" + extName,
+		pictureDir + skyboxName + "/bottom" + extName,
+		pictureDir + skyboxName + "/back" + extName,
+		pictureDir + skyboxName + "/front" + extName
 	};
 	cubemapTexture = loadCubemap(faces);
 

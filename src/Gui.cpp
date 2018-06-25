@@ -267,7 +267,7 @@ void Gui::showEditBar() {
 	ImGui::EndChild();
 
 	if (allowCloth) {
-		if (ImGui::Button("Cloth Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+		if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
 			allowCloth = false;
 		}
 	}
