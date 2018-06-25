@@ -255,8 +255,15 @@ void CubeManager::load(string model_path) {
     for (unsigned int i = 0; i < cubes.size(); ++i) {
         auto j_c = j_cubes[i];
         cubes[i] = shared_ptr<Cube>(new Cube(i, sizePerCube, j_c["shaderID"]));
-        cubes[i]->shaderID = j_c["id"];
+        cubes[i]->shaderID = j_c["shaderID"];
         cubes[i]->isInInf = j_c["isInInf"];
+        if (cubes[i]->isInInf) {
+            auto temp = cubesOriginalPosition[i];
+            cubesOriginalPosition[i] = CubeManager::infPos;
+            cubes[i]->setModelMat4(calculateModelMat4(i));
+            cubes[i]->isInInf = true;
+            cubesOriginalPosition[i] = temp;
+        }
         auto & in_data = j_c["cubeColor"];
         cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
         cubes[i]->cubeColor2Buffer();
