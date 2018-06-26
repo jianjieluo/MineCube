@@ -50,3 +50,6 @@ docs/doxygen/
 # Windows temp file
 src/*.TMP
 include/*.TMP
+
+# pptx
+docs/*.pptx
