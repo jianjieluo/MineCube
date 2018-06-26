@@ -14,7 +14,7 @@ A final project originally of 5 undergraduate students for the course Computer G
 
 ![presentation](./docs/imgs/demo.gif)
 
-## More img example
+## More Image Example
 
 ![](./docs/imgs/example/Dinosaur.jpg)
 
@@ -47,9 +47,9 @@ We mainly use issue && project to manage development in the futrue. The document
 
 ## How to Run Demo 
 
-### 1. Download the `.exe` in release
+### 1. Download the `.exe` in Release
 
-### 2. Build from source
+### 2. Build from the Source
 
 1. Create a new directory  `3rd_party` at root.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
@@ -117,6 +117,6 @@ Now your `3rd_party` looks like:
 - [Mr.Gu 菇生](https://github.com/mgsweet)
 - [Hiyoung.Tsui](https://github.com/15331335)
 
-## Bugs report
+## Bugs Report
 
 Feel free to new issues. 
