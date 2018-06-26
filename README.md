@@ -1,9 +1,34 @@
+![titlebar](./docs/imgs/titlebar.jpg)
+
 # MineCube
- A sample voxel editor based on OpenGL 3.3+, inspired by [MagicaVoxel](https://ephtracy.github.io/).
 
+**A sample voxel editor based on OpenGL 3.3+**, inspired by [MagicaVoxel](https://ephtracy.github.io/).
 
+Support Windows 10 and Mac OX currently.
 
-## 1. Dependences
+A final project originally of 5 undergraduate students for the course Computer Graphics, SYSU.
+
+**A good OpenGL learning example** for the green hand in Computer Graphics, while maybe not the best practice in the related field.
+
+## Create any small stuff you like!
+
+![presentation](./docs/imgs/demo.gif)
+
+## More img example
+
+![](./docs/imgs/example/Dinosaur.jpg)
+
+![](./docs/imgs/example/Warrior.jpg)
+
+![](./docs/imgs/example/YellowDuck.jpg)
+
+## Iteration Details (Chinese)
+
+[迭代计划](./docs/迭代计划.md)
+
+We mainly use issue && project to manage development in the futrue. The document above won't be updated.
+
+## Dependences
 
 1. OpenGL 3.3+
 2. [GLAD](https://github.com/Dav1dde/glad)
@@ -20,9 +45,11 @@
 5. [imgui v1.60](https://github.com/ocornut/imgui/releases/tag/v1.60)
 6. [nlohmann::json v3.1.2](https://github.com/nlohmann/json/releases/tag/v3.1.2) , 只需要下载 `json.hpp` 的 release 文件。
 
+## How to Run Demo 
 
+### 1. Download the `.exe` in release
 
-## 2. How to Run Demo 
+### 2. Build from source
 
 1. Create a new directory  `3rd_party` at root.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
@@ -42,7 +69,7 @@ Now your `3rd_party` looks like:
 
 5. Use Cmake to generate your project file.
 
-### 2.1 Windows (Visual Studio 2015 or higher)
+#### 2.1 Windows (Visual Studio 2015 or higher)
 
 1. Use Cmake-gui to generate the `build/` dir.
 2. Open it in Visual Studio, set `MineCube` as Startup Project.
@@ -50,7 +77,7 @@ Now your `3rd_party` looks like:
 
 > You might need to modify the shaders' path in `demo.cpp`
 
-### 2.2 Mac OS
+#### 2.2 Mac OS
 
 1. Generate the `build/` dir and enter it
 
@@ -82,15 +109,14 @@ Now your `3rd_party` looks like:
 3. Then, you will find `MineCube.xcodeproj` . You can eithor double click to open it or just `open MineCube.xcodeproj`
 
 
-## 3. Iteration Details (Chinese)
-
-[迭代计划](./docs/迭代计划.md)
-
-
-## 4. Contributors
+## Contributors
 
 - [Johnny Law](https://longjj.com/)
 - [Bob Wu](https://github.com/Bowenwu1)
 - [Jarvis](https://github.com/Ace-0)
 - [Mr.Gu 菇生](https://github.com/mgsweet)
 - [Hiyoung.Tsui](https://github.com/15331335)
+
+## Bugs report
+
+Feel free to new issues. 
