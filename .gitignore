@@ -30,3 +30,26 @@
 *.exe
 *.out
 *.app
+
+# MacFileSystem
+.DS_Store
+
+
+# Thrid Party
+3rd_party/
+
+# Cmake cache
+build/
+
+# vscode
+.vscode/
+
+# doxygen output file
+docs/doxygen/
+
+# Windows temp file
+src/*.TMP
+include/*.TMP
+
+# pptx
+docs/*.pptx
