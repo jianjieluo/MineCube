@@ -11,7 +11,9 @@ struct CubeInfo
 	CubeInfo(bool _isDelected, glm::vec4 _color) : isDelected(_isDelected), color(_color) {}
 };
 
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, 
+glm::vec3 getAddPos(const glm::vec3& cubePos, const int plane);
+
+void createCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos,
 	glm::vec3 color, const unsigned int shaderID, int numPerEdge);
 
 void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
@@ -23,7 +25,8 @@ void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos,
 void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
 	const glm::vec3& endCubePos, const glm::vec3& color);
 
-void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int constHoverPlane);
+void undoAdd(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos,
+	const std::vector<CubeInfo> constCubeInfos);
 
 void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos,
 	const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos);
@@ -38,7 +41,7 @@ void selectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const 
 
 void unselectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 
-bool canCreate(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, int numPerEdge);
+bool canAccess(int new_x, int new_y, int new_z, int numPerEdge);
 
 //vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startCubePos, 
 //	const glm::vec3& endCubePos);
