@@ -47,7 +47,11 @@ We mainly use issue && project to manage development in the futrue. The document
 
 ## How to Run Demo 
 
-### 1. Build from the Source
+### 1. Download the Binary File in Release
+
+[Release List](https://github.com/longjj/MineCube/releases)
+
+### 2. Build from the Source
 
 1. Create a new directory  `3rd_party` at root.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
@@ -67,7 +71,7 @@ Now your `3rd_party` looks like:
 
 5. Use Cmake to generate your project file.
 
-#### 1.1 Windows (Visual Studio 2015 or higher)
+#### 2.1 Windows (Visual Studio 2015 or higher)
 
 1. Use Cmake-gui to generate the `build/` dir.
 2. Open it in Visual Studio, set `MineCube` as Startup Project.
@@ -75,7 +79,7 @@ Now your `3rd_party` looks like:
 
 > You might need to modify the shaders' path in `demo.cpp`
 
-#### 1.2 Mac OS
+#### 2.2 Mac OS
 
 1. Generate the `build/` dir and enter it
 
