@@ -450,6 +450,14 @@ int main()
 
 		gui.render();
 
+#ifdef __APPLE__
+        	// resolution for retina display issue
+        	int width, height;
+        	glfwGetFramebufferSize(window, &width, &height);
+        	screenWidth = width;
+        	screenHeight = height;
+#endif
+		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
