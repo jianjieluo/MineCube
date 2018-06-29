@@ -7,8 +7,13 @@ SkyBox::SkyBox(GLFWwindow* theWindow, Camera* theCamera) {
 
 	window = theWindow;
 	camera = theCamera;
+	#ifdef __APPLE__
+	skyboxShader = new Shader("/Users/wubowen/Documents/MineCube/src/Shader/skybox.vs", "/Users/wubowen/Documents/MineCube/src/Shader/skybox.fs");
+	std::string pictureDir = "/Users/wubowen/Documents/MineCube/Asset/skybox/";
+	#else
 	skyboxShader = new Shader("../src/Shader/skybox.vs", "../src/Shader/skybox.fs");
 	std::string pictureDir = "../Asset/skybox/";
+	#endif
 	std::string skyboxName = "city";
 	std::string extName = ".tga";
 	std::vector<std::string> faces

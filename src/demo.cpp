@@ -119,12 +119,20 @@ int main()
 #endif
 
 	glEnable(GL_DEPTH_TEST);
-
+	#ifdef __APPLE__
+	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
+	#else
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
+	#endif
 
 #ifdef SHADOW	
+	#ifdef __APPLE__
+	Shader simpleDepthShader("Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.fs");
+    Shader debugDepthQuad("Users/wubowen/Documents/MineCube/src/Shader/debug_quad_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/debug_quad_depth.fs");
+	#else
 	Shader simpleDepthShader("../src/Shader/shadow_mapping_depth.vs", "../src/Shader/shadow_mapping_depth.fs");
     Shader debugDepthQuad("../src/Shader/debug_quad_depth.vs", "../src/Shader/debug_quad_depth.fs");
+	#endif
 #endif
 
 	Gui gui(window);
