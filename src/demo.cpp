@@ -6,9 +6,7 @@
 #include "Cube.hpp"
 #include "SkyBox.hpp"
 #include "Cloth.hpp"
-#include "BasicOperation.hpp"
-#include "OperationManager.hpp"
-#include "crud.h"
+#include "CRUD.h"
 
 #include <iostream>
 #include <list>
@@ -48,7 +46,6 @@ static Camera* camera = Camera::getInstance();
 glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
-glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
 bool no_reset = false;
 
 // parameters
@@ -136,9 +133,6 @@ int main()
 #endif
 
 	Gui gui(window);
-
-	//use to capture io
-	ImGuiIO& io = ImGui::GetIO();
 
 	SkyBox skybox(window, camera);
 
@@ -265,7 +259,6 @@ int main()
 		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
 
-		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -395,103 +388,14 @@ int main()
 
 			/**********************************************************************************
 			*
-			*	deal with some cubes
-			*	以下代码执行顺序很重要，掉乱顺序有可能造成斑点
+			*	run CRUD
 			*
 			***********************************************************************************/
-			if (hit && !gui.isSaveWindowShow()) {
-				//若点击左键
-				if (ImGui::IsMouseClicked(0)) {
-					// 记录当前悬浮方块
-					startCubePos = hoverCubePosCurrent;
-					farCubePos = hoverCubePosCurrent;
-
-					//用于拉出框体的操作
-					isHitBefore = true;
-
-					if (mode == CREATE_MODE) {
-						hoverPlaneLast = hoverPlaneCurrent;
-					}
-				}
-				//若按着左键
-				if (io.MouseDown[0]) {
-					if (farCubePos != hoverCubePosCurrent && isHitBefore) {
-						unselectCubes(cubeManager, startCubePos, farCubePos);
-						selectCubes(cubeManager, startCubePos, hoverCubePosCurrent);
-						farCubePos = hoverCubePosCurrent;
-					}
-				}
-
-				// set hovered plane
-				auto hover_cube = cubeManager.getCube(hoverCubePosCurrent.x, hoverCubePosCurrent.y, hoverCubePosCurrent.z);
-				if (!hover_cube->isDeleted()) {
-					hoverCubePosLast = hoverCubePosCurrent;
-					hover_cube->hitted();
-				}
-			} 
-
-			//若松开左键
-			if (ImGui::IsMouseReleased(0)) {
-				if (isHitBefore) {
-					// 去除辅助色
-					unselectCubes(cubeManager, startCubePos, farCubePos);
-
-					objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-					// 保全当前全局变量
-					glm::vec3 savedColor = objectColor;
-					glm::vec3 savedStartCubePos = startCubePos;
-					glm::vec3 savedEndCubePos = hoverCubePosCurrent;
-
-					if (mode == CREATE_MODE) {
-						savedStartCubePos = getAddPos(savedStartCubePos, hoverPlaneLast);
-						savedEndCubePos = getAddPos(savedEndCubePos, hoverPlaneCurrent);
-					}
-
-					const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, savedStartCubePos, savedEndCubePos);
-
-					if (mode == ERASE_MODE) {
-						auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
-							//	do 
-							[&cubeManager, savedStartCubePos, savedEndCubePos]() {
-								eraseCube(cubeManager, savedStartCubePos, savedEndCubePos);
-							},
-							//	undo
-							[&cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo]() {
-								undoErase(cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo);
-							}
-						));
-						operationManager.executeOp(eraseOP, "Erase a cubes");
-					}
-					if (mode == PAINT_MODE) {
-						auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
-							//	do 
-							[&cubeManager, savedColor, savedStartCubePos, savedEndCubePos]() {
-
-								paintCube(cubeManager, savedStartCubePos, savedEndCubePos, savedColor);
-							},
-							//	undo
-							[&cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo]() {
-								undoPaint(cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo);
-							}
-						));
-						operationManager.executeOp(paintOP, "Change cubes color");
-					}
-					if (mode == CREATE_MODE) {
-						auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
-							//	do 
-							[&cubeManager, savedColor, phongShader, savedStartCubePos, savedEndCubePos]() {
-								createCube(cubeManager, savedStartCubePos, savedEndCubePos, savedColor, phongShader.ID, numPerEdge);
-							},
-							//	undo
-							[&cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo]() {
-								undoAdd(cubeManager, savedStartCubePos, savedEndCubePos, constCubesInfo);
-							}
-						));
-						operationManager.executeOp(createOP, "Create a cube");
-					}
-				}
-				isHitBefore = false;
-			}
+			
+			CRUD::run(hit, gui, startCubePos, farCubePos,
+				hoverCubePosCurrent, isHitBefore, hoverPlaneLast,
+				hoverPlaneCurrent, cubeManager, hoverCubePosLast,
+				phongShader);
 
 			/**********************************************************************************
 			*

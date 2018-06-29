@@ -23,6 +23,7 @@ Gui::Gui(GLFWwindow* theWindow) {
 	latest_color = ImVec4(cubes_color[0], cubes_color[1], cubes_color[2], cubes_color[3]);
 
 	allowCloth = true;
+	isFullNeed = false;
 }
 
 void Gui::createNewFrame() {
@@ -88,19 +89,19 @@ void Gui::showAppMainMenuBar()
 				}
 			}
 
-			ImGui::Separator();
-			if (ImGui::MenuItem("Cut", "CTRL+X")) 
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Copy", "CTRL+C")) 
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Paste", "CTRL+V")) 
-			{
-				// TODO
-			}
+			//ImGui::Separator();
+			//if (ImGui::MenuItem("Cut", "CTRL+X")) 
+			//{
+			//	// TODO
+			//}
+			//if (ImGui::MenuItem("Copy", "CTRL+C")) 
+			//{
+			//	// TODO
+			//}
+			//if (ImGui::MenuItem("Paste", "CTRL+V")) 
+			//{
+			//	// TODO
+			//}
 			ImGui::EndMenu();
 		}
 
@@ -132,8 +133,6 @@ void Gui::showEditBar() {
 
 
 	ImGui::Text("Mode: ");
-
-
 	{	// add button
 		ImGui::PushID(0);
 		if (mode == CREATE_MODE) {
@@ -193,10 +192,23 @@ void Gui::showEditBar() {
 		ImGui::PopID();
 	}
 
-	/*static int e = 0;
-	ImGui::RadioButton("  Add  ", &e, 0); ImGui::SameLine();
-	ImGui::RadioButton(" Erase ", &e, 1); ImGui::SameLine();
-	ImGui::RadioButton(" Paint ", &e, 2);*/
+	ImGui::Text("Tool:");
+	{
+		if (ImGui::Button("Full", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+			isFullNeed = true;
+		}
+
+		if (allowCloth) {
+			if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				allowCloth = false;
+			}
+		}
+		else {
+			if (ImGui::Button("Open Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				allowCloth = true;
+			}
+		}
+	}
 
 	ImGui::Text("");
 	ImGui::Text("History:");
@@ -266,17 +278,6 @@ void Gui::showEditBar() {
 			def_selected = n;
 	}
 	ImGui::EndChild();
-
-	if (allowCloth) {
-		if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
-			allowCloth = false;
-		}
-	}
-	else {
-		if (ImGui::Button("Open Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
-			allowCloth = true;
-		}
-	}
 
 	{	//Save button
 		if (ImGui::Button("Save", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f)))
@@ -497,6 +498,7 @@ void Gui::captureKeys() {
 			camera->pause();
 		}
 
+		// ¹öÂÖ
 		if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
 			camera->zoomInOrOut(io.MouseWheel);
 		}

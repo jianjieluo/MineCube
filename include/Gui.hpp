@@ -1,3 +1,6 @@
+#ifndef GUI_HPP
+#define GUI_HPP
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -21,6 +24,7 @@ public:
 	void render();
 	void clear();
 	void autoRePos();
+	bool isFullNeed;
 
 	bool isClothAllow();
 	bool isSaveWindowShow();
@@ -42,7 +46,6 @@ private:
 	bool editBar;
 	bool workBar;
 	bool saveWindow;
-	void showAppMainMenuBar();
 	void showEditBar();
 	void showColorBar();
 	void showWorkBar(unsigned int textureColorbuffer);
@@ -50,4 +53,7 @@ private:
 	void setMode_print();
 	void setMode_erase();
 	void captureKeys();
+	void showAppMainMenuBar();
 };
+
+#endif GUI_HPP
