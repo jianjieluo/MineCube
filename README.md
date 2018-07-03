@@ -44,6 +44,7 @@ We mainly use issue && project to manage development in the futrue. The document
 4. [GLM 0.9.8.5](https://github.com/g-truc/glm/releases/tag/0.9.8.5)
 5. [imgui v1.60](https://github.com/ocornut/imgui/releases/tag/v1.60)
 6. [nlohmann::json v3.1.2](https://github.com/nlohmann/json/releases/tag/v3.1.2) , 只需要下载 `json.hpp` 的 release 文件。
+7. [freetype 2.9.1](https://download.savannah.gnu.org/releases/freetype/) , 建议下载 `ft291.zip` 并解压 , 然后将 freetype-2.9.1 文件夹更名为 freetype 添加至 `3rd_party` 。
 
 ## How to Run Demo 
 
@@ -67,6 +68,7 @@ Now your `3rd_party` looks like:
 ----glm/
 ----imgui/
 ----nlohmann/json.hpp
+----freetype
 ```
 
 5. Use Cmake to generate your project file.

@@ -21,6 +21,11 @@ add_subdirectory(3rd_party/glfw)
 include_directories(3rd_party/glfw/include)
 LIST(APPEND LIBS glfw ${GLFW_LIBRARIES})
 
+# config freetype2
+add_subdirectory(3rd_party/freetype)
+include_directories(3rd_party/freetype/include)
+LIST(APPEND LIBS freetype ${FREETYPE_LIBRARIES})
+
 # config glad
 set(GLAD_SRC 3rd_party/glad/src/glad.c)
 if (NOT WIN32)
