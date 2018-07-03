@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <stdio.h>
+// 这样可以确保，当编译器提供了dirent.h的时候(比如mingw),优先使用编译自带的dirent.h, 使用前请重新CMAKE
 #include <dirent.h>
 #include "Cube.hpp"
 #include "GLBufferManager.hpp"

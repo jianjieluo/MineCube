@@ -21,7 +21,7 @@ struct CubeInfo
 
 class CRUD {
 public:
-	static void CRUD::run(const bool &hit, Gui& gui, glm::vec3& startCubePos, glm::vec3& farCubePos,
+	static void run(const bool &hit, Gui& gui, glm::vec3& startCubePos, glm::vec3& farCubePos,
 		const glm::vec3& hoverCubePosCurrent, bool& isHitBefore, int& hoverPlaneLast,
 		int& hoverPlaneCurrent, CubeManager& cubeManager, glm::vec3& hoverCubePosLast,
 		Shader& phongShader);
