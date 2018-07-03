@@ -270,12 +270,15 @@ void Gui::showEditBar() {
 	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
 	
 	static int def_selected = -1;
-	for (int n = 0; n < 5; n++)
+	vector<string> file_list = ptr_cubeManager->getModels();
+	for (int i = 0; i < file_list.size(); i++)
 	{
 		char buf[32];
-		sprintf(buf, "Object %d", n);
-		if (ImGui::Selectable(buf, def_selected == n))
-			def_selected = n;
+		sprintf(buf, "%s", file_list[i].c_str());
+		if (ImGui::Selectable(buf, def_selected == i)) {
+			ptr_cubeManager->load(buf);
+			def_selected = i;
+		}
 	}
 	ImGui::EndChild();
 

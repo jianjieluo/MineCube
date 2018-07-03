@@ -112,6 +112,14 @@ class CubeManager {
      * @return true if sucesss, otherwise false
      */
     bool load(string model_path);
+
+    /**
+     * @brief load model files of certain dir(defalut)
+     * 
+     * @author Bob Wu
+     * @return vector<string> of available model file
+     */
+    vector<string> getModels();
     /**
      * @brief Get the Cube object using the 3D coordinates (x, y, z).
      * 
