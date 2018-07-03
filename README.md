@@ -58,6 +58,7 @@ We mainly use issue && project to manage development in the futrue. The document
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
 3. Rename all the dependences' directories without certain version number.
 4. Download `nlohmann/json.hpp` file from the URL above.
+5. Follow the steps above to add `freetype` library.
 
 Now your `3rd_party` looks like:
 
@@ -71,7 +72,7 @@ Now your `3rd_party` looks like:
 ----freetype
 ```
 
-5. Use Cmake to generate your project file.
+6. Use Cmake to generate your project file.
 
 #### 2.1 Windows (Visual Studio 2015 or higher)
 
