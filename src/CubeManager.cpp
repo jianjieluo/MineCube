@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <stdio.h>
+#include <dirent.h>
 #include "Cube.hpp"
 #include "GLBufferManager.hpp"
 using std::cout;
@@ -288,6 +290,22 @@ bool CubeManager::load(string model_path) {
         cout << "ERROR:OPEN::FILE::FAIL" << endl;
         return false;
     }
+}
+
+vector<string> CubeManager::getModels() {
+    vector<string> result = vector<string>();
+    struct dirent *ptr;
+    DIR *dir;
+    dir = opendir(model_saved_dir.c_str());
+    while ((ptr=readdir(dir)) != NULL) {
+        if (ptr->d_name[0] == '.')
+            continue;
+        // cout << ptr->d_name << endl;
+        result.push_back(string(ptr->d_name));
+
+    }
+    closedir(dir);
+    return result;
 }
 #ifdef __APPLE__
 const string CubeManager::model_saved_dir = "/Users/wubowen/Documents/MineCube/Asset/example/";
