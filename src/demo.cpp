@@ -7,6 +7,7 @@
 #include "SkyBox.hpp"
 #include "Cloth.hpp"
 #include "CRUD.h"
+#include "Text.hpp"
 
 #include <iostream>
 #include <list>
@@ -138,6 +139,8 @@ int main()
 
 	Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
 	int timestep = 0;
+
+	Text text(window, camera);
 
 #ifdef PLANE
 	// set floor
@@ -432,6 +435,10 @@ int main()
 		// cubeManager.draw();
 		skybox.render();
 		if (gui.isClothAllow()) cloth.render(camera, timestep++);
+
+		// Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, int life)
+		// for example:
+		text.render("Hello World", 0.0f, -960.0f, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f), 50);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -34,9 +34,11 @@ class Text {
 		Shader* textShader;
 		std::map<GLchar, Character> Characters;
 		GLuint textVAO, textVBO;
+		std::string last;
+		int old;
 
     public:
         Text(GLFWwindow* theWindow, Camera* theCamera);
-        void render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+        void render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, int life);
 		void clean();
 };
