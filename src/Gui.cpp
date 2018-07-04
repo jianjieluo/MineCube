@@ -2,7 +2,7 @@
 #include <iostream>
 #include "string.h"
 
-Gui::Gui(GLFWwindow* theWindow) {
+Gui::Gui(GLFWwindow* theWindow, Text* _text) {
 	// ImGui initialization and bindings
 	window = theWindow;
 	ImGui::CreateContext();
@@ -24,6 +24,8 @@ Gui::Gui(GLFWwindow* theWindow) {
 
 	allowCloth = true;
 	isFullNeed = false;
+	specialEffect = 0;
+	text = _text;
 }
 
 void Gui::createNewFrame() {
@@ -89,19 +91,6 @@ void Gui::showAppMainMenuBar()
 				}
 			}
 
-			//ImGui::Separator();
-			//if (ImGui::MenuItem("Cut", "CTRL+X")) 
-			//{
-			//	// TODO
-			//}
-			//if (ImGui::MenuItem("Copy", "CTRL+C")) 
-			//{
-			//	// TODO
-			//}
-			//if (ImGui::MenuItem("Paste", "CTRL+V")) 
-			//{
-			//	// TODO
-			//}
 			ImGui::EndMenu();
 		}
 
@@ -198,6 +187,8 @@ void Gui::showEditBar() {
 			isFullNeed = true;
 		}
 
+		ImGui::SameLine();
+
 		if (allowCloth) {
 			if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
 				allowCloth = false;
@@ -209,6 +200,109 @@ void Gui::showEditBar() {
 			}
 		}
 	}
+
+	ImGui::Text("Special Effect:");
+	{
+		{	// normal button
+			ImGui::PushID(0);
+			if (specialEffect == 0) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Normal", ImVec2(ImGui::GetWindowWidth() * 0.9 + 8.0f, 20.0f))) {
+				specialEffect = 0;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		{	// Inversion button
+			ImGui::PushID(1);
+			if (specialEffect == 1) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Inversion", ImVec2(ImGui::GetWindowWidth() * 0.45, 20.0f))) {
+				specialEffect = 1;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		ImGui::SameLine();
+
+		{	// Grayscale button
+			ImGui::PushID(2);
+			if (specialEffect == 2) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Grayscale", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 2;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		{	// Grayscale button
+			ImGui::PushID(3);
+			if (specialEffect == 3) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Sharpen", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 3;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		ImGui::SameLine();
+
+		{	// Grayscale button
+			ImGui::PushID(4);
+			if (specialEffect == 4) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Blur", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 4;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+	}
+
 
 	ImGui::Text("");
 	ImGui::Text("History:");
@@ -471,14 +565,17 @@ void Gui::autoRePos() {
 
 void Gui::setMode_add() {
 	mode = CREATE_MODE;
+	text->push("ADD", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::setMode_print() {
 	mode = PAINT_MODE;
+	text->push("PAINT", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::setMode_erase() {
 	mode = ERASE_MODE;
+	text->push("ERASE", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::captureKeys() {
@@ -542,4 +639,12 @@ bool Gui::isSaveWindowShow() {
 
 void Gui::setPtrCubeManager(CubeManager* ptr) {
 	ptr_cubeManager = ptr;
+}
+
+int Gui::getSpecialEffect() {
+	return specialEffect;
+}
+
+void Gui::updateSE(Shader* shader) {
+	shader->setInt("specialEffect", specialEffect);
 }

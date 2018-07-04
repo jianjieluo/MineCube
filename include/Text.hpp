@@ -1,3 +1,7 @@
+#ifndef TEXT_HPP
+#define TEXT_HPP
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
@@ -47,3 +51,5 @@ class Text {
         void render();
 		void clean();
 };
+
+#endif // TEXT_HPP

@@ -9,6 +9,7 @@
 #include "imgui_impl_glfw_gl3.h"
 #include "Camera.hpp"
 #include "CubeManager.hpp"
+#include "Text.hpp"
 #include <vector>
 
 using namespace std;
@@ -16,8 +17,7 @@ using namespace std;
 class Gui {
 public:
 	// constructor, ImGui initialization and bindings
-	Gui(GLFWwindow* theWindow);
-
+	Gui(GLFWwindow* theWindow, Text* _text);
 	void createNewFrame();
 	void draw();
 	void draw(unsigned int textureColorbuffer);
@@ -25,15 +25,17 @@ public:
 	void clear();
 	void autoRePos();
 	bool isFullNeed;
-
 	bool isClothAllow();
 	bool isSaveWindowShow();
-
 	float* getWorkBarPos();
-
 	void setPtrCubeManager(CubeManager*);
+	int getSpecialEffect();
+	void updateSE(Shader* shader);
+
 
 private:
+	int specialEffect;
+	Text* text;
 	ImVec4 latest_color;
 	bool allowCloth;
 	Camera* camera;

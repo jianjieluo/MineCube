@@ -79,6 +79,32 @@ bool PickOneCube(
 	int& plane_num_current
 );
 
+/**********************************************************************************
+*
+* Work Bar(帧缓存特效相关)
+* @author mgsweet <mgsweet@126.com>
+*
+***********************************************************************************/
+float quadVertices[] = { 
+	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+	1.0f,  1.0f,  1.0f, 1.0f
+};
+GLuint workBarFBO = 0;
+unsigned int workBarColorBuffer;
+GLuint workBarRBO;
+unsigned int quadVAO, quadVBO; // screen quad VAO
+
+void initWorkBar();
+void updateWorkBar();
+
+
 int main()
 {
 	glfwSetErrorCallback(glfw_error_callback);
@@ -133,7 +159,8 @@ int main()
 	#endif
 #endif
 
-	Gui gui(window);
+	// 帧缓存，特效
+	Shader screenShader("../src/Shader/framebuffers_screen.vs", "../src/Shader/framebuffers_screen.fs");
 
 	SkyBox skybox(window, camera);
 
@@ -142,6 +169,7 @@ int main()
 
 	Text text(window, camera);
 	text.push("Mine Cube", glm::vec3(1.0f, 1.0f, 1.0f), 50);
+	Gui gui(window, &text);
 
 #ifdef PLANE
 	// set floor
@@ -204,38 +232,13 @@ int main()
     phongShader.setInt("shadowMap", 1);
     debugDepthQuad.use();
     debugDepthQuad.setInt("depthMap", 0);
+
+	// 帧缓存特效相关
+	screenShader.use();
+	screenShader.setInt("screenTexture", 0);
 #endif
 
-
-/*-------------------Work Bar--------------------------*/
-	GLuint workBarFBO = 0;
-	glGenFramebuffers(1, &workBarFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
-
-	//create a color attachment texture
-	unsigned int workBarColorBuffer;
-	glGenTextures(1, &workBarColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// 将它附加到当前绑定的帧缓冲对象
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, workBarColorBuffer, 0);
-
-	GLuint workBarRBO;
-	glGenRenderbuffers(1, &workBarRBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, workBarRBO); // now actually attach it
-
-	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-/*----------------------end workbar----------------*/
+	initWorkBar();
 
 	// to normalize
 	attriSize.push_back(3);
@@ -255,13 +258,16 @@ int main()
 #ifdef CALTIME
 	clock_t tic, toc;
 #endif // CALTIME
-
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
+		updateWorkBar();
+
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
+
+		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
 
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -290,22 +296,11 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         RenderScene(simpleDepthShader, cubeManager);
 
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// bind to framebuffer and draw scene as we normally would to color texture 
-		//glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
-		//glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-
-
+		// 这里先不到原来的帧中渲染，先渲染到帧缓存中
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
 
         glCullFace(GL_BACK); // 不要忘记设回原先的culling face
-
-        // -----------------------------------------
-        // reset viewport
-        glViewport(0, 0, screenWidth, screenHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 #endif
 
 		glViewport(0, 0, screenWidth, screenHeight);
@@ -394,8 +389,7 @@ int main()
 			*
 			*	run CRUD
 			*
-			***********************************************************************************/
-			
+			***********************************************************************************/		
 			CRUD::run(hit, gui, startCubePos, farCubePos,
 				hoverCubePosCurrent, isHitBefore, hoverPlaneLast,
 				hoverPlaneCurrent, cubeManager, hoverCubePosLast,
@@ -435,28 +429,27 @@ int main()
 		// RenderScene(phongShader, cubeManager);
 		// cubeManager.draw();
 		skybox.render();
-		if (gui.isClothAllow()) cloth.render(camera, timestep++);
-
-		// Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, int life)
-		// for example:
-		text.render();
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-		//						  // clear all relevant buffers
-		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
-		//glClear(GL_COLOR_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+		// clear all relevant buffers
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT);
+		screenShader.use();
+		screenShader.setInt("specialEffect", gui.getSpecialEffect());
 
+		glBindVertexArray(quadVAO);
+		glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);	// use the color attachment texture as the texture of the quad plane
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		// gui should render after all above
+		if (gui.isClothAllow()) cloth.render(camera, timestep++);
+		text.render();
 		gui.createNewFrame();
 		gui.draw();
-
-		/*ImGui::Begin("Work Bar");
-		ImGui::Image((void*)(intptr_t)workBarColorBuffer, ImVec2(SCR_WIDTH, SCR_HEIGHT), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-		ImGui::End();*/
-
 		gui.render();
+
 
 #ifdef __APPLE__
         	// resolution for retina display issue
@@ -471,8 +464,6 @@ int main()
 	}
 
 	gui.clear();
-
-
 	glfwTerminate();
 	return 0;
 }
@@ -507,4 +498,47 @@ void RenderScene(Shader &shader, CubeManager & cubeManager)
     // glBindVertexArray(cubeVAO);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // glBindVertexArray(0);
+}
+
+void initWorkBar() {
+	glGenFramebuffers(1, &workBarFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
+
+	//create a color attachment texture
+	glGenTextures(1, &workBarColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// 将它附加到当前绑定的帧缓冲对象
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, workBarColorBuffer, 0);
+
+	glGenRenderbuffers(1, &workBarRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, workBarRBO); // now actually attach it
+
+																										 // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+}
+
+void updateWorkBar() {
+	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
 }
