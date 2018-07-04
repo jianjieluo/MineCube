@@ -8,8 +8,9 @@ Text::Text(GLFWwindow* theWindow, Camera* theCamera) {
 	textShader = new Shader("../src/Shader/text.vs", "../src/Shader/text.fs");
 
 	// text control
-	last = "";
+	lastText = "";
 	old = 0;
+	textScale = 3.0f;
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
@@ -81,20 +82,50 @@ Text::Text(GLFWwindow* theWindow, Camera* theCamera) {
 	glBindVertexArray(0);
 }
 
+void Text::push(std::string next, glm::vec3 color, int life) {
+	textColor = color;
+	textLife = life;
+	old = 0;
+	lastText = next;
 
-void Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, int life) {
-	if (text == last) {
-		old = old + 1;
-	}
-	else {
-		last = text;
-		old = 0;
+	// cal the string width & height
+	GLfloat x = 0.0f, y = 0.0f;
+	// Iterate through all characters
+	std::string::const_iterator c;
+	for (c = lastText.begin(); c != lastText.end(); c++)
+	{
+		Character ch = Characters[*c];
+
+		GLfloat xpos = x + ch.Bearing.x * textScale;
+		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * textScale;
+
+		GLfloat w = ch.Size.x * textScale;
+		GLfloat h = ch.Size.y * textScale;
+
+		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		x += (ch.Advance >> 6) * textScale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	}
 
-	if (old > life) {
+	textX = - x / 2;
+	textY = y;
+}
+
+
+void Text::render() {
+	if (old > textLife) {
 		// do nothing
 	}
 	else {
+		old = old + 1;
+		int x = textX, y = textY;
+		glm::vec4 color(
+			textColor.r,
+			textColor.g,
+			textColor.b,
+			1.0 - 1.0 * (static_cast<GLfloat>(old)/ static_cast<GLfloat>(textLife))
+		);
+
+
 		// Set OpenGL options
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
@@ -105,30 +136,30 @@ void Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::ve
 
 		// Activate corresponding render state	
 		textShader->use();
-		textShader->setVec3("textColor", color);
+		textShader->setVec4("textColor", color);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(textVAO);
 
 		// Iterate through all characters
 		std::string::const_iterator c;
-		for (c = text.begin(); c != text.end(); c++)
+		for (c = lastText.begin(); c != lastText.end(); c++)
 		{
 			Character ch = Characters[*c];
 
-			GLfloat xpos = x + ch.Bearing.x * scale;
-			GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+			GLfloat xpos = x + ch.Bearing.x * textScale;
+			GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * textScale;
 
-			GLfloat w = ch.Size.x * scale;
-			GLfloat h = ch.Size.y * scale;
+			GLfloat w = ch.Size.x * textScale;
+			GLfloat h = ch.Size.y * textScale;
 			// Update VBO for each character
 			GLfloat vertices[6][4] = {
 				{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos,     ypos,       0.0, 1.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
+				{ xpos,     ypos,       0.0, 1.0 },
+				{ xpos + w, ypos,       1.0, 1.0 },
 
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-			{ xpos + w, ypos + h,   1.0, 0.0 }
+				{ xpos,     ypos + h,   0.0, 0.0 },
+				{ xpos + w, ypos,       1.0, 1.0 },
+				{ xpos + w, ypos + h,   1.0, 0.0 }
 			};
 			for (int i = 0; i < 6; i++) {
 				vertices[i][0] = vertices[i][0] / screenWidth;
@@ -146,7 +177,7 @@ void Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::ve
 
 
 			// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-			x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+			x += (ch.Advance >> 6) * textScale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 		}
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);

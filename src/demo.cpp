@@ -141,6 +141,7 @@ int main()
 	int timestep = 0;
 
 	Text text(window, camera);
+	text.push("Mine Cube", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 
 #ifdef PLANE
 	// set floor
@@ -438,7 +439,7 @@ int main()
 
 		// Text::render(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, int life)
 		// for example:
-		text.render("Hello World", 0.0f, -960.0f, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f), 50);
+		text.render();
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
