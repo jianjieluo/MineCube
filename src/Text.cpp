@@ -60,7 +60,7 @@ Text::Text(GLFWwindow* theWindow, Camera* theCamera) {
 			texture,
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			static_cast<GLuint>(face->glyph->advance.x)
 		};
 		Characters.insert(std::pair<GLchar, Character>(c, character));
 	}
@@ -90,20 +90,11 @@ void Text::push(std::string next, glm::vec3 color, int life) {
 
 	// cal the string width & height
 	GLfloat x = 0.0f, y = 0.0f;
-	// Iterate through all characters
 	std::string::const_iterator c;
 	for (c = lastText.begin(); c != lastText.end(); c++)
 	{
 		Character ch = Characters[*c];
-
-		GLfloat xpos = x + ch.Bearing.x * textScale;
-		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * textScale;
-
-		GLfloat w = ch.Size.x * textScale;
-		GLfloat h = ch.Size.y * textScale;
-
-		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.Advance >> 6) * textScale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+		x += (ch.Advance >> 6) * textScale;
 	}
 
 	textX = - x / 2;
