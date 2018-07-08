@@ -437,6 +437,13 @@ void Gui::showEditBar() {
 		}
 	}
 
+    // Change light attribute
+    if (ImGui::CollapsingHeader("lighting options")) {
+        ImGui::SliderFloat("lightPos.x", &lightPos.x, -10.0f, 10.0f, "X = %.1f");
+        ImGui::SliderFloat("lightPos.y", &lightPos.y, -10.0f, 10.0f, "Y = %.1f");
+        ImGui::SliderFloat("lightPos.z", &lightPos.z, -10.0f, 10.0f, "Z = %.1f");
+    }
+
 	ImGui::End();
 }
 

@@ -14,3 +14,7 @@ int mode = ERASE_MODE;
 int screenWidth = 960;
 int screenHeight = 960;
 bool isFirstDraw = true;
+
+// Light variable
+glm::vec3 lightPos = glm::vec3(1.5f, 1.0f, 1.5f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);

@@ -16,7 +16,6 @@
 using namespace std;
 
 #define SHADOW
-//#define PLANE
 #define DEBUG
 //#define CALTIME  // calculate time/efficiency
 
@@ -43,10 +42,6 @@ glm::vec3 auxColor(0.9f, 0.9f, 1.0f);
 // Camera class
 static Camera* camera = Camera::getInstance();
 
-// lighting
-glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
-glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-
 bool no_reset = false;
 
 // parameters
@@ -58,11 +53,6 @@ int main();
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-
-#ifdef PLANE
-GLuint planeVAO;
-#endif
 
 void RenderScene(Shader &phongShader, CubeManager & cubeManager);
 
@@ -96,7 +86,7 @@ float quadVertices[] = {
 	1.0f, -1.0f,  1.0f, 0.0f,
 	1.0f,  1.0f,  1.0f, 1.0f
 };
-GLuint workBarFBO = 0;
+GLuint workBarFBO = 1;
 unsigned int workBarColorBuffer;
 GLuint workBarRBO;
 unsigned int quadVAO, quadVBO; // screen quad VAO
@@ -137,12 +127,6 @@ int main()
 		return -1;
 	}
 
-    // Define the viewport dimensions
-#ifdef SHADOW
-    glViewport(0, 0, screenWidth, screenHeight);
-#endif
-
-	glEnable(GL_DEPTH_TEST);
 	#ifdef __APPLE__
 	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
 	#else
@@ -171,33 +155,10 @@ int main()
 	text.push("Mine Cube", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 	Gui gui(window, &text);
 
-#ifdef PLANE
-	// set floor
-    GLfloat planeVertices[] = {
-        // Positions          // Normals       
-        25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
-        -25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f, 
-        -25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
-
-        25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
-        25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f,
-        -25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f
-    };
-    // Setup plane VAO
-    GLuint planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glBindVertexArray(0);
-#endif
-
-#ifdef SHADOW
+    // Shadow  config
+    // Define the viewport dimensions
+    glViewport(0, 0, screenWidth, screenHeight);
+    glEnable(GL_DEPTH_TEST);
 	// Configure depth map FBO
     const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     GLuint depthMapFBO;
@@ -210,12 +171,9 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // 防止纹理贴图在远处重复渲染
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
     GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
@@ -225,7 +183,7 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // phongShader configuration
+    // shadow configuration
     // --------------------
     phongShader.use();
     phongShader.setInt("diffuseTexture", 0);
@@ -236,7 +194,6 @@ int main()
 	// 帧缓存特效相关
 	screenShader.use();
 	screenShader.setInt("screenTexture", 0);
-#endif
 
 	initWorkBar();
 
@@ -276,7 +233,6 @@ int main()
 		// -------------------------------------------
         // 1. Render depth of scene to texture (from light's perspective)
         // - Get light projection/view matrix.
-        glCullFace(GL_FRONT);
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
         GLfloat near_plane = 1.0f, far_plane = 7.5f;
@@ -293,19 +249,20 @@ int main()
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-        glActiveTexture(GL_TEXTURE0);
         RenderScene(simpleDepthShader, cubeManager);
-
-		// 这里先不到原来的帧中渲染，先渲染到帧缓存中
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
-
-        glCullFace(GL_BACK); // 不要忘记设回原先的culling face
 #endif
 
+		// 这里先不到原来的帧中渲染，先渲染到帧缓存中
+		glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
+
+        // -----------------------------------------
+        // reset viewport
 		glViewport(0, 0, screenWidth, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		phongShader.use();
+
+        // 2. render scene as normal using the generated depth/shadow map  
+        // --------------------------------------------------------------
+        phongShader.use();
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
@@ -319,10 +276,10 @@ int main()
 
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
-		glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        //glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(camera->getZoomFactor(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
-        glActiveTexture(GL_TEXTURE0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
 		RenderScene(phongShader, cubeManager);
@@ -333,7 +290,6 @@ int main()
         debugDepthQuad.use();
         debugDepthQuad.setFloat("near_plane", near_plane);
         debugDepthQuad.setFloat("far_plane", far_plane);
-        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         // RenderQuad();
 #endif
@@ -481,23 +437,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void RenderScene(Shader &shader, CubeManager & cubeManager)
 {
-#ifdef PLANE
-    // Floor
-    glm::mat4 model;
-    shader.setMat4("model", model);
-    glBindVertexArray(planeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-#endif // PLANE
     // Cubes
     cubeManager.draw();
-    // model = glm::mat4();
-    // //model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
-    // phongShader.setMat4("model", glm::value_ptr(model));
-    // phongShader.setFloat3("objectColor", glm::value_ptr(glm::vec3(1.0f, 0.5f, 0.31f)));
-    // glBindVertexArray(cubeVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, 36);
-    // glBindVertexArray(0);
 }
 
 void initWorkBar() {
