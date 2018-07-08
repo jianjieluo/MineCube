@@ -186,8 +186,7 @@ int main()
     // shadow configuration
     // --------------------
     phongShader.use();
-    phongShader.setInt("diffuseTexture", 0);
-    phongShader.setInt("shadowMap", 1);
+    phongShader.setInt("shadowMap", 0);
     debugDepthQuad.use();
     debugDepthQuad.setInt("depthMap", 0);
 
@@ -280,10 +279,9 @@ int main()
         //glm::mat4 projection = glm::perspective(camera->getZoomFactor(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
-        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
 		RenderScene(phongShader, cubeManager);
-
+        
 #ifdef SHADOW
 		// render Depth map to quad for visual debugging
         // ---------------------------------------------
