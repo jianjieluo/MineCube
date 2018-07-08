@@ -276,8 +276,8 @@ int main()
 
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
-        //glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-        glm::mat4 projection = glm::perspective(camera->getZoomFactor(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        //glm::mat4 projection = glm::perspective(camera->getZoomFactor(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
         glActiveTexture(GL_TEXTURE1);
