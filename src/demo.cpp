@@ -208,6 +208,7 @@ int main()
 
     // Open Face Culling
     glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	bool hit = false;
 
@@ -273,6 +274,8 @@ int main()
         phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
         phongShader.setVec3("light.specular", 0.3f, 0.3f, 0.3f);
 
+
+		phongShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		glm::mat4 view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
         glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
