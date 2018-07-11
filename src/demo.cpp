@@ -15,8 +15,6 @@
 
 using namespace std;
 
-#define SHADOW
-#define DEBUG
 //#define CALTIME  // calculate time/efficiency
 
 // About cubes
@@ -129,19 +127,11 @@ int main()
 
 	#ifdef __APPLE__
 	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
+	Shader simpleDepthShader("Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.fs");
 	#else
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
-	#endif
-
-#ifdef SHADOW	
-	#ifdef __APPLE__
-	Shader simpleDepthShader("Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.fs");
-    Shader debugDepthQuad("Users/wubowen/Documents/MineCube/src/Shader/debug_quad_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/debug_quad_depth.fs");
-	#else
 	Shader simpleDepthShader("../src/Shader/shadow_mapping_depth.vs", "../src/Shader/shadow_mapping_depth.fs");
-    Shader debugDepthQuad("../src/Shader/debug_quad_depth.vs", "../src/Shader/debug_quad_depth.fs");
 	#endif
-#endif
 
 	// 帧缓存，特效
 	Shader screenShader("../src/Shader/framebuffers_screen.vs", "../src/Shader/framebuffers_screen.fs");
@@ -160,13 +150,12 @@ int main()
     glViewport(0, 0, screenWidth, screenHeight);
     glEnable(GL_DEPTH_TEST);
 	// Configure depth map FBO
-    const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    const GLuint SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
     GLuint depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
     // - Create depth texture
     GLuint depthMap;
     glGenTextures(1, &depthMap);
-    glActiveTexture(GL_TEXTURE1); // 在绑定纹理之前先激活纹理单元
     glBindTexture(GL_TEXTURE_2D, depthMap);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -187,9 +176,7 @@ int main()
     // shadow configuration
     // --------------------
     phongShader.use();
-    phongShader.setInt("shadowMap", 1);
-    debugDepthQuad.use();
-    debugDepthQuad.setInt("depthMap", 0);
+    phongShader.setInt("shadowMap", 0); // In phongshader we just use 1 texture, TEXTURE0 is default.
 
 	// 帧缓存特效相关
 	screenShader.use();
@@ -230,7 +217,7 @@ int main()
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#ifdef SHADOW
+		// Shadow support
 		// -------------------------------------------
         // 1. Render depth of scene to texture (from light's perspective)
         // - Get light projection/view matrix.
@@ -251,7 +238,6 @@ int main()
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
         RenderScene(simpleDepthShader, cubeManager);
-#endif
 
 		// 这里先不到原来的帧中渲染，先渲染到帧缓存中
 		glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
@@ -277,25 +263,16 @@ int main()
 
 
 		phongShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-		glm::mat4 view = camera->getViewMatrix();
+		auto view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
         glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-        //glm::mat4 projection = glm::perspective(camera->getZoomFactor(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
         glBindTexture(GL_TEXTURE_2D, depthMap);
 		RenderScene(phongShader, cubeManager);
-        
-#ifdef SHADOW
-		// render Depth map to quad for visual debugging
-        // ---------------------------------------------
-        debugDepthQuad.use();
-        debugDepthQuad.setFloat("near_plane", near_plane);
-        debugDepthQuad.setFloat("far_plane", far_plane);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        // RenderQuad();
-#endif
 
+		// hover support
+		// ---------------------------------------------------------------
 		// reset last hovered plane
 		if (hit && static_cast<int>(hoverCubePosLast.x) < numPerEdge && static_cast<int>(hoverCubePosLast.y) < numPerEdge && static_cast<int>(hoverCubePosLast.z) < numPerEdge) {
 			auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
@@ -384,8 +361,6 @@ int main()
 
 		cubeManager.setAllShaderId(phongShader.ID);
 
-		// RenderScene(phongShader, cubeManager);
-		// cubeManager.draw();
 		skybox.render();
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
@@ -410,11 +385,11 @@ int main()
 
 
 #ifdef __APPLE__
-        	// resolution for retina display issue
-        	int width, height;
-        	glfwGetFramebufferSize(window, &width, &height);
-        	screenWidth = width;
-        	screenHeight = height;
+		// resolution for retina display issue
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		screenWidth = width;
+		screenHeight = height;
 #endif
 		
 		glfwSwapBuffers(window);
@@ -449,7 +424,6 @@ void initWorkBar() {
 
 	//create a color attachment texture
 	glGenTextures(1, &workBarColorBuffer);
-    glActiveTexture(GL_TEXTURE0); // 在绑定纹理之前先激活纹理单元
 	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
