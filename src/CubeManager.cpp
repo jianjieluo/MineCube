@@ -213,7 +213,14 @@ void CubeManager::dump(string model_path) {
         cube["id"] = ptr_cube->id;
         cube["isInInf"] = ptr_cube->isInInf;
         glm::vec4 color = ptr_cube->cubeColor;
-        cube["cubeColor"] = {color.x, color.y, color.z, color.y};
+        /** 
+         * Bug by Bowen Wu
+         * Since we have created a lot model under this bug, and value of alpha
+         * not change, we fix this problem in a tricky way
+         * Notice this in load model
+         */
+        // cube["cubeColor"] = {color.x, color.y, color.z, color.y};
+        cube["cubeColor"] = {color.x, color.y, color.z, color.w};
         j_cubes.push_back(cube);
     }
     j["cubes"] = j_cubes;
@@ -282,7 +289,12 @@ bool CubeManager::load(string model_path) {
             cubesOriginalPosition[i] = temp;
         }
         auto & in_data = j_c["cubeColor"];
-        cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
+        /**
+         * To temporarily fix the bug of dump model.
+         * We do not dump correct alpha value when dump model
+         */
+        // cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
+        cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], 1.0f);
         cubes[i]->cubeColor2Buffer();
     }
     refreshModelMat4();
