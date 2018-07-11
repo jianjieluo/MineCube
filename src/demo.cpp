@@ -166,6 +166,7 @@ int main()
     // - Create depth texture
     GLuint depthMap;
     glGenTextures(1, &depthMap);
+    glActiveTexture(GL_TEXTURE1); // 在绑定纹理之前先激活纹理单元
     glBindTexture(GL_TEXTURE_2D, depthMap);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -186,7 +187,7 @@ int main()
     // shadow configuration
     // --------------------
     phongShader.use();
-    phongShader.setInt("shadowMap", 0);
+    phongShader.setInt("shadowMap", 1);
     debugDepthQuad.use();
     debugDepthQuad.setInt("depthMap", 0);
 
@@ -445,6 +446,7 @@ void initWorkBar() {
 
 	//create a color attachment texture
 	glGenTextures(1, &workBarColorBuffer);
+    glActiveTexture(GL_TEXTURE0); // 在绑定纹理之前先激活纹理单元
 	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
