@@ -15,7 +15,7 @@ void main()
 	else if (specialEffect == 2) {
 		FragColor = texture(screenTexture, TexCoords);
 		float average = 0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.b;
-	FragColor = vec4(average, average, average, 1.0);
+		FragColor = vec4(average, average, average, 1.0);
 	} 
 	else if (specialEffect == 3 || specialEffect == 4) {
 		vec2 offsets[9] = vec2[](
@@ -61,4 +61,5 @@ void main()
 	else {
 		FragColor = vec4(texture(screenTexture, TexCoords).rgb, 1.0);
 	}
+	// Cause skybox here too so we apply gamma Correction in phongshader.fs
 } 

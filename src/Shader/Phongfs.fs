@@ -94,4 +94,7 @@ void main()
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * rgbColor;    
 
     FragColor = vec4(lighting, alpha);
+    // apply gamma correction
+    float gamma = 2.2;
+    FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
 } 
