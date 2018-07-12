@@ -12,7 +12,7 @@ int mode = ERASE_MODE;
 
 // interactive variables
 int screenWidth = 960;
-int screenHeight = 960;
+int screenHeight = 600;
 bool isFirstDraw = true;
 
 // Light variable
