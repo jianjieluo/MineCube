@@ -41,33 +41,36 @@ void Gui::showAppMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("New")) {}
-			if (ImGui::MenuItem("Open", "Ctrl+O"))
-			{
-				// TODO
-			}
-			if (ImGui::BeginMenu("Open Recent"))
-			{
-				// TODO
-				ImGui::EndMenu();
-			}
-			if (ImGui::MenuItem("Save", "Ctrl+S"))
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Save As.."))
-			{
-				// TODO
-			}
-			ImGui::Separator();
-			if (ImGui::MenuItem("Quit", "Alt+F4")) 
-			{
-				// TODO
-			}
-			ImGui::EndMenu();
-		}
+		//if (ImGui::BeginMenu("File"))
+		//{
+		//	if (ImGui::MenuItem("New")) 
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::MenuItem("Open", "Ctrl+O"))
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::BeginMenu("Open Recent"))
+		//	{
+		//		// TODO
+		//		ImGui::EndMenu();
+		//	}
+		//	if (ImGui::MenuItem("Save", "Ctrl+S"))
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::MenuItem("Save As.."))
+		//	{
+		//		// TODO
+		//	}
+		//	ImGui::Separator();
+		//	if (ImGui::MenuItem("Quit", "Alt+F4")) 
+		//	{
+		//		// TODO
+		//	}
+		//	ImGui::EndMenu();
+		//}
 
 		if (ImGui::BeginMenu("Edit"))
 		{
@@ -303,21 +306,22 @@ void Gui::showEditBar() {
 		}
 	}
 
-
 	ImGui::Text("");
 	ImGui::Text("History:");
-	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
+	if (screenHeight >= 600) {
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, screenHeight > 700? ImGui::GetWindowHeight() * 0.15 : ImGui::GetWindowHeight() * 0.1), true);
 
-	static int his_selected = operationManager.getIndexOfHistory() - 1;
-	for (int i = 0; i < operationManager.getIndexOfHistory(); i++)
-	{
-		char buf[32];
-		sprintf(buf, operationManager.str_history[i].c_str());
-		if (ImGui::Selectable(buf, his_selected == i))
-			his_selected = i;
+		static int his_selected = operationManager.getIndexOfHistory() - 1;
+		for (int i = 0; i < operationManager.getIndexOfHistory(); i++)
+		{
+			char buf[32];
+			sprintf(buf, operationManager.str_history[i].c_str());
+			if (ImGui::Selectable(buf, his_selected == i))
+				his_selected = i;
+		}
+
+		ImGui::EndChild();
 	}
-
-	ImGui::EndChild();
 
 	{	//undo button
 		ImGui::PushID(0);
@@ -361,20 +365,22 @@ void Gui::showEditBar() {
 
 	ImGui::Text("");
 	ImGui::Text("Default:");
-	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
-	
-	static int def_selected = -1;
-	vector<string> file_list = ptr_cubeManager->getModels();
-	for (int i = 0; i < file_list.size(); i++)
-	{
-		char buf[32];
-		sprintf(buf, "%s", file_list[i].c_str());
-		if (ImGui::Selectable(buf, def_selected == i)) {
-			ptr_cubeManager->load(buf);
-			def_selected = i;
+	if (screenHeight >= 450) {
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, ImGui::GetWindowHeight() * 0.2), true);
+
+		static int def_selected = -1;
+		vector<string> file_list = ptr_cubeManager->getModels();
+		for (int i = 0; i < file_list.size(); i++)
+		{
+			char buf[32];
+			sprintf(buf, "%s", file_list[i].c_str());
+			if (ImGui::Selectable(buf, def_selected == i)) {
+				ptr_cubeManager->load(buf);
+				def_selected = i;
+			}
 		}
+		ImGui::EndChild();
 	}
-	ImGui::EndChild();
 
 	{	//Save button
 		if (ImGui::Button("Save", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f)))
@@ -437,6 +443,8 @@ void Gui::showEditBar() {
 		}
 	}
 
+	ImGui::Text("");
+	ImGui::Text("Other Options:");
     // Change light attribute
     if (ImGui::CollapsingHeader("lighting options")) {
         ImGui::SliderFloat("lightPos.x", &lightPos.x, -10.0f, 10.0f, "X = %.1f");
@@ -454,14 +462,11 @@ void Gui::showColorBar() {
 		ImGui::SetWindowSize(ImVec2(260, screenHeight));
 		ImGui::SetWindowPos(ImVec2(0, 18));
 	}
-	static bool alpha_preview = true;
-	static bool alpha_half_preview = false;
-	static bool options_menu = true;
-	static bool hdr = false;
-	int misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0) | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
-	ImGuiColorEditFlags flags = misc_flags;
 
-	ImGui::ColorPicker4("MyColor##4", (float*)&cubes_color, flags, NULL);
+
+	ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoAlpha;
+
+	ImGui::ColorPicker4("Color##4", (float*)&cubes_color, flags, NULL);
 
 	if (latest_color.x != cubes_color[0] || latest_color.y != cubes_color[1] || 
 			latest_color.z != cubes_color[2] || latest_color.w != cubes_color[3]) {
@@ -491,7 +496,7 @@ void Gui::showColorBar() {
 	}
 
 	{	// color list
-		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, (screenHeight - 80 - 240) * 0.8), true);
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, screenHeight > 400 ? (screenHeight - 80 - 240) * 0.8 : screenHeight * 0.1), true);
 		for (int i = 0; i < 100; i++)
 		{
 			for (int j = 0; j < 5; j++)
@@ -626,17 +631,19 @@ void Gui::captureKeys() {
 	}
 }
 
-void Gui::addColor2His(ImVec4 hisColor) {
-	if (colorHistory.size() < 10) {
-		colorHistory.push_back(hisColor);
-	}
-	else {
-		for (auto i = 0; i < 9; i++) {
-			colorHistory[i] = colorHistory[i + 1];
+void Gui::addColor2His(ImVec4 color) {
+	if (latest_color.x != color.x || latest_color.y != color.y || latest_color.z != color.z) {
+		if (colorHistory.size() < 10) {
+			colorHistory.push_back(color);
 		}
-		colorHistory[9] = hisColor;
+		else {
+			for (auto i = 0; i < 9; i++) {
+				colorHistory[i] = colorHistory[i + 1];
+			}
+			colorHistory[9] = color;
+		}
+		latest_color = color;
 	}
-	latest_color = hisColor;
 }
 
 bool Gui::isSaveWindowShow() {

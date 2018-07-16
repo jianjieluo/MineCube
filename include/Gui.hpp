@@ -42,7 +42,7 @@ private:
 	CubeManager* ptr_cubeManager;
 	GLFWwindow* window;
 	vector<ImVec4> colorHistory;
-	void addColor2His(ImVec4 hisColor);
+	void addColor2His(ImVec4 color);
 	float workBarPos[2];
 	bool colorBar;
 	bool editBar;
