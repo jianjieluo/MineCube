@@ -438,11 +438,11 @@ void Gui::showEditBar() {
 	}
 
     // Change light attribute
-    if (ImGui::CollapsingHeader("lighting options")) {
-        ImGui::SliderFloat("lightPos.x", &lightPos.x, -10.0f, 10.0f, "X = %.1f");
-        ImGui::SliderFloat("lightPos.y", &lightPos.y, -10.0f, 10.0f, "Y = %.1f");
-        ImGui::SliderFloat("lightPos.z", &lightPos.z, -10.0f, 10.0f, "Z = %.1f");
-    }
+    // if (ImGui::CollapsingHeader("lighting options")) {
+    //     ImGui::SliderFloat("lightPos.x", &lightPos.x, -10.0f, 10.0f, "X = %.1f");
+    //     ImGui::SliderFloat("lightPos.y", &lightPos.y, -10.0f, 10.0f, "Y = %.1f");
+    //     ImGui::SliderFloat("lightPos.z", &lightPos.z, -10.0f, 10.0f, "Z = %.1f");
+    // }
 
 	ImGui::End();
 }
@@ -605,7 +605,7 @@ void Gui::captureKeys() {
 			camera->pause();
 		}
 
-		// ¹öÂÖ
+		// ï¿½ï¿½ï¿½ï¿½
 		if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
 			camera->zoomInOrOut(io.MouseWheel);
 		}
