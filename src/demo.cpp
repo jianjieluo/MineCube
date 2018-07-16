@@ -373,6 +373,11 @@ int main()
 
 		// gui should render after all above
 		if (gui.isClothAllow()) cloth.render(camera, timestep++);
+		if (timestep > 100) {
+			gui.allowCloth = false;
+			timestep = 0;
+			cloth = Cloth(window, lightPos, lightColor, screenWidth, screenHeight);
+		}
 		text.render();
 		gui.createNewFrame();
 		gui.draw();

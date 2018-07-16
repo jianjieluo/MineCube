@@ -31,13 +31,13 @@ public:
 	void setPtrCubeManager(CubeManager*);
 	int getSpecialEffect();
 	void updateSE(Shader* shader);
+	bool allowCloth;
 
 
 private:
 	int specialEffect;
 	Text* text;
 	ImVec4 latest_color;
-	bool allowCloth;
 	Camera* camera;
 	CubeManager* ptr_cubeManager;
 	GLFWwindow* window;
