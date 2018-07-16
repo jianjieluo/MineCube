@@ -296,6 +296,14 @@ bool CubeManager::load(string model_path) {
         // cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
         cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], 1.0f);
         cubes[i]->cubeColor2Buffer();
+
+        // resize sizePerCube
+        vector<GLfloat> vertexTemp =
+        vector<GLfloat>(Cube::VERTEX_PER_CUBE * Cube::COOR_DIMENSION);
+        for (unsigned int i = 0; i < vertexTemp.size(); ++i) {
+            vertexTemp[i] = sizePerCube * Cube::cubeVertex[i];
+        }
+        this->glBufferManager.setCubeData(vertexTemp, Cube::cubeNormal);
     }
     refreshModelMat4();
         return true;
@@ -320,8 +328,4 @@ vector<string> CubeManager::getModels() {
     closedir(dir);
     return result;
 }
-#ifdef __APPLE__
-const string CubeManager::model_saved_dir = "/Users/wubowen/Documents/MineCube/Asset/example/";
-#else
 const string CubeManager::model_saved_dir = "../Asset/example/";
-#endif
