@@ -38,3 +38,12 @@ void OperationManager::cancle_undo() {
 const unsigned int OperationManager::getIndexOfHistory() {
 	return indexOfHistory;
 }
+
+void OperationManager::clear() {
+	// init undo_history
+	undo_history = stack<shared_ptr<EditOperationInterface>>();
+	// init undo_history
+	history = stack<shared_ptr<EditOperationInterface>>();
+	indexOfHistory = 0;
+	str_history.clear();
+}

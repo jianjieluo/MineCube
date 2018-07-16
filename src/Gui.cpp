@@ -376,6 +376,7 @@ void Gui::showEditBar() {
 			sprintf(buf, "%s", file_list[i].c_str());
 			if (ImGui::Selectable(buf, def_selected == i)) {
 				ptr_cubeManager->load(buf);
+				operationManager.clear();
 				def_selected = i;
 			}
 		}
@@ -463,6 +464,13 @@ void Gui::showColorBar() {
 		ImGui::SetWindowPos(ImVec2(0, 18));
 	}
 
+	//效果不太好
+	/*if (ImGui::IsWindowFocused()) {
+		saveWindow = true;
+	}
+	else {
+		saveWindow = false;
+	}*/
 
 	ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoAlpha;
 
@@ -495,8 +503,33 @@ void Gui::showColorBar() {
 		ImGui::EndChild();
 	}
 
-	{	// color list
-		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, screenHeight > 400 ? (screenHeight - 80 - 240) * 0.8 : screenHeight * 0.1), true);
+	if (screenHeight > 600) {	// color list1
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, (screenHeight - 80 - 240) * 0.2), true);
+		for (int i = 0; i < 30; i++)
+		{
+			if (i % 6 != 0) ImGui::SameLine();
+			ImGui::PushID(i);
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i/ 31.0f, 0.8f, 0.8f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 31.0f, 0.8f + 0.05f, 0.8f + 0.05f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 31.0f, 0.8f + 0.1f, 0.8f + 0.1f));
+			if (ImGui::Button("     ", ImVec2(ImGui::GetWindowWidth() * 0.12, 20.0f))) {
+				static ImVec4 saved_palette;
+				ImGui::ColorConvertHSVtoRGB(i / 31.0f, 0.8f, 0.8f, saved_palette.x, saved_palette.y, saved_palette.z);
+				cubes_color[0] = saved_palette.x;
+				cubes_color[1] = saved_palette.y;
+				cubes_color[2] = saved_palette.z;
+				saved_palette.w = 1.0f;
+				// save the color
+				addColor2His(saved_palette);
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
+	}
+
+	{	// color list2
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)2), ImVec2(ImGui::GetWindowWidth() * 0.95, screenHeight > 500 ? (screenHeight - 80 - 240) * 0.7 : screenHeight * 0.1), true);
 		for (int i = 0; i < 100; i++)
 		{
 			for (int j = 0; j < 5; j++)
