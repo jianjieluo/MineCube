@@ -125,13 +125,8 @@ int main()
 		return -1;
 	}
 
-	#ifdef __APPLE__
-	Shader phongShader("/Users/wubowen/Documents/MineCube/src/Shader/phongvs.vs", "/Users/wubowen/Documents/MineCube/src/Shader/phongfs.fs");
-	Shader simpleDepthShader("Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.vs", "Users/wubowen/Documents/MineCube/src/Shader/shadow_mapping_depth.fs");
-	#else
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
 	Shader simpleDepthShader("../src/Shader/shadow_mapping_depth.vs", "../src/Shader/shadow_mapping_depth.fs");
-	#endif
 
 	// 帧缓存，特效
 	Shader screenShader("../src/Shader/framebuffers_screen.vs", "../src/Shader/framebuffers_screen.fs");

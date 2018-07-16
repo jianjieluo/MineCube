@@ -328,8 +328,4 @@ vector<string> CubeManager::getModels() {
     closedir(dir);
     return result;
 }
-#ifdef __APPLE__
-const string CubeManager::model_saved_dir = "/Users/wubowen/Documents/MineCube/Asset/example/";
-#else
 const string CubeManager::model_saved_dir = "../Asset/example/";
-#endif
