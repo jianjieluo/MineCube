@@ -4,7 +4,7 @@
 
 **A sample voxel editor based on OpenGL 3.3+**, inspired by [MagicaVoxel](https://ephtracy.github.io/).
 
-Support Windows 10 and Mac OX currently.
+Support Windows 10 currently.
 
 A final project originally of 5 undergraduate students for the course Computer Graphics, SYSU.
 
@@ -14,19 +14,18 @@ A final project originally of 5 undergraduate students for the course Computer G
 
 ![presentation](./docs/imgs/demo.gif)
 
-## More Image Example
+## More Image Examples
 
-![](./docs/imgs/example/Dinosaur.jpg)
+![Mastersword](./docs/imgs/example/Mastersword.jpg)
 
-![](./docs/imgs/example/Warrior.jpg)
+
+![warrior](./docs/imgs/example/Warrior.jpg)
+
+![diglett](./docs/imgs/example/Diglett.jpg)
 
 ![](./docs/imgs/example/YellowDuck.jpg)
 
-## Iteration Details (Chinese)
-
-[迭代计划](./docs/迭代计划.md)
-
-We mainly use issue && project to manage development in the futrue. The document above won't be updated.
+![](./docs/imgs/example/Dinosaur.jpg)
 
 ## Dependences
 
@@ -44,6 +43,7 @@ We mainly use issue && project to manage development in the futrue. The document
 4. [GLM 0.9.8.5](https://github.com/g-truc/glm/releases/tag/0.9.8.5)
 5. [imgui v1.60](https://github.com/ocornut/imgui/releases/tag/v1.60)
 6. [nlohmann::json v3.1.2](https://github.com/nlohmann/json/releases/tag/v3.1.2) , 只需要下载 `json.hpp` 的 release 文件。
+7. [freetype 2.9.1](https://download.savannah.gnu.org/releases/freetype/) , 建议下载 `ft291.zip` 并解压 , 然后将 freetype-2.9.1 文件夹更名为 freetype 添加至 `3rd_party` 。
 
 ## How to Run Demo 
 
@@ -53,10 +53,11 @@ We mainly use issue && project to manage development in the futrue. The document
 
 ### 2. Build from the Source
 
-1. Create a new directory  `3rd_party` at root.
+1. Create a new directory  `3rd_party` at root directory.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
 3. Rename all the dependences' directories without certain version number.
 4. Download `nlohmann/json.hpp` file from the URL above.
+5. Follow the steps above to add `freetype` library.
 
 Now your `3rd_party` looks like:
 
@@ -67,9 +68,10 @@ Now your `3rd_party` looks like:
 ----glm/
 ----imgui/
 ----nlohmann/json.hpp
+----freetype
 ```
 
-5. Use Cmake to generate your project file.
+6. Use Cmake to generate your project file.
 
 #### 2.1 Windows (Visual Studio 2015 or higher)
 
@@ -81,35 +83,11 @@ Now your `3rd_party` looks like:
 
 #### 2.2 Mac OS
 
-1. Generate the `build/` dir and enter it
+*Still need to be developed.*
 
-   ```Shell
-   mkdir build
-   cd build
-   ```
+#### 2.3 Linux(Ubuntu)
 
-2. If you want to do you work on Xcode, do the following
-
-   ```shell
-    cmake -G "Xcode" ..
-   ```
-
-   If something goes wrong, such as :
-
-   ```
-   CMake Error: Error required internal CMake variable not set, cmake may not be built correctly.
-   Missing variable is:
-   CMAKE_C_COMPILE_OBJECT
-   ```
-
-   Then you may need to add following statement to the `CMakeLists.txt` in the end of the file:
-
-   ```
-   set(CMAKE_C_COMPILE_OBJECT g++)
-   ```
-
-3. Then, you will find `MineCube.xcodeproj` . You can eithor double click to open it or just `open MineCube.xcodeproj`
-
+*Still need to be developed.*
 
 ## Contributors
 
@@ -118,6 +96,10 @@ Now your `3rd_party` looks like:
 - [Jarvis](https://github.com/Ace-0)
 - [Mr.Gu 菇生](https://github.com/mgsweet)
 - [Hiyoung.Tsui](https://github.com/15331335)
+
+## More about MineCube
+
+Read [wiki](https://github.com/longjj/MineCube/wiki) for more technical details.
 
 ## Bugs Report
 

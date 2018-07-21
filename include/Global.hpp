@@ -32,4 +32,8 @@ extern unsigned int numPerEdge;
 extern int screenWidth;
 extern int screenHeight;
 
+// Light variable
+extern glm::vec3 lightPos;
+extern glm::vec3 lightColor;
+
 #endif  // GLOBAL_HPP

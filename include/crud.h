@@ -1,8 +1,16 @@
-// crud.hpp
+// CRUD.h
+#ifndef CRUD_H
+#define CRUD_H
+
+#include "CubeManager.hpp"
+#include "BasicOperation.hpp"
+#include "OperationManager.hpp"
+#include "Cube.hpp"
+#include "Shader.hpp"
+#include "Gui.hpp"
 #include <vector>
 #include <list>
-
-using namespace std;
+#include <iostream>
 
 struct CubeInfo
 {
@@ -11,43 +19,47 @@ struct CubeInfo
 	CubeInfo(bool _isDelected, glm::vec4 _color) : isDelected(_isDelected), color(_color) {}
 };
 
-void createCube(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, 
-	glm::vec3 color, const unsigned int shaderID, int numPerEdge);
+class CRUD {
+public:
+	static void run(const bool &hit, Gui& gui, glm::vec3& startCubePos, glm::vec3& farCubePos,
+		const glm::vec3& hoverCubePosCurrent, bool& isHitBefore, int& hoverPlaneLast,
+		int& hoverPlaneCurrent, CubeManager& cubeManager, glm::vec3& hoverCubePosLast,
+		Shader& phongShader);
 
-void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-	const glm::vec3& endCubePos, const vector<bool> saveCubesIsDeleted);
+private:
+	static glm::vec3 getAddPos(const glm::vec3& cubePos, const int plane);
 
-void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-	const glm::vec3& endCubePos);
+	static void createCube(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos,
+		glm::vec3 color, const unsigned int shaderID, int numPerEdge);
 
-void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-	const glm::vec3& endCubePos, const glm::vec3& color);
+	static void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos, const vector<bool> saveCubesIsDeleted);
 
-void undoAdd(CubeManager& cubeManager, const glm::vec3 constCubePos, const int constHoverPlane);
+	static void eraseCube(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos);
 
-void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos,
-	const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos);
+	static void paintCube(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos, const glm::vec3& color);
 
-vector<CubeInfo> getCubesInfo(CubeManager& cubeManager, const glm::vec3& startCubePos,
-	const glm::vec3& endCubePos);
+	static void undoAdd(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos,
+		const std::vector<CubeInfo> constCubeInfos);
 
-void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-	const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos);
+	static void undoErase(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos);
 
-void selectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
+	static vector<CubeInfo> getCubesInfo(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos);
 
-void unselectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
+	static void undoPaint(CubeManager& cubeManager, const glm::vec3& startCubePos,
+		const glm::vec3& endCubePos, const std::vector<CubeInfo> constCubeInfos);
 
-bool canCreate(CubeManager& cubeManager, const glm::vec3& cubePos, const int plane, int numPerEdge);
+	static void selectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 
-//vector<bool> getCubesIsDeleted(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-//	const glm::vec3& endCubePos);
-//
-//vector<glm::vec4> getCubesColor(CubeManager& cubeManager, const glm::vec3& startCubePos,
-//	const glm::vec3& endCubePos);
+	static void unselectCubes(CubeManager& cubeManager, const glm::vec3& startCubePos, const glm::vec3& endCubePos);
 
-//void recoverCubeColor(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-//	const glm::vec3& endCubePos, list<glm::vec4>& savedColorList);
-//
-//void saveRecoverColor(CubeManager& cubeManager, const glm::vec3& startCubePos, 
-//	const glm::vec3& endCubePos, list<glm::vec4>& savedColorList);
+	static bool canAccess(int new_x, int new_y, int new_z, int numPerEdge);
+
+
+};
+
+#endif CRUD_H

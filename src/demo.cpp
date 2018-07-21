@@ -6,9 +6,8 @@
 #include "Cube.hpp"
 #include "SkyBox.hpp"
 #include "Cloth.hpp"
-#include "BasicOperation.hpp"
-#include "OperationManager.hpp"
-#include "crud.h"
+#include "CRUD.h"
+#include "Text.hpp"
 
 #include <iostream>
 #include <list>
@@ -16,9 +15,6 @@
 
 using namespace std;
 
-#define SHADOW
-//#define PLANE
-#define DEBUG
 //#define CALTIME  // calculate time/efficiency
 
 // About cubes
@@ -44,11 +40,6 @@ glm::vec3 auxColor(0.9f, 0.9f, 1.0f);
 // Camera class
 static Camera* camera = Camera::getInstance();
 
-// lighting
-glm::vec3 lightPos(1.5f, 1.0f, 1.5f);
-glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-
-glm::vec3 objectColor(cubes_color[0], cubes_color[1], cubes_color[2]);
 bool no_reset = false;
 
 // parameters
@@ -60,11 +51,6 @@ int main();
 // callback functions
 void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-
-#ifdef PLANE
-GLuint planeVAO;
-#endif
 
 void RenderScene(Shader &phongShader, CubeManager & cubeManager);
 
@@ -80,6 +66,32 @@ bool PickOneCube(
 	glm::vec3& hoverCubeCurrent,
 	int& plane_num_current
 );
+
+/**********************************************************************************
+*
+* Work Bar(帧缓存特效相关)
+* @author mgsweet <mgsweet@126.com>
+*
+***********************************************************************************/
+float quadVertices[] = { 
+	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+	1.0f,  1.0f,  1.0f, 1.0f
+};
+GLuint workBarFBO = 1;
+unsigned int workBarColorBuffer;
+GLuint workBarRBO;
+unsigned int quadVAO, quadVBO; // screen quad VAO
+
+void initWorkBar();
+void updateWorkBar();
+
 
 int main()
 {
@@ -113,59 +125,27 @@ int main()
 		return -1;
 	}
 
-    // Define the viewport dimensions
-#ifdef SHADOW
-    glViewport(0, 0, screenWidth, screenHeight);
-#endif
-
-	glEnable(GL_DEPTH_TEST);
-
 	Shader phongShader("../src/Shader/phongvs.vs", "../src/Shader/phongfs.fs");
-
-#ifdef SHADOW	
 	Shader simpleDepthShader("../src/Shader/shadow_mapping_depth.vs", "../src/Shader/shadow_mapping_depth.fs");
-    Shader debugDepthQuad("../src/Shader/debug_quad_depth.vs", "../src/Shader/debug_quad_depth.fs");
-#endif
 
-	Gui gui(window);
-
-	//use to capture io
-	ImGuiIO& io = ImGui::GetIO();
+	// 帧缓存，特效
+	Shader screenShader("../src/Shader/framebuffers_screen.vs", "../src/Shader/framebuffers_screen.fs");
 
 	SkyBox skybox(window, camera);
 
 	Cloth cloth(window, lightPos, lightColor, screenWidth, screenHeight);
 	int timestep = 0;
 
-#ifdef PLANE
-	// set floor
-    GLfloat planeVertices[] = {
-        // Positions          // Normals       
-        25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
-        -25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f, 
-        -25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
+	Text text(window, camera);
+	text.push("Mine Cube", glm::vec3(1.0f, 1.0f, 1.0f), 50);
+	Gui gui(window, &text);
 
-        25.0f, -0.7f, 25.0f, 0.0f, 1.0f, 0.0f,
-        25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f,
-        -25.0f, -0.7f, -25.0f, 0.0f, 1.0f, 0.0f
-    };
-    // Setup plane VAO
-    GLuint planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glBindVertexArray(0);
-#endif
-
-#ifdef SHADOW
+    // Shadow  config
+    // Define the viewport dimensions
+    glViewport(0, 0, screenWidth, screenHeight);
+    glEnable(GL_DEPTH_TEST);
 	// Configure depth map FBO
-    const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    const GLuint SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
     GLuint depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
     // - Create depth texture
@@ -176,12 +156,9 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // 防止纹理贴图在远处重复渲染
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
     GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
@@ -191,45 +168,16 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // phongShader configuration
+    // shadow configuration
     // --------------------
     phongShader.use();
-    phongShader.setInt("diffuseTexture", 0);
-    phongShader.setInt("shadowMap", 1);
-    debugDepthQuad.use();
-    debugDepthQuad.setInt("depthMap", 0);
-#endif
+    phongShader.setInt("shadowMap", 0); // In phongshader we just use 1 texture, TEXTURE0 is default.
 
+	// 帧缓存特效相关
+	screenShader.use();
+	screenShader.setInt("screenTexture", 0);
 
-/*-------------------Work Bar--------------------------*/
-	GLuint workBarFBO = 0;
-	glGenFramebuffers(1, &workBarFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
-
-	//create a color attachment texture
-	unsigned int workBarColorBuffer;
-	glGenTextures(1, &workBarColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// 将它附加到当前绑定的帧缓冲对象
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, workBarColorBuffer, 0);
-
-	GLuint workBarRBO;
-	glGenRenderbuffers(1, &workBarRBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, workBarRBO); // now actually attach it
-
-	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-/*----------------------end workbar----------------*/
+	initWorkBar();
 
 	// to normalize
 	attriSize.push_back(3);
@@ -243,29 +191,31 @@ int main()
 
     // Open Face Culling
     glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	bool hit = false;
 
 #ifdef CALTIME
 	clock_t tic, toc;
 #endif // CALTIME
-
 	// main loop
 	while (!glfwWindowShouldClose(window))
 	{
+		updateWorkBar();
+
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;	
 		lastFrame = currentFrame;
 
-		glm::vec3 objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
+		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+
 		glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#ifdef SHADOW
+		// Shadow support
 		// -------------------------------------------
         // 1. Render depth of scene to texture (from light's perspective)
         // - Get light projection/view matrix.
-        glCullFace(GL_FRONT);
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
         GLfloat near_plane = 1.0f, far_plane = 7.5f;
@@ -282,30 +232,19 @@ int main()
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-        glActiveTexture(GL_TEXTURE0);
         RenderScene(simpleDepthShader, cubeManager);
 
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// bind to framebuffer and draw scene as we normally would to color texture 
-		//glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
-		//glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-
-
-
-        glCullFace(GL_BACK); // 不要忘记设回原先的culling face
+		// 这里先不到原来的帧中渲染，先渲染到帧缓存中
+		glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
 
         // -----------------------------------------
         // reset viewport
-        glViewport(0, 0, screenWidth, screenHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-#endif
-
 		glViewport(0, 0, screenWidth, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		phongShader.use();
+
+        // 2. render scene as normal using the generated depth/shadow map  
+        // --------------------------------------------------------------
+        phongShader.use();
 		phongShader.setVec3("viewPos", camera->getCameraPosition());
 
         // material
@@ -317,27 +256,18 @@ int main()
         phongShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
         phongShader.setVec3("light.specular", 0.3f, 0.3f, 0.3f);
 
-		glm::mat4 view = camera->getViewMatrix();
+
+		phongShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		auto view = camera->getViewMatrix();
 		phongShader.setMat4("view", view);
-		glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera->getZoomFactor()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		phongShader.setMat4("projection", projection);
 
-        glActiveTexture(GL_TEXTURE0);
-        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
 		RenderScene(phongShader, cubeManager);
 
-#ifdef SHADOW
-		// render Depth map to quad for visual debugging
-        // ---------------------------------------------
-        debugDepthQuad.use();
-        debugDepthQuad.setFloat("near_plane", near_plane);
-        debugDepthQuad.setFloat("far_plane", far_plane);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        // RenderQuad();
-#endif
-
+		// hover support
+		// ---------------------------------------------------------------
 		// reset last hovered plane
 		if (hit && static_cast<int>(hoverCubePosLast.x) < numPerEdge && static_cast<int>(hoverCubePosLast.y) < numPerEdge && static_cast<int>(hoverCubePosLast.z) < numPerEdge) {
 			auto last_hover_cube = cubeManager.getCube(static_cast<int>(hoverCubePosLast.x), static_cast<int>(hoverCubePosLast.y), static_cast<int>(hoverCubePosLast.z));
@@ -387,107 +317,13 @@ int main()
 
 			/**********************************************************************************
 			*
-			*	deal with some cubes
-			*	以下代码执行顺序很重要，掉乱顺序有可能造成斑点
+			*	run CRUD
 			*
-			***********************************************************************************/
-			if (hit && !gui.isSaveWindowShow()) {
-				//若点击左键
-				if (ImGui::IsMouseClicked(0)) {
-					if (mode == ERASE_MODE || mode == PAINT_MODE) {
-						// 记录当前悬浮方块
-						startCubePos = hoverCubePosCurrent;
-						farCubePos = hoverCubePosCurrent;
-
-						//用于拉出框体的操作
-						isHitBefore = true;
-					}
-					if (mode == CREATE_MODE) {
-						objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-						// 保全当前全局变量
-						glm::vec3 savedColor = objectColor;
-						const int constHoverPlane = hoverPlaneCurrent;
-						const glm::vec3 constCubePos = hoverCubePosCurrent;
-						// 先判断能否创建再执行
-						if (canCreate(cubeManager, hoverCubePosCurrent, hoverPlaneCurrent, numPerEdge)) {
-							auto createOP = shared_ptr<BasicOperation>(new BasicOperation(
-								//	do 
-								[&cubeManager, savedColor, phongShader, constCubePos, constHoverPlane]() {
-								createCube(cubeManager, constCubePos, constHoverPlane, savedColor, phongShader.ID, numPerEdge);
-							},
-								//	undo
-								[&cubeManager, constCubePos, constHoverPlane]() {
-								undoAdd(cubeManager, constCubePos, constHoverPlane);
-							}
-							));
-							operationManager.executeOp(createOP, "Create a cube");
-						}
-					}
-				}
-				//若按着左键
-				if (io.MouseDown[0]) {
-					if ((mode == PAINT_MODE || mode == ERASE_MODE) && farCubePos != hoverCubePosCurrent && isHitBefore) {
-						unselectCubes(cubeManager, startCubePos, farCubePos);
-						selectCubes(cubeManager, startCubePos, hoverCubePosCurrent);
-						farCubePos = hoverCubePosCurrent;
-					}
-				}
-
-				// set hovered plane
-				auto hover_cube = cubeManager.getCube(hoverCubePosCurrent.x, hoverCubePosCurrent.y, hoverCubePosCurrent.z);
-				if (!hover_cube->isDeleted()) {
-					hoverCubePosLast = hoverCubePosCurrent;
-					hover_cube->hitted();
-				}
-			} 
-
-			//若松开左键
-			if (ImGui::IsMouseReleased(0)) {
-				if (isHitBefore) {
-					if (mode == ERASE_MODE) {
-						// 保全当前全局变量
-						const glm::vec3 constStartCubePos = startCubePos;
-						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
-						auto eraseOP = shared_ptr<BasicOperation>(new BasicOperation(
-							//	do 
-							[&cubeManager, constStartCubePos, constEndCubePos]() {
-							//	去除辅助色
-							unselectCubes(cubeManager, startCubePos, farCubePos);
-
-							eraseCube(cubeManager, constStartCubePos, constEndCubePos);
-						},
-							//	undo
-							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
-							undoErase(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
-						}
-						));
-						operationManager.executeOp(eraseOP, "Erase a cubes");
-					}
-					if (mode == PAINT_MODE) {
-						// 保全当前全局变量
-						const glm::vec3 constStartCubePos = startCubePos;
-						const glm::vec3 constEndCubePos = hoverCubePosCurrent;
-						const vector<CubeInfo> constCubesInfo = getCubesInfo(cubeManager, constStartCubePos, constEndCubePos);
-						auto paintOP = shared_ptr<BasicOperation>(new BasicOperation(
-							//	do 
-							[&cubeManager, &objectColor, constStartCubePos, constEndCubePos]() {
-							//	去除辅助色
-							unselectCubes(cubeManager, startCubePos, farCubePos);
-
-							objectColor = glm::vec3(cubes_color[0], cubes_color[1], cubes_color[2]);
-							paintCube(cubeManager, constStartCubePos, constEndCubePos, objectColor);
-						},
-							//	undo
-							[&cubeManager, constStartCubePos, constEndCubePos, constCubesInfo]() {
-							undoPaint(cubeManager, constStartCubePos, constEndCubePos, constCubesInfo);
-						}
-						));
-						operationManager.executeOp(paintOP, "Change cubes color");
-					}
-				}
-				isHitBefore = false;
-			}
+			***********************************************************************************/		
+			CRUD::run(hit, gui, startCubePos, farCubePos,
+				hoverCubePosCurrent, isHitBefore, hoverPlaneLast,
+				hoverPlaneCurrent, cubeManager, hoverCubePosLast,
+				phongShader);
 
 			/**********************************************************************************
 			*
@@ -520,35 +356,47 @@ int main()
 
 		cubeManager.setAllShaderId(phongShader.ID);
 
-		// RenderScene(phongShader, cubeManager);
-		// cubeManager.draw();
 		skybox.render();
-		if (gui.isClothAllow()) cloth.render(camera, timestep++);
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-		//						  // clear all relevant buffers
-		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
-		//glClear(GL_COLOR_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+		// clear all relevant buffers
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT);
+		screenShader.use();
+		screenShader.setInt("specialEffect", gui.getSpecialEffect());
 
+		glBindVertexArray(quadVAO);
+		glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);	// use the color attachment texture as the texture of the quad plane
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		// gui should render after all above
+		if (gui.isClothAllow()) cloth.render(camera, timestep++);
+		if (timestep > 100) {
+			gui.allowCloth = false;
+			timestep = 0;
+			cloth = Cloth(window, lightPos, lightColor, screenWidth, screenHeight);
+		}
+		text.render();
 		gui.createNewFrame();
 		gui.draw();
-
-		/*ImGui::Begin("Work Bar");
-		ImGui::Image((void*)(intptr_t)workBarColorBuffer, ImVec2(SCR_WIDTH, SCR_HEIGHT), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-		ImGui::End();*/
-
 		gui.render();
 
+
+#ifdef __APPLE__
+		// resolution for retina display issue
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		screenWidth = width;
+		screenHeight = height;
+#endif
+		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	gui.clear();
-
-
 	glfwTerminate();
 	return 0;
 }
@@ -566,21 +414,49 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void RenderScene(Shader &shader, CubeManager & cubeManager)
 {
-#ifdef PLANE
-    // Floor
-    glm::mat4 model;
-    shader.setMat4("model", model);
-    glBindVertexArray(planeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-#endif // PLANE
     // Cubes
     cubeManager.draw();
-    // model = glm::mat4();
-    // //model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
-    // phongShader.setMat4("model", glm::value_ptr(model));
-    // phongShader.setFloat3("objectColor", glm::value_ptr(glm::vec3(1.0f, 0.5f, 0.31f)));
-    // glBindVertexArray(cubeVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, 36);
-    // glBindVertexArray(0);
+}
+
+void initWorkBar() {
+	glGenFramebuffers(1, &workBarFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, workBarFBO);
+
+	//create a color attachment texture
+	glGenTextures(1, &workBarColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// 将它附加到当前绑定的帧缓冲对象
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, workBarColorBuffer, 0);
+
+	glGenRenderbuffers(1, &workBarRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, workBarRBO); // now actually attach it
+
+																										 // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+}
+
+void updateWorkBar() {
+	glBindTexture(GL_TEXTURE_2D, workBarColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, workBarRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
 }

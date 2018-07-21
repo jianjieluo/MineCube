@@ -40,6 +40,11 @@ public:
 	* Get the latest history pos to show
 	*/
 	const unsigned int getIndexOfHistory();
+
+	/*
+	* Clear all history
+	*/
+	void clear();
 };
 
 #endif /* OperationManager_hpp */

@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <stdio.h>
+// 这样可以确保，当编译器提供了dirent.h的时候(比如mingw),优先使用编译自带的dirent.h, 使用前请重新CMAKE
+#include <dirent.h>
 #include "Cube.hpp"
 #include "GLBufferManager.hpp"
 using std::cout;
@@ -210,7 +213,14 @@ void CubeManager::dump(string model_path) {
         cube["id"] = ptr_cube->id;
         cube["isInInf"] = ptr_cube->isInInf;
         glm::vec4 color = ptr_cube->cubeColor;
-        cube["cubeColor"] = {color.x, color.y, color.z, color.y};
+        /** 
+         * Bug by Bowen Wu
+         * Since we have created a lot model under this bug, and value of alpha
+         * not change, we fix this problem in a tricky way
+         * Notice this in load model
+         */
+        // cube["cubeColor"] = {color.x, color.y, color.z, color.y};
+        cube["cubeColor"] = {color.x, color.y, color.z, color.w};
         j_cubes.push_back(cube);
     }
     j["cubes"] = j_cubes;
@@ -279,8 +289,21 @@ bool CubeManager::load(string model_path) {
             cubesOriginalPosition[i] = temp;
         }
         auto & in_data = j_c["cubeColor"];
-        cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
+        /**
+         * To temporarily fix the bug of dump model.
+         * We do not dump correct alpha value when dump model
+         */
+        // cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], in_data[3]);
+        cubes[i]->cubeColor = glm::vec4(in_data[0], in_data[1], in_data[2], 1.0f);
         cubes[i]->cubeColor2Buffer();
+
+        // resize sizePerCube
+        vector<GLfloat> vertexTemp =
+        vector<GLfloat>(Cube::VERTEX_PER_CUBE * Cube::COOR_DIMENSION);
+        for (unsigned int i = 0; i < vertexTemp.size(); ++i) {
+            vertexTemp[i] = sizePerCube * Cube::cubeVertex[i];
+        }
+        this->glBufferManager.setCubeData(vertexTemp, Cube::cubeNormal);
     }
     refreshModelMat4();
         return true;
@@ -290,4 +313,19 @@ bool CubeManager::load(string model_path) {
     }
 }
 
+vector<string> CubeManager::getModels() {
+    vector<string> result = vector<string>();
+    struct dirent *ptr;
+    DIR *dir;
+    dir = opendir(model_saved_dir.c_str());
+    while ((ptr=readdir(dir)) != NULL) {
+        if (ptr->d_name[0] == '.')
+            continue;
+        // cout << ptr->d_name << endl;
+        result.push_back(string(ptr->d_name));
+
+    }
+    closedir(dir);
+    return result;
+}
 const string CubeManager::model_saved_dir = "../Asset/example/";

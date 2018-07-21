@@ -2,7 +2,7 @@
 #include <iostream>
 #include "string.h"
 
-Gui::Gui(GLFWwindow* theWindow) {
+Gui::Gui(GLFWwindow* theWindow, Text* _text) {
 	// ImGui initialization and bindings
 	window = theWindow;
 	ImGui::CreateContext();
@@ -23,6 +23,9 @@ Gui::Gui(GLFWwindow* theWindow) {
 	latest_color = ImVec4(cubes_color[0], cubes_color[1], cubes_color[2], cubes_color[3]);
 
 	allowCloth = true;
+	isFullNeed = false;
+	specialEffect = 0;
+	text = _text;
 }
 
 void Gui::createNewFrame() {
@@ -38,33 +41,36 @@ void Gui::showAppMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("New")) {}
-			if (ImGui::MenuItem("Open", "Ctrl+O"))
-			{
-				// TODO
-			}
-			if (ImGui::BeginMenu("Open Recent"))
-			{
-				// TODO
-				ImGui::EndMenu();
-			}
-			if (ImGui::MenuItem("Save", "Ctrl+S"))
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Save As.."))
-			{
-				// TODO
-			}
-			ImGui::Separator();
-			if (ImGui::MenuItem("Quit", "Alt+F4")) 
-			{
-				// TODO
-			}
-			ImGui::EndMenu();
-		}
+		//if (ImGui::BeginMenu("File"))
+		//{
+		//	if (ImGui::MenuItem("New")) 
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::MenuItem("Open", "Ctrl+O"))
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::BeginMenu("Open Recent"))
+		//	{
+		//		// TODO
+		//		ImGui::EndMenu();
+		//	}
+		//	if (ImGui::MenuItem("Save", "Ctrl+S"))
+		//	{
+		//		// TODO
+		//	}
+		//	if (ImGui::MenuItem("Save As.."))
+		//	{
+		//		// TODO
+		//	}
+		//	ImGui::Separator();
+		//	if (ImGui::MenuItem("Quit", "Alt+F4")) 
+		//	{
+		//		// TODO
+		//	}
+		//	ImGui::EndMenu();
+		//}
 
 		if (ImGui::BeginMenu("Edit"))
 		{
@@ -88,19 +94,6 @@ void Gui::showAppMainMenuBar()
 				}
 			}
 
-			ImGui::Separator();
-			if (ImGui::MenuItem("Cut", "CTRL+X")) 
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Copy", "CTRL+C")) 
-			{
-				// TODO
-			}
-			if (ImGui::MenuItem("Paste", "CTRL+V")) 
-			{
-				// TODO
-			}
 			ImGui::EndMenu();
 		}
 
@@ -132,8 +125,6 @@ void Gui::showEditBar() {
 
 
 	ImGui::Text("Mode: ");
-
-
 	{	// add button
 		ImGui::PushID(0);
 		if (mode == CREATE_MODE) {
@@ -193,25 +184,144 @@ void Gui::showEditBar() {
 		ImGui::PopID();
 	}
 
-	/*static int e = 0;
-	ImGui::RadioButton("  Add  ", &e, 0); ImGui::SameLine();
-	ImGui::RadioButton(" Erase ", &e, 1); ImGui::SameLine();
-	ImGui::RadioButton(" Paint ", &e, 2);*/
+	ImGui::Text("Tool:");
+	{
+		if (ImGui::Button("Full", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+			isFullNeed = true;
+		}
+
+		ImGui::SameLine();
+
+		if (allowCloth) {
+			if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				allowCloth = false;
+			}
+		}
+		else {
+			if (ImGui::Button("Open Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				allowCloth = true;
+			}
+		}
+	}
+
+	ImGui::Text("Special Effect:");
+	{
+		{	// normal button
+			ImGui::PushID(0);
+			if (specialEffect == 0) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Normal", ImVec2(ImGui::GetWindowWidth() * 0.9 + 8.0f, 20.0f))) {
+				specialEffect = 0;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		{	// Inversion button
+			ImGui::PushID(1);
+			if (specialEffect == 1) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Inversion", ImVec2(ImGui::GetWindowWidth() * 0.45, 20.0f))) {
+				specialEffect = 1;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		ImGui::SameLine();
+
+		{	// Grayscale button
+			ImGui::PushID(2);
+			if (specialEffect == 2) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Grayscale", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 2;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		{	// Grayscale button
+			ImGui::PushID(3);
+			if (specialEffect == 3) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Sharpen", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 3;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+
+		ImGui::SameLine();
+
+		{	// Grayscale button
+			ImGui::PushID(4);
+			if (specialEffect == 4) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
+			}
+			if (ImGui::Button("Blur", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
+				specialEffect = 4;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+	}
 
 	ImGui::Text("");
 	ImGui::Text("History:");
-	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
+	if (screenHeight >= 600) {
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth()* 0.95, screenHeight > 700? ImGui::GetWindowHeight() * 0.15 : ImGui::GetWindowHeight() * 0.1), true);
 
-	static int his_selected = operationManager.getIndexOfHistory() - 1;
-	for (int i = 0; i < operationManager.getIndexOfHistory(); i++)
-	{
-		char buf[32];
-		sprintf(buf, operationManager.str_history[i].c_str());
-		if (ImGui::Selectable(buf, his_selected == i))
-			his_selected = i;
+		static int his_selected = operationManager.getIndexOfHistory() - 1;
+		for (int i = 0; i < operationManager.getIndexOfHistory(); i++)
+		{
+			char buf[32];
+			sprintf(buf, operationManager.str_history[i].c_str());
+			if (ImGui::Selectable(buf, his_selected == i))
+				his_selected = i;
+		}
+
+		ImGui::EndChild();
 	}
-
-	ImGui::EndChild();
 
 	{	//undo button
 		ImGui::PushID(0);
@@ -255,27 +365,22 @@ void Gui::showEditBar() {
 
 	ImGui::Text("");
 	ImGui::Text("Default:");
-	ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, 200.0f), true);
-	
-	static int def_selected = -1;
-	for (int n = 0; n < 5; n++)
-	{
-		char buf[32];
-		sprintf(buf, "Object %d", n);
-		if (ImGui::Selectable(buf, def_selected == n))
-			def_selected = n;
-	}
-	ImGui::EndChild();
+	if (screenHeight >= 450) {
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth()* 0.95, ImGui::GetWindowHeight() * 0.2), true);
 
-	if (allowCloth) {
-		if (ImGui::Button("Close Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
-			allowCloth = false;
+		static int def_selected = -1;
+		vector<string> file_list = ptr_cubeManager->getModels();
+		for (int i = 0; i < file_list.size(); i++)
+		{
+			char buf[32];
+			sprintf(buf, "%s", file_list[i].c_str());
+			if (ImGui::Selectable(buf, def_selected == i)) {
+				ptr_cubeManager->load(buf);
+				operationManager.clear();
+				def_selected = i;
+			}
 		}
-	}
-	else {
-		if (ImGui::Button("Open Cloth", ImVec2(ImGui::GetWindowWidth()* 0.45, 20.0f))) {
-			allowCloth = true;
-		}
+		ImGui::EndChild();
 	}
 
 	{	//Save button
@@ -339,6 +444,14 @@ void Gui::showEditBar() {
 		}
 	}
 
+	ImGui::Text("");
+	ImGui::Text("Other Options:");
+    if (ImGui::CollapsingHeader("lighting options")) {
+         ImGui::SliderFloat("lightPos.x", &lightPos.x, -10.0f, 10.0f, "X = %.1f");
+         ImGui::SliderFloat("lightPos.y", &lightPos.y, -10.0f, 10.0f, "Y = %.1f");
+         ImGui::SliderFloat("lightPos.z", &lightPos.z, -10.0f, 10.0f, "Z = %.1f");
+     }
+
 	ImGui::End();
 }
 
@@ -349,14 +462,18 @@ void Gui::showColorBar() {
 		ImGui::SetWindowSize(ImVec2(260, screenHeight));
 		ImGui::SetWindowPos(ImVec2(0, 18));
 	}
-	static bool alpha_preview = true;
-	static bool alpha_half_preview = false;
-	static bool options_menu = true;
-	static bool hdr = false;
-	int misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0) | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
-	ImGuiColorEditFlags flags = misc_flags;
 
-	ImGui::ColorPicker4("MyColor##4", (float*)&cubes_color, flags, NULL);
+	//Ð§¹û²»Ì«ºÃ
+	/*if (ImGui::IsWindowFocused()) {
+		saveWindow = true;
+	}
+	else {
+		saveWindow = false;
+	}*/
+
+	ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoAlpha;
+
+	ImGui::ColorPicker4("Color##4", (float*)&cubes_color, flags, NULL);
 
 	if (latest_color.x != cubes_color[0] || latest_color.y != cubes_color[1] || 
 			latest_color.z != cubes_color[2] || latest_color.w != cubes_color[3]) {
@@ -385,8 +502,33 @@ void Gui::showColorBar() {
 		ImGui::EndChild();
 	}
 
-	{	// color list
-		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, (screenHeight - 80 - 240) * 0.8), true);
+	if (screenHeight > 600) {	// color list1
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * 0.95, (screenHeight - 80 - 240) * 0.2), true);
+		for (int i = 0; i < 30; i++)
+		{
+			if (i % 6 != 0) ImGui::SameLine();
+			ImGui::PushID(i);
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i/ 31.0f, 0.8f, 0.8f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 31.0f, 0.8f + 0.05f, 0.8f + 0.05f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 31.0f, 0.8f + 0.1f, 0.8f + 0.1f));
+			if (ImGui::Button("     ", ImVec2(ImGui::GetWindowWidth() * 0.12, 20.0f))) {
+				static ImVec4 saved_palette;
+				ImGui::ColorConvertHSVtoRGB(i / 31.0f, 0.8f, 0.8f, saved_palette.x, saved_palette.y, saved_palette.z);
+				cubes_color[0] = saved_palette.x;
+				cubes_color[1] = saved_palette.y;
+				cubes_color[2] = saved_palette.z;
+				saved_palette.w = 1.0f;
+				// save the color
+				addColor2His(saved_palette);
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
+	}
+
+	{	// color list2
+		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)2), ImVec2(ImGui::GetWindowWidth() * 0.95, screenHeight > 500 ? (screenHeight - 80 - 240) * 0.7 : screenHeight * 0.1), true);
 		for (int i = 0; i < 100; i++)
 		{
 			for (int j = 0; j < 5; j++)
@@ -467,14 +609,17 @@ void Gui::autoRePos() {
 
 void Gui::setMode_add() {
 	mode = CREATE_MODE;
+	text->push("ADD", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::setMode_print() {
 	mode = PAINT_MODE;
+	text->push("PAINT", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::setMode_erase() {
 	mode = ERASE_MODE;
+	text->push("ERASE", glm::vec3(1.0f, 1.0f, 1.0f), 50);
 }
 
 void Gui::captureKeys() {
@@ -497,6 +642,7 @@ void Gui::captureKeys() {
 			camera->pause();
 		}
 
+		// ï¿½ï¿½ï¿½ï¿½
 		if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
 			camera->zoomInOrOut(io.MouseWheel);
 		}
@@ -517,17 +663,19 @@ void Gui::captureKeys() {
 	}
 }
 
-void Gui::addColor2His(ImVec4 hisColor) {
-	if (colorHistory.size() < 10) {
-		colorHistory.push_back(hisColor);
-	}
-	else {
-		for (auto i = 0; i < 9; i++) {
-			colorHistory[i] = colorHistory[i + 1];
+void Gui::addColor2His(ImVec4 color) {
+	if (latest_color.x != color.x || latest_color.y != color.y || latest_color.z != color.z) {
+		if (colorHistory.size() < 10) {
+			colorHistory.push_back(color);
 		}
-		colorHistory[9] = hisColor;
+		else {
+			for (auto i = 0; i < 9; i++) {
+				colorHistory[i] = colorHistory[i + 1];
+			}
+			colorHistory[9] = color;
+		}
+		latest_color = color;
 	}
-	latest_color = hisColor;
 }
 
 bool Gui::isSaveWindowShow() {
@@ -537,4 +685,12 @@ bool Gui::isSaveWindowShow() {
 
 void Gui::setPtrCubeManager(CubeManager* ptr) {
 	ptr_cubeManager = ptr;
+}
+
+int Gui::getSpecialEffect() {
+	return specialEffect;
+}
+
+void Gui::updateSE(Shader* shader) {
+	shader->setInt("specialEffect", specialEffect);
 }
