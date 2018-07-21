@@ -4,7 +4,7 @@
 
 **A sample voxel editor based on OpenGL 3.3+**, inspired by [MagicaVoxel](https://ephtracy.github.io/).
 
-Support Windows 10 and Mac OX currently.
+Support Windows 10 currently.
 
 A final project originally of 5 undergraduate students for the course Computer Graphics, SYSU.
 
@@ -83,35 +83,11 @@ Now your `3rd_party` looks like:
 
 #### 2.2 Mac OS
 
-1. Generate the `build/` dir and enter it
+*Still need to be developed.*
 
-   ```Shell
-   mkdir build
-   cd build
-   ```
+#### 2.3 Linux(Ubuntu)
 
-2. If you want to do you work on Xcode, do the following
-
-   ```shell
-    cmake -G "Xcode" ..
-   ```
-
-   If something goes wrong, such as :
-
-   ```
-   CMake Error: Error required internal CMake variable not set, cmake may not be built correctly.
-   Missing variable is:
-   CMAKE_C_COMPILE_OBJECT
-   ```
-
-   Then you may need to add following statement to the `CMakeLists.txt` in the end of the file:
-
-   ```
-   set(CMAKE_C_COMPILE_OBJECT g++)
-   ```
-
-3. Then, you will find `MineCube.xcodeproj` . You can eithor double click to open it or just `open MineCube.xcodeproj`
-
+*Still need to be developed.*
 
 ## Contributors
 
