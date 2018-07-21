@@ -14,7 +14,7 @@ A final project originally of 5 undergraduate students for the course Computer G
 
 ![presentation](./docs/imgs/demo.gif)
 
-## More Image Example
+## More Image Examples
 
 ![Mastersword](./docs/imgs/example/Mastersword.jpg)
 
