@@ -16,17 +16,16 @@ A final project originally of 5 undergraduate students for the course Computer G
 
 ## More Image Example
 
-![](./docs/imgs/example/Dinosaur.jpg)
+![Mastersword](./docs/imgs/example/Mastersword.jpg)
 
-![](./docs/imgs/example/Warrior.jpg)
+
+![warrior](./docs/imgs/example/Warrior.jpg)
+
+![diglett](./docs/imgs/example/Diglett.jpg)
 
 ![](./docs/imgs/example/YellowDuck.jpg)
 
-## Iteration Details (Chinese)
-
-[迭代计划](./docs/迭代计划.md)
-
-We mainly use issue && project to manage development in the futrue. The document above won't be updated.
+![](./docs/imgs/example/Dinosaur.jpg)
 
 ## Dependences
 
@@ -54,7 +53,7 @@ We mainly use issue && project to manage development in the futrue. The document
 
 ### 2. Build from the Source
 
-1. Create a new directory  `3rd_party` at root.
+1. Create a new directory  `3rd_party` at root directory.
 2. Download and unzip `glad`, `glfw`, `glm`, `imgui` dependences  following the URL above. 
 3. Rename all the dependences' directories without certain version number.
 4. Download `nlohmann/json.hpp` file from the URL above.
@@ -121,6 +120,10 @@ Now your `3rd_party` looks like:
 - [Jarvis](https://github.com/Ace-0)
 - [Mr.Gu 菇生](https://github.com/mgsweet)
 - [Hiyoung.Tsui](https://github.com/15331335)
+
+## More about MineCube
+
+Read [wiki](https://github.com/longjj/MineCube/wiki) for more technical details.
 
 ## Bugs Report
 
