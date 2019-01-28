@@ -14,7 +14,8 @@ Camera* Camera::getInstance() {
 	return instance;
 }
 Camera::Camera() {
-    cameraPosition = glm::vec3(0.0f, 0.0f, 3.5f);
+	sphereRadius = 3.5f;
+    cameraPosition = glm::vec3(0.0f, 0.0f, sphereRadius);
     targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     yaw = YAW;
@@ -36,6 +37,10 @@ glm::mat4 Camera::getViewMatrix() const {
 
 glm::vec3 Camera::getCameraPosition() const {
     return cameraPosition;
+}
+
+void Camera::setCameraPosition(glm::vec3 position) {
+	cameraPosition = position;
 }
 
 float Camera::getZoomFactor() const {
@@ -96,15 +101,23 @@ void Camera::lookAround(const float currentX, const float currentY) {
 }
 
 void Camera::updateCamera() {
-    cameraFront.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-    cameraFront.y = sin(glm::radians(pitch));
-    cameraFront.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	if (isFpsMode) {
+		cameraFront.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+		cameraFront.y = sin(glm::radians(pitch));
+		cameraFront.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+		cameraFront = glm::normalize(cameraFront);
+	}
+	else {
+		cameraFront = cameraPosition - targetPosition;
+	}
     cameraFront = glm::normalize(cameraFront);
 
     cameraRight = glm::normalize(glm::cross(worldUp, cameraFront));
     cameraUp = glm::cross(cameraFront, cameraRight);
 
-	targetPosition = cameraPosition + cameraFront;
+	if (isFpsMode) {
+		targetPosition = cameraPosition + cameraFront;
+	}
 }
 
 void Camera::zoomInOrOut(const float offsetY) {

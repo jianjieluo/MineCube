@@ -635,14 +635,14 @@ void Gui::captureKeys() {
 				operationManager.cancle_undo();
 			}
 		}
+		// The FPS mode conflicts with the rotation
+		// So I disable it temporarily
+		//// release v
+		//if (ImGui::IsKeyReleased(GLFW_KEY_V)) {
+		//	camera->isFpsMode = !camera->isFpsMode;
+		//	camera->pause();
+		//}
 
-		// release v
-		if (ImGui::IsKeyReleased(GLFW_KEY_V)) {
-			camera->isFpsMode = !camera->isFpsMode;
-			camera->pause();
-		}
-
-		// ����
 		if (io.MouseWheel && io.MousePos.x > 260 && io.MousePos.x < screenWidth - 260) {
 			camera->zoomInOrOut(io.MouseWheel);
 		}

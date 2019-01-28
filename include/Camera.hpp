@@ -19,6 +19,7 @@ class Camera {
 		glm::mat4 getViewMatrix() const;
 		// get position of camera
 		glm::vec3 getCameraPosition() const;
+		void setCameraPosition(glm::vec3 position);
 		// get zoom factor for perspective calculation
 		float getZoomFactor() const;
 		// move position with keyboard input
@@ -50,6 +51,7 @@ class Camera {
 		Camera();
 
 		// positions
+		float sphereRadius;
 		glm::vec3 cameraPosition;
 		glm::vec3 targetPosition;
 		// direction vectors
