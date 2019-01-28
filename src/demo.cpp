@@ -275,7 +275,9 @@ int main()
 				last_hover_cube->unhitted();
 		}
 
-
+		// The FPS mode conflicts with the rotation
+		// So I disable it temporarily
+		// You can find the codes in Gui.cpp:line 638
 		if (camera->isFpsMode) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
@@ -348,8 +350,27 @@ int main()
 					double x, y;
 					glfwGetCursorPos(window, &x, &y);
 					glm::vec2 offset = camera->updateXYoffset((float)x, (float)y);
-					cubeManager.rotateHorizontal(offset.x * 0.25);
-					cubeManager.rotateVertical(offset.y * 0.25);
+					
+					// convert to polar coordinates
+					float R = 3.5;
+					float THETA = acos(camera->getCameraPosition().y / R);
+					float PHI = atan(camera->getCameraPosition().x / camera->getCameraPosition().z);
+
+					PHI -= offset.x * 0.005;
+					// TODO(bugs): PHI can only range in [-90.0, 90.0] 
+
+					THETA -= offset.y * 0.005;
+					if (THETA > glm::radians(179.0))
+						THETA = glm::radians(179.0);
+					if (THETA < glm::radians(1.0))
+						THETA = glm::radians(1.0);
+
+					// convert to xyz coordinates
+					float CUR_X = R * sin(THETA) * sin(PHI);
+					float CUR_Y = R * cos(THETA);
+					float CUR_Z = R * sin(THETA) * cos(PHI);
+
+					camera->setCameraPosition(glm::vec3(CUR_X, CUR_Y, CUR_Z));
 				}
 			}
 		}
