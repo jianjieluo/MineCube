@@ -91,7 +91,7 @@ Now your `3rd_party` looks like:
 
 ## Contributors
 
-- [Johnny Law](https://longjj.com/)
+- [Johnny Law](https://github.com/jianjieluo)
 - [Bob Wu](https://github.com/Bowenwu1)
 - [Jarvis](https://github.com/Ace-0)
 - [Mr.Gu 菇生](https://github.com/mgsweet)
@@ -99,7 +99,7 @@ Now your `3rd_party` looks like:
 
 ## More about MineCube
 
-Read [wiki](https://github.com/longjj/MineCube/wiki) for more technical details.
+Read [wiki](https://github.com/jianjieluo/MineCube/wiki) for more technical details.
 
 ## Bugs Report
 
